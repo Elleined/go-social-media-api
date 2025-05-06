@@ -34,7 +34,7 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 		r.POST("", c.save)
 
 		r.GET("", c.findAll)
-		r.GET("/:emojiId", c.findAllByEmoji)
+		r.GET("/emoji/:emojiId", c.findAllByEmoji)
 
 		r.DELETE("", c.delete)
 	}
@@ -73,7 +73,7 @@ func (c ControllerImpl) save(e *gin.Context) {
 }
 
 func (c ControllerImpl) findAll(e *gin.Context) {
-	postId, err := strconv.Atoi(e.Param("postId"))
+	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
 			"message": "can't find all posts " + err.Error(),
@@ -93,7 +93,7 @@ func (c ControllerImpl) findAll(e *gin.Context) {
 }
 
 func (c ControllerImpl) findAllByEmoji(e *gin.Context) {
-	postId, err := strconv.Atoi(e.Param("postId"))
+	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
 			"message": "can't find all posts by emoji " + err.Error(),
@@ -129,7 +129,7 @@ func (c ControllerImpl) delete(e *gin.Context) {
 		return
 	}
 
-	postId, err := strconv.Atoi(e.Param("postId"))
+	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
 			"message": "can't find all posts " + err.Error(),
