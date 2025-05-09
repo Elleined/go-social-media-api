@@ -8,11 +8,19 @@ type Service interface {
 	findAll(postId int) ([]Reaction, error)
 	findAllByEmoji(postId int, emojiId int) ([]Reaction, error)
 
+	update(reactorId, postId, newEmojiId int) (affectedRows int64, err error)
+
 	delete(reactorId, postId int) (affectedRows int64, err error)
 }
 
 type ServiceImpl struct {
 	repository Repository
+}
+
+func NewService(repository Repository) Service {
+	return &ServiceImpl{
+		repository: repository,
+	}
 }
 
 func (s ServiceImpl) save(reactorId, postId, emojiId int) (id int64, err error) {
@@ -26,6 +34,11 @@ func (s ServiceImpl) save(reactorId, postId, emojiId int) (id int64, err error) 
 
 	if emojiId <= 0 {
 		return 0, errors.New("emoji id is required")
+	}
+
+	isAlreadyReacted := s.repository.isAlreadyReacted(reactorId, postId)
+	if isAlreadyReacted {
+		return 0, errors.New("reactor already reacted")
 	}
 
 	id, err = s.repository.save(reactorId, postId, emojiId)
@@ -66,6 +79,27 @@ func (s ServiceImpl) findAllByEmoji(postId int, emojiId int) ([]Reaction, error)
 	return reactions, nil
 }
 
+func (s ServiceImpl) update(reactorId, postId, newEmojiId int) (affectedRows int64, err error) {
+	if reactorId <= 0 {
+		return 0, errors.New("reactor id is required")
+	}
+
+	if postId <= 0 {
+		return 0, errors.New("post id is required")
+	}
+
+	if newEmojiId <= 0 {
+		return 0, errors.New("new emoji id is required")
+	}
+
+	affectedRows, err = s.repository.update(reactorId, postId, newEmojiId)
+	if err != nil {
+		return 0, err
+	}
+
+	return affectedRows, nil
+}
+
 func (s ServiceImpl) delete(reactorId, postId int) (affectedRows int64, err error) {
 	if reactorId <= 0 {
 		return 0, errors.New("reactor id is required")
@@ -75,16 +109,15 @@ func (s ServiceImpl) delete(reactorId, postId int) (affectedRows int64, err erro
 		return 0, errors.New("post id is required")
 	}
 
+	isAlreadyReacted := s.repository.isAlreadyReacted(reactorId, postId)
+	if !isAlreadyReacted {
+		return 0, errors.New("reactor does not react in this post")
+	}
+
 	affectedRows, err = s.repository.delete(reactorId, postId)
 	if err != nil {
 		return 0, err
 	}
-	
-	return affectedRows, nil
-}
 
-func NewService(repository Repository) Service {
-	return &ServiceImpl{
-		repository: repository,
-	}
+	return affectedRows, nil
 }
