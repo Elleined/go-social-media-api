@@ -1,4 +1,4 @@
-package middlewares
+package middleware
 
 import (
 	"github.com/gin-gonic/gin"
@@ -7,8 +7,7 @@ import (
 func SecurityHeaders(c *gin.Context) {
 	c.Header("X-Frame-Options", "DENY")
 	c.Header("X-DNS-Prefetch-Control", "off")
-	c.Header("Referrer-Policy", "no-referrer")
-	c.Header("Content-Security-Policy", "default-src 'self'; connect-src *; font-src *; script-src-elem * 'unsafe-inline'; img-src * data:; style-src * 'unsafe-inline';")
+	c.Header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:;")
 	c.Header("X-XSS-Protection", "1; mode=block")
 	c.Header("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
 	c.Header("Referrer-Policy", "strict-origin")

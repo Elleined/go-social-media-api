@@ -1,14 +1,15 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"github.com/rs/zerolog/log"
 	"social-media-application/internal/post"
 	"social-media-application/internal/post/reaction"
 	"social-media-application/internal/user"
 	mw "social-media-application/middlewares"
 	"social-media-application/utils"
+
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"github.com/rs/zerolog/log"
 )
 
 func init() {
@@ -33,6 +34,7 @@ func main() {
 	if err != nil {
 		log.Panic().Msg("cannot connect to database")
 	}
+	defer db.Close()
 
 	// root endpoint
 	r.GET("/", func(c *gin.Context) {
