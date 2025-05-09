@@ -1,11 +1,13 @@
 package main
 
 import (
+	"os"
 	"social-media-application/internal/post"
 	"social-media-application/internal/post/reaction"
 	"social-media-application/internal/user"
 	mw "social-media-application/middlewares"
 	"social-media-application/utils"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -13,11 +15,18 @@ import (
 )
 
 func init() {
-	// Initialize godotenv
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Panic().Msg("cannot load the .env file for mysql")
-		return
+	ginMode := os.Getenv("GIN_MODE")
+
+	// Only load the godotenv when running in debug mode
+	// But in release mode the .env will be supplied dynamically
+	if ginMode == gin.ReleaseMode || strings.TrimSpace(ginMode) == "" {
+		gin.SetMode(gin.ReleaseMode)
+	} else {
+		gin.SetMode(gin.DebugMode)
+		err := godotenv.Load(".env")
+		if err != nil {
+			panic("Error loading .env file")
+		}
 	}
 }
 
