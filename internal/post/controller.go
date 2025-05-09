@@ -18,8 +18,6 @@ type Controller interface {
 	updateAttachment(e *gin.Context)
 
 	deleteById(e *gin.Context)
-
-	RegisterRoutes(e *gin.Engine)
 }
 
 type ControllerImpl struct {
@@ -63,7 +61,7 @@ func (c ControllerImpl) save(e *gin.Context) {
 	}{}
 	if err := e.BindJSON(&postRequest); err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "cannot save post malformed request " + err.Error(),
+			"message": "can't save post malformed request " + err.Error(),
 		})
 		return
 	}
@@ -71,7 +69,7 @@ func (c ControllerImpl) save(e *gin.Context) {
 	id, err := c.service.save(currentUserId, postRequest.Subject, postRequest.Content)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "cannot save post " + err.Error(),
+			"message": "can't save post " + err.Error(),
 		})
 		return
 	}
@@ -102,7 +100,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 	posts, err := c.service.getAll(currentUserId, limit, offset)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "cannot get posts " + err.Error(),
+			"message": "can't get all post " + err.Error(),
 		})
 		return
 	}
@@ -133,7 +131,7 @@ func (c ControllerImpl) getAllBy(e *gin.Context) {
 	posts, err := c.service.getAllBy(currentUserId, limit, offset)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "cannot get posts " + err.Error(),
+			"message": "can't get all by " + err.Error(),
 		})
 		return
 	}
@@ -153,7 +151,7 @@ func (c ControllerImpl) updateSubject(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "cannot update post " + err.Error(),
+			"message": "cannot update post subject " + err.Error(),
 		})
 		return
 	}
@@ -162,7 +160,7 @@ func (c ControllerImpl) updateSubject(e *gin.Context) {
 	_, err = c.service.updateSubject(currentUserId, postId, subject)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "cannot update subject " + err.Error(),
+			"message": "cannot update post subject " + err.Error(),
 		})
 	}
 
@@ -181,7 +179,7 @@ func (c ControllerImpl) updateContent(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "cannot update post " + err.Error(),
+			"message": "cannot update post content" + err.Error(),
 		})
 		return
 	}
@@ -190,7 +188,7 @@ func (c ControllerImpl) updateContent(e *gin.Context) {
 	_, err = c.service.updateContent(currentUserId, postId, content)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "cannot update post " + err.Error(),
+			"message": "cannot update post content" + err.Error(),
 		})
 		return
 	}
@@ -210,7 +208,7 @@ func (c ControllerImpl) updateAttachment(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "cannot update post " + err.Error(),
+			"message": "cannot update post attachment " + err.Error(),
 		})
 		return
 	}
@@ -219,7 +217,7 @@ func (c ControllerImpl) updateAttachment(e *gin.Context) {
 	_, err = c.service.updateAttachment(currentUserId, postId, attachment)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "cannot update post " + err.Error(),
+			"message": "cannot update post attachment " + err.Error(),
 		})
 		return
 	}
@@ -239,7 +237,7 @@ func (c ControllerImpl) deleteById(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "cannot update post " + err.Error(),
+			"message": "can't delete post " + err.Error(),
 		})
 		return
 	}
@@ -247,10 +245,10 @@ func (c ControllerImpl) deleteById(e *gin.Context) {
 	_, err = c.service.deleteById(currentUserId, postId)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "cannot update post " + err.Error(),
+			"message": "can't delete post " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusOK, nil)
+	e.JSON(http.StatusOK, postId)
 }

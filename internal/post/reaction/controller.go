@@ -16,8 +16,6 @@ type Controller interface {
 	update(e *gin.Context)
 
 	delete(e *gin.Context)
-
-	RegisterRoutes(e *gin.Engine)
 }
 
 type ControllerImpl struct {

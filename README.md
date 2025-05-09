@@ -9,11 +9,17 @@ This project uses the dependencies:
 # Features to be added
 1. Reactions
 2. Comments
-3. Upload files
+3. Upload files with go-file-server-api project
 
 # For improvement
 1. Add logs in repository and service layers
-2. Add tests for all modules
+2. Unit testing for all modules
+3. Integration testing for all modules
+4. Proper error messages
+5. Add pessimistic/ preventive validations
+   - has()
+   - isAlreadyExists()
+   - exists()
 
 # How to run
 1. Install golang-migrate for database migration
