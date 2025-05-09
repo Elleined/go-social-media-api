@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/jmoiron/sqlx"
 	"os"
 	"social-media-application/internal/post"
 	"social-media-application/internal/post/reaction"
@@ -31,8 +32,6 @@ func init() {
 }
 
 func main() {
-	port := ":8000"
-
 	// Initialize gin
 	r := gin.New()
 	r.Use(gin.Logger())
@@ -43,7 +42,12 @@ func main() {
 	if err != nil {
 		log.Panic().Msg("cannot connect to database")
 	}
-	defer db.Close()
+	defer func(db *sqlx.DB) {
+		err := db.Close()
+		if err != nil {
+			return
+		}
+	}(db)
 
 	// root endpoint
 	r.GET("/", func(c *gin.Context) {
@@ -80,7 +84,7 @@ func main() {
 	postReactionController := reaction.NewController(postReactionService)
 	postReactionController.RegisterRoutes(r)
 
-	err = r.Run(port)
+	err = r.Run(os.Getenv("PORT"))
 	if err != nil {
 		panic("cannot start server" + err.Error())
 	}

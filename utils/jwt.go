@@ -90,5 +90,5 @@ func parseClaims(token *jwt.Token) (currentUserId int, err error) {
 }
 
 func getSecretKey() []byte {
-	return []byte(os.Getenv("SECRET_KEY"))
+	return []byte(os.Getenv("JWT_SECRET_KEY"))
 }
