@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type CommentReaction struct {
+type Reaction struct {
 	Id        int       `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	ReactorId int       `json:"reactor_id"`
