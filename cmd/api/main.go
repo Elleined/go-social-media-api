@@ -32,11 +32,6 @@ func init() {
 }
 
 func main() {
-	// Initialize gin
-	r := gin.New()
-	r.Use(gin.Logger())
-	r.Use(gin.Recovery())
-
 	// Initialize Database Connection
 	db, err := utils.GetConnection()
 	if err != nil {
@@ -48,6 +43,11 @@ func main() {
 			return
 		}
 	}(db)
+
+	// Initialize gin
+	r := gin.New()
+	r.Use(gin.Logger())
+	r.Use(gin.Recovery())
 
 	// root endpoint
 	r.GET("/", func(c *gin.Context) {
