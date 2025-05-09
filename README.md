@@ -45,7 +45,7 @@ go mod download
 go mod tidy
 ```
 
-5. Supply the proper environment variables in .env file present in root project
+4. Supply the proper environment variables in .env file present in root project
 ```
 PORT=:8000
 
@@ -58,3 +58,10 @@ DB_NAME=sma_db
 # Generate this with `openssl rand -base64 32`
 JWT_SECRET_KEY=7nnoasdFD58zhjVO+GjQLhpRl6ps2x9+bZVfolJJlpI=
 ```
+
+5. Add `GIN_MODE=VALUE` release or debug in IDE environment or host machine.
+    - The default mode is release.
+    - When GIN_MODE value is not supplied or set to release it will be release mode
+    - Should explicitly declare in debug mode when in development
+
+6. Run the project
