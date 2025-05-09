@@ -18,6 +18,8 @@ type Controller interface {
 	updateAttachment(e *gin.Context)
 
 	deleteById(e *gin.Context)
+
+	RegisterRoutes(e *gin.Engine)
 }
 
 type ControllerImpl struct {

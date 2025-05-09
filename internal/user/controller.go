@@ -21,6 +21,8 @@ type Controller interface {
 	changePassword(e *gin.Context)
 
 	login(e *gin.Context)
+
+	RegisterRoutes(c *gin.Engine)
 }
 
 type ControllerImpl struct {
