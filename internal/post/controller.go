@@ -166,10 +166,7 @@ func (c ControllerImpl) updateSubject(e *gin.Context) {
 		})
 	}
 
-	e.JSON(http.StatusOK, gin.H{
-		"id":      postId,
-		"subject": subject,
-	})
+	e.JSON(http.StatusOK, subject)
 }
 
 func (c ControllerImpl) updateContent(e *gin.Context) {
@@ -198,10 +195,7 @@ func (c ControllerImpl) updateContent(e *gin.Context) {
 		return
 	}
 
-	e.JSON(http.StatusOK, gin.H{
-		"id":      postId,
-		"content": content,
-	})
+	e.JSON(http.StatusOK, content)
 }
 
 func (c ControllerImpl) updateAttachment(e *gin.Context) {
@@ -230,10 +224,7 @@ func (c ControllerImpl) updateAttachment(e *gin.Context) {
 		return
 	}
 
-	e.JSON(http.StatusOK, gin.H{
-		"id":         postId,
-		"attachment": attachment,
-	})
+	e.JSON(http.StatusOK, attachment)
 }
 
 func (c ControllerImpl) deleteById(e *gin.Context) {
@@ -261,5 +252,5 @@ func (c ControllerImpl) deleteById(e *gin.Context) {
 		return
 	}
 
-	e.JSON(http.StatusOK, gin.H{})
+	e.JSON(http.StatusOK, nil)
 }

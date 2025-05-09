@@ -13,6 +13,8 @@ type Controller interface {
 	findAll(e *gin.Context)
 	findAllByEmoji(e *gin.Context)
 
+	update(e *gin.Context)
+
 	delete(e *gin.Context)
 
 	RegisterRoutes(e *gin.Engine)
@@ -36,6 +38,7 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 		r.GET("", c.findAll)
 		r.GET("/emoji/:emojiId", c.findAllByEmoji)
 
+		r.PATCH("/:emojiId", c.update)
 		r.DELETE("", c.delete)
 	}
 }
@@ -120,6 +123,42 @@ func (c ControllerImpl) findAllByEmoji(e *gin.Context) {
 	e.JSON(http.StatusOK, reactions)
 }
 
+func (c ControllerImpl) update(e *gin.Context) {
+	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
+	if err != nil {
+		e.JSON(http.StatusUnauthorized, gin.H{
+			"message": "something wrong with jwt " + err.Error(),
+		})
+		return
+	}
+
+	postId, err := strconv.Atoi(e.Param("id"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "can't update post reaction " + err.Error(),
+		})
+		return
+	}
+
+	newEmojiId, err := strconv.Atoi(e.Param("emojiId"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "can't update post reaction " + err.Error(),
+		})
+	}
+
+	_, err = c.service.update(currentUserId, postId, newEmojiId)
+	if err != nil {
+		e.JSON(http.StatusInternalServerError, gin.H{
+			"message": "can't update post reaction " + err.Error(),
+		})
+	}
+
+	e.JSON(http.StatusOK, gin.H{
+		"message": "reaction updated successfully",
+	})
+}
+
 func (c ControllerImpl) delete(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
@@ -132,7 +171,7 @@ func (c ControllerImpl) delete(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't find all posts " + err.Error(),
+			"message": "can't delete reaction " + err.Error(),
 		})
 		return
 	}
@@ -140,10 +179,10 @@ func (c ControllerImpl) delete(e *gin.Context) {
 	_, err = c.service.delete(currentUserId, postId)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't find all posts " + err.Error(),
+			"message": "can't delete reaction " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusOK, gin.H{})
+	e.JSON(http.StatusOK, nil)
 }

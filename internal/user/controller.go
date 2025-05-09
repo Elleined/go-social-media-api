@@ -62,7 +62,7 @@ func (c *ControllerImpl) save(e *gin.Context) {
 
 	if err := e.ShouldBind(&userRequest); err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "cannot save user! malformed request" + err.Error(),
+			"message": "can't save user! malformed request" + err.Error(),
 		})
 		return
 	}
@@ -70,7 +70,7 @@ func (c *ControllerImpl) save(e *gin.Context) {
 	id, err := c.service.save(userRequest.FirstName, userRequest.LastName, userRequest.Email, userRequest.Password)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "cannot save user " + err.Error(),
+			"message": "can't save user " + err.Error(),
 		})
 		return
 	}
@@ -159,7 +159,7 @@ func (c *ControllerImpl) deleteById(e *gin.Context) {
 		return
 	}
 
-	e.JSON(http.StatusOK, gin.H{})
+	e.JSON(http.StatusOK, nil)
 }
 
 func (c *ControllerImpl) changeStatus(e *gin.Context) {
@@ -187,10 +187,7 @@ func (c *ControllerImpl) changeStatus(e *gin.Context) {
 		return
 	}
 
-	e.JSON(http.StatusOK, gin.H{
-		"id":     id,
-		"status": status,
-	})
+	e.JSON(http.StatusOK, status)
 }
 
 func (c *ControllerImpl) changePassword(e *gin.Context) {

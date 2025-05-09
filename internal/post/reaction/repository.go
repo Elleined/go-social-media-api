@@ -26,10 +26,10 @@ func NewRepository(db *sqlx.DB) Repository {
 }
 
 func (r RepositoryImpl) save(reactorId, postId, emojiId int) (id int64, err error) {
-	result, err := r.db.NamedExec("INSERT INTO post_reaction (reactor_id, post_id, emoji_id) VALUES (:reactor_id, :postId, :emojiId)", map[string]int{
-		"reactor_id": reactorId,
-		"post_id":    postId,
-		"emoji_id":   emojiId,
+	result, err := r.db.NamedExec("INSERT INTO post_reaction (reactor_id, post_id, emoji_id) VALUES (:reactorId, :postId, :emojiId)", map[string]any{
+		"reactorId": reactorId,
+		"postId":    postId,
+		"emojiId":   emojiId,
 	})
 
 	if err != nil {
@@ -67,7 +67,7 @@ func (r RepositoryImpl) findAllByEmoji(postId int, emojiId int) ([]Reaction, err
 }
 
 func (r RepositoryImpl) update(reactorId, postId, newEmojiId int) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE post_reaction SET emoji_id = :newEmojiId WHERE reactor_id = :reactorId AND post_id = :postId", map[string]int{
+	result, err := r.db.NamedExec("UPDATE post_reaction SET emoji_id = :newEmojiId WHERE reactor_id = :reactorId AND post_id = :postId", map[string]any{
 		"reactorId":  reactorId,
 		"postId":     postId,
 		"newEmojiId": newEmojiId,
@@ -86,9 +86,9 @@ func (r RepositoryImpl) update(reactorId, postId, newEmojiId int) (affectedRows 
 }
 
 func (r RepositoryImpl) delete(reactorId, postId int) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("DELETE FROM post_reaction WHERE reactor_id = :reactor_id AND post_id = :post_id", map[string]int{
-		"reactor_id": reactorId,
-		"post_id":    postId,
+	result, err := r.db.NamedExec("DELETE FROM post_reaction WHERE reactor_id = :reactorId AND post_id = :postId", map[string]any{
+		"reactorId": reactorId,
+		"postId":    postId,
 	})
 	if err != nil {
 		return 0, err
