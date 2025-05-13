@@ -99,7 +99,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 		return
 	}
 
-	posts, err := c.service.getAll(currentUserId, limit, offset)
+	posts, err := c.service.findAll(currentUserId, limit, offset)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "can't get all post " + err.Error(),
@@ -130,7 +130,7 @@ func (c ControllerImpl) getAllBy(e *gin.Context) {
 		return
 	}
 
-	posts, err := c.service.getAllBy(currentUserId, limit, offset)
+	posts, err := c.service.findAllBy(currentUserId, limit, offset)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "can't get all by " + err.Error(),

@@ -7,8 +7,8 @@ import (
 type Repository interface {
 	save(authorId int, subject, content string) (id int64, err error)
 
-	getAll(currentUserId, limit, offset int) ([]Post, error)
-	getAllBy(currentUserId, limit, offset int) ([]Post, error)
+	findAll(currentUserId, limit, offset int) ([]Post, error)
+	findAllBy(currentUserId, limit, offset int) ([]Post, error)
 
 	updateSubject(currentUserId, postId int, newSubject string) (affectedRows int64, err error)
 	updateContent(currentUserId, postId int, newContent string) (affectedRows int64, err error)
@@ -46,8 +46,8 @@ func (r RepositoryImpl) save(authorId int, subject, content string) (id int64, e
 	return id, nil
 }
 
-func (r RepositoryImpl) getAll(currentUserId, limit, offset int) ([]Post, error) {
-	posts := make([]Post, offset)
+func (r RepositoryImpl) findAll(currentUserId, limit, offset int) ([]Post, error) {
+	posts := make([]Post, limit)
 
 	err := r.db.Select(&posts, "SELECT * FROM post WHERE author_id != ? ORDER BY created_at DESC LIMIT ? OFFSET ?", currentUserId, limit, offset)
 	if err != nil {
@@ -57,8 +57,8 @@ func (r RepositoryImpl) getAll(currentUserId, limit, offset int) ([]Post, error)
 	return posts, nil
 }
 
-func (r RepositoryImpl) getAllBy(currentUserId, limit, offset int) ([]Post, error) {
-	posts := make([]Post, offset)
+func (r RepositoryImpl) findAllBy(currentUserId, limit, offset int) ([]Post, error) {
+	posts := make([]Post, limit)
 
 	err := r.db.Select(&posts, "SELECT * FROM post WHERE author_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", currentUserId, limit, offset)
 	if err != nil {
@@ -124,16 +124,9 @@ func (r RepositoryImpl) updateAttachment(currentUserId, postId int, newAttachmen
 }
 
 func (r RepositoryImpl) deleteById(currentUserId, postId int) (affectedRows int64, err error) {
-	var isDeleted bool
-	err = r.db.Get(&isDeleted, "SELECT is_deleted FROM post WHERE id = ? AND author_id = ?", postId, currentUserId)
-	if err != nil {
-		return 0, err
-	}
-
-	result, err := r.db.NamedExec("UPDATE post SET is_deleted = :isDeleted WHERE id = :postId AND author_id = :authorId", map[string]any{
-		"isDeleted": !isDeleted,
-		"postId":    postId,
-		"authorId":  currentUserId,
+	result, err := r.db.NamedExec("UPDATE post SET is_deleted = true WHERE id = :postId AND author_id = :authorId", map[string]any{
+		"postId":   postId,
+		"authorId": currentUserId,
 	})
 
 	if err != nil {

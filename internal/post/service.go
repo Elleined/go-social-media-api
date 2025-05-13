@@ -8,8 +8,8 @@ import (
 type Service interface {
 	save(authorId int, subject, content string) (id int64, err error)
 
-	getAll(currentUserId, limit, offset int) ([]Post, error)
-	getAllBy(currentUserId, limit, offset int) ([]Post, error)
+	findAll(currentUserId, limit, offset int) ([]Post, error)
+	findAllBy(currentUserId, limit, offset int) ([]Post, error)
 
 	updateSubject(currentUserId int, postId int, newSubject string) (affectedRows int64, err error)
 	updateContent(currentUserId, postId int, newContent string) (affectedRows int64, err error)
@@ -43,7 +43,7 @@ func (s ServiceImpl) save(authorId int, subject, content string) (id int64, err 
 	return id, nil
 }
 
-func (s ServiceImpl) getAll(currentUserId, limit, offset int) ([]Post, error) {
+func (s ServiceImpl) findAll(currentUserId, limit, offset int) ([]Post, error) {
 	if limit < 0 {
 		return nil, errors.New("limit is required")
 	}
@@ -52,7 +52,7 @@ func (s ServiceImpl) getAll(currentUserId, limit, offset int) ([]Post, error) {
 		return nil, errors.New("offset is required")
 	}
 
-	posts, err := s.repository.getAll(currentUserId, limit, offset)
+	posts, err := s.repository.findAll(currentUserId, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (s ServiceImpl) getAll(currentUserId, limit, offset int) ([]Post, error) {
 	return posts, nil
 }
 
-func (s ServiceImpl) getAllBy(currentUserId, limit, offset int) ([]Post, error) {
+func (s ServiceImpl) findAllBy(currentUserId, limit, offset int) ([]Post, error) {
 	if currentUserId <= 0 {
 		return nil, errors.New("author id is required")
 	}
@@ -73,7 +73,7 @@ func (s ServiceImpl) getAllBy(currentUserId, limit, offset int) ([]Post, error) 
 		return nil, errors.New("offset is required")
 	}
 
-	posts, err := s.repository.getAllBy(currentUserId, limit, offset)
+	posts, err := s.repository.findAllBy(currentUserId, limit, offset)
 	if err != nil {
 		return nil, err
 	}

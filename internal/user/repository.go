@@ -70,7 +70,7 @@ func (r *RepositoryImpl) findByEmail(email string) (User, error) {
 }
 
 func (r *RepositoryImpl) findAll(isActive bool, limit, offset int) ([]User, error) {
-	users := make([]User, offset)
+	users := make([]User, limit)
 
 	err := r.db.Select(&users, "SELECT * FROM user WHERE is_active = ? LIMIT ? OFFSET ?", isActive, limit, offset)
 	if err != nil {
