@@ -2,20 +2,22 @@ package reaction
 
 import "errors"
 
-type Service interface {
-	save(reactorId, postId, emojiId int) (id int64, err error)
+type (
+	Service interface {
+		save(reactorId, postId, emojiId int) (id int64, err error)
 
-	findAll(postId int) ([]Reaction, error)
-	findAllByEmoji(postId int, emojiId int) ([]Reaction, error)
+		findAll(postId int) ([]Reaction, error)
+		findAllByEmoji(postId int, emojiId int) ([]Reaction, error)
 
-	update(reactorId, postId, newEmojiId int) (affectedRows int64, err error)
+		update(reactorId, postId, newEmojiId int) (affectedRows int64, err error)
 
-	delete(reactorId, postId int) (affectedRows int64, err error)
-}
+		delete(reactorId, postId int) (affectedRows int64, err error)
+	}
 
-type ServiceImpl struct {
-	repository Repository
-}
+	ServiceImpl struct {
+		repository Repository
+	}
+)
 
 func NewService(repository Repository) Service {
 	return &ServiceImpl{

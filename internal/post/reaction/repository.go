@@ -2,22 +2,24 @@ package reaction
 
 import "github.com/jmoiron/sqlx"
 
-type Repository interface {
-	save(reactorId, postId, emojiId int) (id int64, err error)
+type (
+	Repository interface {
+		save(reactorId, postId, emojiId int) (id int64, err error)
 
-	findAll(postId int) ([]Reaction, error)
-	findAllByEmoji(postId int, emojiId int) ([]Reaction, error)
+		findAll(postId int) ([]Reaction, error)
+		findAllByEmoji(postId int, emojiId int) ([]Reaction, error)
 
-	update(reactorId, postId, newEmojiId int) (affectedRows int64, err error)
+		update(reactorId, postId, newEmojiId int) (affectedRows int64, err error)
 
-	delete(reactorId, postId int) (affectedRows int64, err error)
+		delete(reactorId, postId int) (affectedRows int64, err error)
 
-	isAlreadyReacted(reactorId, postId int) bool
-}
+		isAlreadyReacted(reactorId, postId int) bool
+	}
 
-type RepositoryImpl struct {
-	db *sqlx.DB
-}
+	RepositoryImpl struct {
+		db *sqlx.DB
+	}
+)
 
 func NewRepository(db *sqlx.DB) Repository {
 	return &RepositoryImpl{

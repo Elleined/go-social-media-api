@@ -4,23 +4,27 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type Repository interface {
-	save(firstName, lastName, email, password string) (id int64, err error)
+type (
+	Repository interface {
+		save(firstName, lastName, email, password string) (id int64, err error)
 
-	findById(id int) (User, error)
-	findByEmail(email string) (User, error)
+		findById(id int) (User, error)
+		findByEmail(email string) (User, error)
 
-	findAll(isActive bool, limit, offset int) ([]User, error)
+		findAll(isActive bool, limit, offset int) ([]User, error)
 
-	deleteById(id int) (affectedRows int64, err error)
+		deleteById(id int) (affectedRows int64, err error)
 
-	changeStatus(userId int, isActive bool) (affectedRows int64, err error)
-	changePassword(userId int, newPassword string) (affectedRows int64, err error)
-}
+		changeStatus(userId int, isActive bool) (affectedRows int64, err error)
+		changePassword(userId int, newPassword string) (affectedRows int64, err error)
 
-type RepositoryImpl struct {
-	db *sqlx.DB
-}
+		isEmailExists(email string) (bool, error)
+	}
+
+	RepositoryImpl struct {
+		db *sqlx.DB
+	}
+)
 
 func NewRepository(db *sqlx.DB) Repository {
 	return &RepositoryImpl{
@@ -128,4 +132,9 @@ func (r *RepositoryImpl) changePassword(userId int, newPassword string) (affecte
 	}
 
 	return affectedRows, nil
+}
+
+func (r *RepositoryImpl) isEmailExists(email string) (bool, error) {
+	//TODO implement me
+	panic("implement me")
 }

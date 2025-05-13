@@ -7,22 +7,24 @@ import (
 	"strconv"
 )
 
-type Controller interface {
-	save(e *gin.Context)
+type (
+	Controller interface {
+		save(e *gin.Context)
 
-	findAll(e *gin.Context)
-	findAllByEmoji(e *gin.Context)
+		findAll(e *gin.Context)
+		findAllByEmoji(e *gin.Context)
 
-	update(e *gin.Context)
+		update(e *gin.Context)
 
-	delete(e *gin.Context)
+		delete(e *gin.Context)
 
-	RegisterRoutes(e *gin.Engine)
-}
+		RegisterRoutes(e *gin.Engine)
+	}
 
-type ControllerImpl struct {
-	service Service
-}
+	ControllerImpl struct {
+		service Service
+	}
+)
 
 func NewController(service Service) Controller {
 	return &ControllerImpl{

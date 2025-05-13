@@ -7,27 +7,29 @@ import (
 	"strconv"
 )
 
-type Controller interface {
-	save(e *gin.Context)
+type (
+	Controller interface {
+		save(e *gin.Context)
 
-	getById(e *gin.Context)
-	getByEmail(e *gin.Context)
+		getById(e *gin.Context)
+		getByEmail(e *gin.Context)
 
-	getAll(e *gin.Context)
+		getAll(e *gin.Context)
 
-	deleteById(e *gin.Context)
+		deleteById(e *gin.Context)
 
-	changeStatus(e *gin.Context)
-	changePassword(e *gin.Context)
+		changeStatus(e *gin.Context)
+		changePassword(e *gin.Context)
 
-	login(e *gin.Context)
+		login(e *gin.Context)
 
-	RegisterRoutes(c *gin.Engine)
-}
+		RegisterRoutes(c *gin.Engine)
+	}
 
-type ControllerImpl struct {
-	service Service
-}
+	ControllerImpl struct {
+		service Service
+	}
+)
 
 func NewController(service Service) Controller {
 	return &ControllerImpl{

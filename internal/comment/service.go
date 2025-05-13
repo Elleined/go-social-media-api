@@ -5,20 +5,22 @@ import (
 	"strings"
 )
 
-type Service interface {
-	save(authorId, postId int, content string) (id int64, err error)
+type (
+	Service interface {
+		save(authorId, postId int, content string) (id int64, err error)
 
-	getAll(postId int, isDeleted bool, limit, offset int) ([]Comment, error)
+		getAll(postId int, isDeleted bool, limit, offset int) ([]Comment, error)
 
-	updateContent(currentUserId, postId, commentId int, newContent string) (affectedRows int64, err error)
-	updateAttachment(currentUserId, postId, commentId int, newAttachment string) (affectedRows int64, err error)
+		updateContent(currentUserId, postId, commentId int, newContent string) (affectedRows int64, err error)
+		updateAttachment(currentUserId, postId, commentId int, newAttachment string) (affectedRows int64, err error)
 
-	deleteById(currentUserId, postId, commentId int) (affectedRows int64, err error)
-}
+		deleteById(currentUserId, postId, commentId int) (affectedRows int64, err error)
+	}
 
-type ServiceImpl struct {
-	repository Repository
-}
+	ServiceImpl struct {
+		repository Repository
+	}
+)
 
 func NewService(repository Repository) Service {
 	return &ServiceImpl{

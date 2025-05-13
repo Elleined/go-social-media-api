@@ -2,20 +2,22 @@ package comment
 
 import "github.com/jmoiron/sqlx"
 
-type Repository interface {
-	save(authorId, postId int, content string) (id int64, err error)
+type (
+	Repository interface {
+		save(authorId, postId int, content string) (id int64, err error)
 
-	findAll(postId int, isDeleted bool, limit, offset int) ([]Comment, error)
+		findAll(postId int, isDeleted bool, limit, offset int) ([]Comment, error)
 
-	updateContent(currentUserId, postId, commentId int, newContent string) (affectedRows int64, err error)
-	updateAttachment(currentUserId, postId, commentId int, newAttachment string) (affectedRows int64, err error)
+		updateContent(currentUserId, postId, commentId int, newContent string) (affectedRows int64, err error)
+		updateAttachment(currentUserId, postId, commentId int, newAttachment string) (affectedRows int64, err error)
 
-	deleteById(currentUserId, postId, commentId int) (affectedRows int64, err error)
-}
+		deleteById(currentUserId, postId, commentId int) (affectedRows int64, err error)
+	}
 
-type RepositoryImpl struct {
-	db *sqlx.DB
-}
+	RepositoryImpl struct {
+		db *sqlx.DB
+	}
+)
 
 func NewRepository(db *sqlx.DB) Repository {
 	return &RepositoryImpl{

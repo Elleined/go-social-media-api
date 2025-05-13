@@ -4,22 +4,24 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type Repository interface {
-	save(authorId int, subject, content string) (id int64, err error)
+type (
+	Repository interface {
+		save(authorId int, subject, content string) (id int64, err error)
 
-	findAll(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error)
-	findAllBy(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error)
+		findAll(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error)
+		findAllBy(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error)
 
-	updateSubject(currentUserId, postId int, newSubject string) (affectedRows int64, err error)
-	updateContent(currentUserId, postId int, newContent string) (affectedRows int64, err error)
-	updateAttachment(currentUserId, postId int, newAttachment string) (affectedRows int64, err error)
+		updateSubject(currentUserId, postId int, newSubject string) (affectedRows int64, err error)
+		updateContent(currentUserId, postId int, newContent string) (affectedRows int64, err error)
+		updateAttachment(currentUserId, postId int, newAttachment string) (affectedRows int64, err error)
 
-	deleteById(currentUserId, postId int) (affectedRows int64, err error)
-}
+		deleteById(currentUserId, postId int) (affectedRows int64, err error)
+	}
 
-type RepositoryImpl struct {
-	db *sqlx.DB
-}
+	RepositoryImpl struct {
+		db *sqlx.DB
+	}
+)
 
 func NewRepository(db *sqlx.DB) Repository {
 	return &RepositoryImpl{

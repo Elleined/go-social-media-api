@@ -7,25 +7,27 @@ import (
 	"strings"
 )
 
-type Service interface {
-	save(firstName, lastName, email, password string) (id int64, err error)
+type (
+	Service interface {
+		save(firstName, lastName, email, password string) (id int64, err error)
 
-	getById(id int) (User, error)
-	getByEmail(email string) (User, error)
+		getById(id int) (User, error)
+		getByEmail(email string) (User, error)
 
-	getAll(isActive bool, limit, offset int) ([]User, error)
+		getAll(isActive bool, limit, offset int) ([]User, error)
 
-	deleteById(id int) (affectedRows int64, err error)
+		deleteById(id int) (affectedRows int64, err error)
 
-	changeStatus(userId int, isActive bool) (affectedRows int64, err error)
-	changePassword(userId int, newPassword string) (affectedRows int64, err error)
+		changeStatus(userId int, isActive bool) (affectedRows int64, err error)
+		changePassword(userId int, newPassword string) (affectedRows int64, err error)
 
-	login(username, password string) (jwt string, err error)
-}
-
-type ServiceImpl struct {
-	repository Repository
-}
+		login(username, password string) (jwt string, err error)
+	}
+	
+	ServiceImpl struct {
+		repository Repository
+	}
+)
 
 func NewService(repository Repository) Service {
 	return &ServiceImpl{

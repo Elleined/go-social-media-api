@@ -5,22 +5,24 @@ import (
 	"strings"
 )
 
-type Service interface {
-	save(authorId int, subject, content string) (id int64, err error)
+type (
+	Service interface {
+		save(authorId int, subject, content string) (id int64, err error)
 
-	getAll(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error)
-	getAllBy(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error)
+		getAll(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error)
+		getAllBy(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error)
 
-	updateSubject(currentUserId int, postId int, newSubject string) (affectedRows int64, err error)
-	updateContent(currentUserId, postId int, newContent string) (affectedRows int64, err error)
-	updateAttachment(currentUserId, postId int, newAttachment string) (affectedRows int64, err error)
+		updateSubject(currentUserId int, postId int, newSubject string) (affectedRows int64, err error)
+		updateContent(currentUserId, postId int, newContent string) (affectedRows int64, err error)
+		updateAttachment(currentUserId, postId int, newAttachment string) (affectedRows int64, err error)
 
-	deleteById(currentUserId, postId int) (affectedRows int64, err error)
-}
+		deleteById(currentUserId, postId int) (affectedRows int64, err error)
+	}
 
-type ServiceImpl struct {
-	repository Repository
-}
+	ServiceImpl struct {
+		repository Repository
+	}
+)
 
 func (s ServiceImpl) save(authorId int, subject, content string) (id int64, err error) {
 	if authorId <= 0 {
