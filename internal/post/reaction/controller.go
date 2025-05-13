@@ -184,5 +184,5 @@ func (c ControllerImpl) delete(e *gin.Context) {
 		return
 	}
 
-	e.JSON(http.StatusOK, nil)
+	e.JSON(http.StatusNoContent, nil)
 }

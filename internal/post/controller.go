@@ -252,5 +252,5 @@ func (c ControllerImpl) deleteById(e *gin.Context) {
 		return
 	}
 
-	e.JSON(http.StatusOK, postId)
+	e.JSON(http.StatusNoContent, postId)
 }

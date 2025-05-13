@@ -159,7 +159,7 @@ func (c *ControllerImpl) deleteById(e *gin.Context) {
 		return
 	}
 
-	e.JSON(http.StatusOK, nil)
+	e.JSON(http.StatusNoContent, nil)
 }
 
 func (c *ControllerImpl) changeStatus(e *gin.Context) {
