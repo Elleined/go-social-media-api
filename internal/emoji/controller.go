@@ -1,6 +1,10 @@
 package emoji
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"strconv"
+)
 
 type (
 	Controller interface {
@@ -34,21 +38,68 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 }
 
 func (c ControllerImpl) save(e *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	name := e.Query("name")
+
+	id, err := c.service.save(name)
+	if err != nil {
+		e.JSON(http.StatusInternalServerError, gin.H{
+			"message": "can't save emoji" + err.Error(),
+		})
+		return
+	}
+
+	e.JSON(http.StatusOK, id)
 }
 
 func (c ControllerImpl) getAll(e *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	emojis, err := c.service.getAll()
+	if err != nil {
+		e.JSON(http.StatusInternalServerError, gin.H{
+			"message": "can't get all emojis",
+		})
+		return
+	}
+
+	e.JSON(http.StatusOK, emojis)
 }
 
 func (c ControllerImpl) update(e *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	id, err := strconv.Atoi(e.Param("id"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "id is required",
+		})
+		return
+	}
+
+	name := e.Query("name")
+	_, err = c.service.update(id, name)
+	if err != nil {
+		e.JSON(http.StatusInternalServerError, gin.H{
+			"message": "can't update emoji" + err.Error(),
+		})
+		return
+	}
+
+	e.JSON(http.StatusOK, name)
 }
 
 func (c ControllerImpl) delete(e *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	id, err := strconv.Atoi(e.Param("id"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "id is required",
+		})
+		return
+	}
+
+	_, err = c.service.delete(id)
+	if err != nil {
+		e.JSON(http.StatusInternalServerError, gin.H{
+			"message": "can't delete emoji" + err.Error(),
+		})
+		return
+	}
+
+	e.JSON(http.StatusNoContent, id)
 }
