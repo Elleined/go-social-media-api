@@ -64,7 +64,7 @@ func (c *ControllerImpl) save(e *gin.Context) {
 
 	if err := e.ShouldBind(&userRequest); err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't save user! malformed request" + err.Error(),
+			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
@@ -72,7 +72,7 @@ func (c *ControllerImpl) save(e *gin.Context) {
 	id, err := c.service.save(userRequest.FirstName, userRequest.LastName, userRequest.Email, userRequest.Password)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't save user " + err.Error(),
+			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
@@ -84,7 +84,7 @@ func (c *ControllerImpl) getById(e *gin.Context) {
 	id, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid id " + err.Error(),
+			"message": "get by id failed " + err.Error(),
 		})
 		return
 	}
@@ -92,8 +92,9 @@ func (c *ControllerImpl) getById(e *gin.Context) {
 	user, err := c.service.getById(id)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't get by id " + err.Error(),
+			"message": "get by id failed " + err.Error(),
 		})
+		return
 	}
 
 	e.JSON(http.StatusOK, user)
@@ -105,7 +106,7 @@ func (c *ControllerImpl) getByEmail(e *gin.Context) {
 	user, err := c.service.getByEmail(email)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't get by email " + err.Error(),
+			"message": "get by email failed " + err.Error(),
 		})
 		return
 	}
@@ -114,7 +115,6 @@ func (c *ControllerImpl) getByEmail(e *gin.Context) {
 }
 
 func (c *ControllerImpl) getAll(e *gin.Context) {
-	isActive := e.DefaultQuery("isActive", "true")
 	page := e.DefaultQuery("page", "1")
 	pageSize := e.DefaultQuery("pageSize", "10")
 
@@ -126,18 +126,18 @@ func (c *ControllerImpl) getAll(e *gin.Context) {
 		return
 	}
 
-	isActiveBool, err := strconv.ParseBool(isActive)
+	isActive, err := strconv.ParseBool(e.DefaultQuery("isActive", "true"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid isActive " + err.Error(),
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
 
-	users, err := c.service.getAll(isActiveBool, limit, offset)
+	users, err := c.service.getAll(isActive, limit, offset)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "cannot fetch all users " + err.Error(),
+			"message": "get all failed " + err.Error(),
 		})
 	}
 
@@ -148,7 +148,7 @@ func (c *ControllerImpl) deleteById(e *gin.Context) {
 	id, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid id " + err.Error(),
+			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}
@@ -156,7 +156,7 @@ func (c *ControllerImpl) deleteById(e *gin.Context) {
 	_, err = c.service.deleteById(id)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't delete " + err.Error(),
+			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}
@@ -168,7 +168,7 @@ func (c *ControllerImpl) changeStatus(e *gin.Context) {
 	status, err := strconv.ParseBool(e.Query("status"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid status " + err.Error(),
+			"message": "change status failed " + err.Error(),
 		})
 		return
 	}
@@ -176,7 +176,7 @@ func (c *ControllerImpl) changeStatus(e *gin.Context) {
 	id, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid id " + err.Error(),
+			"message": "change status failed " + err.Error(),
 		})
 		return
 	}
@@ -184,7 +184,7 @@ func (c *ControllerImpl) changeStatus(e *gin.Context) {
 	_, err = c.service.changeStatus(id, status)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't change status " + err.Error(),
+			"message": "change status failed " + err.Error(),
 		})
 		return
 	}
@@ -196,9 +196,10 @@ func (c *ControllerImpl) changePassword(e *gin.Context) {
 	passwordRequest := struct {
 		Password string
 	}{}
+
 	if err := e.ShouldBind(&passwordRequest); err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid password " + err.Error(),
+			"message": "change password failed " + err.Error(),
 		})
 		return
 	}
@@ -206,7 +207,7 @@ func (c *ControllerImpl) changePassword(e *gin.Context) {
 	id, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid id " + err.Error(),
+			"message": "change password failed " + err.Error(),
 		})
 		return
 	}
@@ -214,7 +215,7 @@ func (c *ControllerImpl) changePassword(e *gin.Context) {
 	_, err = c.service.changePassword(id, passwordRequest.Password)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't change password " + err.Error(),
+			"message": "change password failed " + err.Error(),
 		})
 		return
 	}
@@ -230,7 +231,7 @@ func (c *ControllerImpl) login(e *gin.Context) {
 
 	if err := e.ShouldBind(&loginRequest); err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid malformed request " + err.Error(),
+			"message": "login failed " + err.Error(),
 		})
 		return
 	}
@@ -238,7 +239,7 @@ func (c *ControllerImpl) login(e *gin.Context) {
 	jwt, err := c.service.login(loginRequest.Username, loginRequest.Password)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't login " + err.Error(),
+			"message": "login failed " + err.Error(),
 		})
 		return
 	}

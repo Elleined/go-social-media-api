@@ -11,15 +11,10 @@ This project uses the dependencies:
 3. Upload files with go-file-server-api project
 
 # For improvement
-1. Add logs in repository and service layers
 2. Unit testing for all modules
 3. Integration testing for all modules
 4. Proper error messages from service to controller
 5. Implement robust pagination
-7. Add pessimistic/ preventive validations
-   - has()
-   - isAlreadyExists()
-   - exists()
 
 # Validations
 ## User

@@ -49,7 +49,7 @@ func (c ControllerImpl) save(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
 		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
+			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
@@ -57,7 +57,7 @@ func (c ControllerImpl) save(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't save posts " + err.Error(),
+			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
@@ -65,7 +65,7 @@ func (c ControllerImpl) save(e *gin.Context) {
 	emojiId, err := strconv.Atoi(e.Query("emojiId"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't save posts " + err.Error(),
+			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
@@ -73,7 +73,7 @@ func (c ControllerImpl) save(e *gin.Context) {
 	id, err := c.service.save(currentUserId, postId, emojiId)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't save reaction " + err.Error(),
+			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
@@ -85,7 +85,7 @@ func (c ControllerImpl) findAll(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't find all posts " + err.Error(),
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
@@ -93,7 +93,7 @@ func (c ControllerImpl) findAll(e *gin.Context) {
 	reactions, err := c.service.findAll(postId)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't find all posts " + err.Error(),
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
@@ -105,7 +105,7 @@ func (c ControllerImpl) findAllByEmoji(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't find all posts by emoji " + err.Error(),
+			"message": "get all by emoji failed " + err.Error(),
 		})
 		return
 	}
@@ -113,7 +113,7 @@ func (c ControllerImpl) findAllByEmoji(e *gin.Context) {
 	emojiId, err := strconv.Atoi(e.Param("emojiId"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't find all posts by emoji " + err.Error(),
+			"message": "get all by emoji failed " + err.Error(),
 		})
 		return
 	}
@@ -121,7 +121,7 @@ func (c ControllerImpl) findAllByEmoji(e *gin.Context) {
 	reactions, err := c.service.findAllByEmoji(postId, emojiId)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't find all posts by emoji " + err.Error(),
+			"message": "get all by emoji failed " + err.Error(),
 		})
 		return
 	}
@@ -133,7 +133,7 @@ func (c ControllerImpl) update(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
 		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
+			"message": "update failed " + err.Error(),
 		})
 		return
 	}
@@ -141,7 +141,7 @@ func (c ControllerImpl) update(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't update post reaction " + err.Error(),
+			"message": "update failed " + err.Error(),
 		})
 		return
 	}
@@ -149,7 +149,7 @@ func (c ControllerImpl) update(e *gin.Context) {
 	newEmojiId, err := strconv.Atoi(e.Param("emojiId"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't update post reaction " + err.Error(),
+			"message": "update failed " + err.Error(),
 		})
 		return
 	}
@@ -157,21 +157,19 @@ func (c ControllerImpl) update(e *gin.Context) {
 	_, err = c.service.update(currentUserId, postId, newEmojiId)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't update post reaction " + err.Error(),
+			"message": "update failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusOK, gin.H{
-		"message": "reaction updated successfully",
-	})
+	e.JSON(http.StatusOK, newEmojiId)
 }
 
 func (c ControllerImpl) delete(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
 		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
+			"message": "delete failed " + err.Error(),
 		})
 		return
 	}
@@ -179,7 +177,7 @@ func (c ControllerImpl) delete(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't delete reaction " + err.Error(),
+			"message": "delete failed " + err.Error(),
 		})
 		return
 	}
@@ -187,7 +185,7 @@ func (c ControllerImpl) delete(e *gin.Context) {
 	_, err = c.service.delete(currentUserId, postId)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't delete reaction " + err.Error(),
+			"message": "delete failed " + err.Error(),
 		})
 		return
 	}

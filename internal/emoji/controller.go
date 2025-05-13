@@ -43,7 +43,7 @@ func (c ControllerImpl) save(e *gin.Context) {
 	id, err := c.service.save(name)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't save emoji" + err.Error(),
+			"message": "saved failed" + err.Error(),
 		})
 		return
 	}
@@ -55,7 +55,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 	emojis, err := c.service.getAll()
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't get all emojis",
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
@@ -67,7 +67,7 @@ func (c ControllerImpl) update(e *gin.Context) {
 	id, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "id is required",
+			"message": "update failed " + err.Error(),
 		})
 		return
 	}
@@ -76,7 +76,7 @@ func (c ControllerImpl) update(e *gin.Context) {
 	_, err = c.service.update(id, name)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't update emoji" + err.Error(),
+			"message": "update failed " + err.Error(),
 		})
 		return
 	}
@@ -88,7 +88,7 @@ func (c ControllerImpl) delete(e *gin.Context) {
 	id, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "id is required",
+			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}
@@ -96,10 +96,10 @@ func (c ControllerImpl) delete(e *gin.Context) {
 	_, err = c.service.delete(id)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't delete emoji" + err.Error(),
+			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusNoContent, id)
+	e.JSON(http.StatusNoContent, nil)
 }

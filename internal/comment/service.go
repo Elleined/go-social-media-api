@@ -93,7 +93,7 @@ func (s ServiceImpl) updateContent(currentUserId, postId, commentId int, newCont
 	}
 
 	if affectedRows <= 0 {
-		return 0, errors.New("can't delete by id! current user doesn't have this comment")
+		return 0, errors.New("current user doesn't have this comment")
 	}
 
 	return affectedRows, nil
@@ -122,7 +122,7 @@ func (s ServiceImpl) updateAttachment(currentUserId, postId, commentId int, newA
 	}
 
 	if affectedRows <= 0 {
-		return 0, errors.New("can't delete by id! current user doesn't have this comment")
+		return 0, errors.New("current user doesn't have this comment")
 	}
 
 	return affectedRows, nil
@@ -147,7 +147,7 @@ func (s ServiceImpl) deleteById(currentUserId, postId, commentId int) (affectedR
 	}
 
 	if affectedRows <= 0 {
-		return 0, errors.New("can't delete by id! current user doesn't have this comment")
+		return 0, errors.New("current user doesn't have this comment")
 	}
 
 	return affectedRows, nil

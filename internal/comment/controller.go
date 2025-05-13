@@ -20,7 +20,7 @@ type (
 
 		RegisterRoutes(e *gin.Engine)
 	}
-	
+
 	ControllerImpl struct {
 		service Service
 	}
@@ -50,7 +50,7 @@ func (c ControllerImpl) save(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
 		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
+			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
@@ -58,7 +58,7 @@ func (c ControllerImpl) save(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't get all comment " + err.Error(),
+			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
@@ -68,7 +68,7 @@ func (c ControllerImpl) save(e *gin.Context) {
 	id, err := c.service.save(currentUserId, postId, content)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't save comment " + err.Error(),
+			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
@@ -80,7 +80,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't get all comment " + err.Error(),
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
@@ -91,7 +91,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 	limit, offset, err := utils.Paginate(page, pageSize)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't get all comment " + err.Error(),
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
@@ -99,7 +99,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 	isDeleted, err := strconv.ParseBool(e.DefaultQuery("isDeleted", "false"))
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "isDeleted is required " + err.Error(),
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
@@ -107,7 +107,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 	comments, err := c.service.getAll(postId, isDeleted, limit, offset)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't get all comment " + err.Error(),
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
@@ -119,7 +119,7 @@ func (c ControllerImpl) updateContent(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
 		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
+			"message": "update content failed " + err.Error(),
 		})
 		return
 	}
@@ -127,7 +127,7 @@ func (c ControllerImpl) updateContent(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't update comment content " + err.Error(),
+			"message": "update content failed " + err.Error(),
 		})
 		return
 	}
@@ -135,7 +135,7 @@ func (c ControllerImpl) updateContent(e *gin.Context) {
 	commentId, err := strconv.Atoi(e.Param("commentId"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't update comment content " + err.Error(),
+			"message": "update content failed " + err.Error(),
 		})
 		return
 	}
@@ -145,7 +145,7 @@ func (c ControllerImpl) updateContent(e *gin.Context) {
 	_, err = c.service.updateContent(currentUserId, postId, commentId, newContent)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't update comment content " + err.Error(),
+			"message": "update content failed " + err.Error(),
 		})
 		return
 	}
@@ -157,7 +157,7 @@ func (c ControllerImpl) updateAttachment(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
 		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
+			"message": "update attachment failed " + err.Error(),
 		})
 		return
 	}
@@ -165,7 +165,7 @@ func (c ControllerImpl) updateAttachment(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't update comment attachment " + err.Error(),
+			"message": "update attachment failed " + err.Error(),
 		})
 		return
 	}
@@ -173,7 +173,7 @@ func (c ControllerImpl) updateAttachment(e *gin.Context) {
 	commentId, err := strconv.Atoi(e.Param("commentId"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't update comment attachment " + err.Error(),
+			"message": "update attachment failed " + err.Error(),
 		})
 		return
 	}
@@ -183,7 +183,7 @@ func (c ControllerImpl) updateAttachment(e *gin.Context) {
 	_, err = c.service.updateAttachment(currentUserId, postId, commentId, newAttachment)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't update comment attachment " + err.Error(),
+			"message": "update attachment failed " + err.Error(),
 		})
 		return
 	}
@@ -195,7 +195,7 @@ func (c ControllerImpl) deleteById(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
 		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
+			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}
@@ -203,7 +203,7 @@ func (c ControllerImpl) deleteById(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't delete comment " + err.Error(),
+			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}
@@ -211,7 +211,7 @@ func (c ControllerImpl) deleteById(e *gin.Context) {
 	commentId, err := strconv.Atoi(e.Param("commentId"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't delete comment " + err.Error(),
+			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}
@@ -219,10 +219,10 @@ func (c ControllerImpl) deleteById(e *gin.Context) {
 	_, err = c.service.deleteById(currentUserId, postId, commentId)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't delete comment " + err.Error(),
+			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusNoContent, commentId)
+	e.JSON(http.StatusNoContent, nil)
 }

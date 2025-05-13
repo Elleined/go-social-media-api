@@ -54,7 +54,7 @@ func (c ControllerImpl) save(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
 		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
+			"message": "save failed " + err.Error(),
 		})
 		return
 	}
@@ -63,9 +63,10 @@ func (c ControllerImpl) save(e *gin.Context) {
 		Subject string `json:"subject" binding:"required"`
 		Content string `json:"content" binding:"required"`
 	}{}
+
 	if err := e.BindJSON(&postRequest); err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't save post malformed request " + err.Error(),
+			"message": "save failed " + err.Error(),
 		})
 		return
 	}
@@ -73,7 +74,7 @@ func (c ControllerImpl) save(e *gin.Context) {
 	id, err := c.service.save(currentUserId, postRequest.Subject, postRequest.Content)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't save post " + err.Error(),
+			"message": "save failed " + err.Error(),
 		})
 		return
 	}
@@ -85,7 +86,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
 		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
@@ -96,7 +97,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 	limit, offset, err := utils.Paginate(page, pageSize)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "something wrong with pagination " + err.Error(),
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
@@ -104,7 +105,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 	isDeleted, err := strconv.ParseBool(e.DefaultQuery("isDeleted", "false"))
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "isDeleted is required " + err.Error(),
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
@@ -112,7 +113,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 	posts, err := c.service.getAll(currentUserId, isDeleted, limit, offset)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't get all post " + err.Error(),
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
@@ -124,7 +125,7 @@ func (c ControllerImpl) getAllBy(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
 		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
+			"message": "get all by failed " + err.Error(),
 		})
 		return
 	}
@@ -135,7 +136,7 @@ func (c ControllerImpl) getAllBy(e *gin.Context) {
 	limit, offset, err := utils.Paginate(page, pageSize)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "something wrong with pagination " + err.Error(),
+			"message": "get all by failed " + err.Error(),
 		})
 		return
 	}
@@ -143,7 +144,7 @@ func (c ControllerImpl) getAllBy(e *gin.Context) {
 	isDeleted, err := strconv.ParseBool(e.DefaultQuery("isDeleted", "false"))
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "isDeleted is required " + err.Error(),
+			"message": "get all by failed " + err.Error(),
 		})
 		return
 	}
@@ -151,7 +152,7 @@ func (c ControllerImpl) getAllBy(e *gin.Context) {
 	posts, err := c.service.getAllBy(currentUserId, isDeleted, limit, offset)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't get all by " + err.Error(),
+			"message": "get all by failed " + err.Error(),
 		})
 		return
 	}
@@ -163,7 +164,7 @@ func (c ControllerImpl) updateSubject(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
 		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
+			"message": "update subject failed " + err.Error(),
 		})
 		return
 	}
@@ -171,7 +172,7 @@ func (c ControllerImpl) updateSubject(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "cannot update post subject " + err.Error(),
+			"message": "update subject failed " + err.Error(),
 		})
 		return
 	}
@@ -180,7 +181,7 @@ func (c ControllerImpl) updateSubject(e *gin.Context) {
 	_, err = c.service.updateSubject(currentUserId, postId, subject)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "cannot update post subject " + err.Error(),
+			"message": "update subject failed " + err.Error(),
 		})
 		return
 	}
@@ -192,7 +193,7 @@ func (c ControllerImpl) updateContent(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
 		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
+			"message": "update content failed " + err.Error(),
 		})
 		return
 	}
@@ -200,7 +201,7 @@ func (c ControllerImpl) updateContent(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "cannot update post content" + err.Error(),
+			"message": "update content failed" + err.Error(),
 		})
 		return
 	}
@@ -209,7 +210,7 @@ func (c ControllerImpl) updateContent(e *gin.Context) {
 	_, err = c.service.updateContent(currentUserId, postId, content)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "cannot update post content" + err.Error(),
+			"message": "update content failed" + err.Error(),
 		})
 		return
 	}
@@ -221,7 +222,7 @@ func (c ControllerImpl) updateAttachment(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
 		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
+			"message": "update attachment failed " + err.Error(),
 		})
 		return
 	}
@@ -229,7 +230,7 @@ func (c ControllerImpl) updateAttachment(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "cannot update post attachment " + err.Error(),
+			"message": "update attachment failed " + err.Error(),
 		})
 		return
 	}
@@ -238,7 +239,7 @@ func (c ControllerImpl) updateAttachment(e *gin.Context) {
 	_, err = c.service.updateAttachment(currentUserId, postId, attachment)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "cannot update post attachment " + err.Error(),
+			"message": "update attachment failed " + err.Error(),
 		})
 		return
 	}
@@ -250,7 +251,7 @@ func (c ControllerImpl) deleteById(e *gin.Context) {
 	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
 	if err != nil {
 		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
+			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}
@@ -258,7 +259,7 @@ func (c ControllerImpl) deleteById(e *gin.Context) {
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't delete post " + err.Error(),
+			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}
@@ -266,7 +267,7 @@ func (c ControllerImpl) deleteById(e *gin.Context) {
 	_, err = c.service.deleteById(currentUserId, postId)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "can't delete post " + err.Error(),
+			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}

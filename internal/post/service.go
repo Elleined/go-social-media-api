@@ -102,7 +102,7 @@ func (s ServiceImpl) updateSubject(currentUserId int, postId int, newSubject str
 	}
 
 	if affectedRows <= 0 {
-		return 0, errors.New("can't update post subject! current user is not the author of post")
+		return 0, errors.New("current user is not the author of post")
 	}
 
 	return affectedRows, nil
@@ -127,7 +127,7 @@ func (s ServiceImpl) updateContent(currentUserId, postId int, newContent string)
 	}
 
 	if affectedRows <= 0 {
-		return 0, errors.New("can't update post content! current user is not the author of post")
+		return 0, errors.New("current user is not the author of post")
 	}
 
 	return affectedRows, nil
@@ -152,7 +152,7 @@ func (s ServiceImpl) updateAttachment(currentUserId, postId int, newAttachment s
 	}
 
 	if affectedRows <= 0 {
-		return 0, errors.New("can't update post attachment! current user is not the author of post")
+		return 0, errors.New("current user is not the author of post")
 	}
 
 	return affectedRows, nil
@@ -173,7 +173,7 @@ func (s ServiceImpl) deleteById(currentUserId, postId int) (affectedRows int64, 
 	}
 
 	if affectedRows <= 0 {
-		return 0, errors.New("can't delete post! current user is not the author of post")
+		return 0, errors.New("current user is not the author of post")
 	}
 
 	return affectedRows, nil

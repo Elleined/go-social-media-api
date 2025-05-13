@@ -180,7 +180,7 @@ func (s ServiceImpl) login(username string, password string) (jwt string, err er
 	}
 
 	if pd.IsPasswordMatch(password, user.Password) {
-		return "", errors.New("invalid credentials. password")
+		return "", errors.New("invalid credentials ")
 	}
 
 	user, err = s.getByEmail(user.Email)
