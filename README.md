@@ -119,6 +119,17 @@ This project uses the dependencies:
       - comment id is required
       - checks if post has the comment
       - checks if logged in user the author of the comment
+## Emoji
+   - save
+     - must have a logged in user
+     - prevent duplicate name
+   - update
+     - must have a logged in user
+     - prevents duplicate name
+     - cannot update if already been used as FK
+   - delete
+     - must have a logged in user
+     - cannot delete if already been used as FK
 # How to run
 1. Install golang-migrate for database migration
 ```go

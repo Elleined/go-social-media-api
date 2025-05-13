@@ -4,6 +4,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"os"
 	"social-media-application/internal/comment"
+	"social-media-application/internal/emoji"
 	"social-media-application/internal/post"
 	"social-media-application/internal/post/reaction"
 	"social-media-application/internal/user"
@@ -72,6 +73,12 @@ func main() {
 	userService := user.NewService(userRepository)
 	userController := user.NewController(userService)
 	userController.RegisterRoutes(r)
+
+	// Initialize emoji module
+	emojiRepository := emoji.NewRepository(db)
+	emojiService := emoji.NewService(emojiRepository)
+	emojiController := emoji.NewController(emojiService)
+	emojiController.RegisterRoutes(r)
 
 	// Initialize post module
 	postRepository := post.NewRepository(db)
