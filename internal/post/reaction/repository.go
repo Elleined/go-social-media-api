@@ -13,7 +13,7 @@ type (
 
 		delete(reactorId, postId int) (affectedRows int64, err error)
 
-		isAlreadyReacted(reactorId, postId int) bool
+		isAlreadyReacted(reactorId, postId int) (bool, error)
 	}
 
 	RepositoryImpl struct {
@@ -104,12 +104,12 @@ func (r RepositoryImpl) delete(reactorId, postId int) (affectedRows int64, err e
 	return affectedRows, nil
 }
 
-func (r RepositoryImpl) isAlreadyReacted(reactorId, postId int) bool {
+func (r RepositoryImpl) isAlreadyReacted(reactorId, postId int) (bool, error) {
 	var exists bool
 	err := r.db.Get(&exists, "SELECT EXISTS (SELECT 1 FROM post_reaction WHERE reactor_id = ? AND post_id = ?)", reactorId, postId)
 	if err != nil {
-		return exists
+		return exists, err
 	}
 
-	return exists
+	return exists, nil
 }

@@ -52,6 +52,15 @@ func (s ServiceImpl) save(firstName, lastName, email, password string) (id int64
 		return 0, errors.New("password is required")
 	}
 
+	exists, err := s.repository.isEmailExists(email)
+	if err != nil {
+		return 0, err
+	}
+
+	if exists {
+		return 0, errors.New("email already exists")
+	}
+
 	hashedPassword, err := pd.Encrypt(password)
 	if err != nil {
 		return 0, err

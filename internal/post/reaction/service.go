@@ -38,7 +38,11 @@ func (s ServiceImpl) save(reactorId, postId, emojiId int) (id int64, err error) 
 		return 0, errors.New("emoji id is required")
 	}
 
-	isAlreadyReacted := s.repository.isAlreadyReacted(reactorId, postId)
+	isAlreadyReacted, err := s.repository.isAlreadyReacted(reactorId, postId)
+	if err != nil {
+		return 0, err
+	}
+
 	if isAlreadyReacted {
 		return 0, errors.New("reactor already reacted")
 	}
@@ -111,7 +115,11 @@ func (s ServiceImpl) delete(reactorId, postId int) (affectedRows int64, err erro
 		return 0, errors.New("post id is required")
 	}
 
-	isAlreadyReacted := s.repository.isAlreadyReacted(reactorId, postId)
+	isAlreadyReacted, err := s.repository.isAlreadyReacted(reactorId, postId)
+	if err != nil {
+		return 0, err
+	}
+	
 	if !isAlreadyReacted {
 		return 0, errors.New("reactor does not react in this post")
 	}

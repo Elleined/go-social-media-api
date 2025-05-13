@@ -135,6 +135,11 @@ func (r *RepositoryImpl) changePassword(userId int, newPassword string) (affecte
 }
 
 func (r *RepositoryImpl) isEmailExists(email string) (bool, error) {
-	//TODO implement me
-	panic("implement me")
+	var exists bool
+	err := r.db.Get(&exists, "SELECT EXISTS(SELECT 1 FROM user WHERE email = ?", email)
+	if err != nil {
+		return exists, err
+	}
+
+	return exists, nil
 }
