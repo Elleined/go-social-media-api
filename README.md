@@ -21,6 +21,52 @@ This project uses the dependencies:
    - isAlreadyExists()
    - exists()
 
+# Validations
+- empty string is validated
+- negative integer are validated
+- empty json is validated
+
+## User
+   - save
+     - prevents duplicate email
+     - strong password (8 length, 1 uppercase, 1 lowercase, 1 special character)
+   - getAll
+     - page is required defaults to 1
+     - pageSize is required defaults to 10
+     - isActive is required defaults to true
+   - 
+## Post
+   - save
+     - must have a logged in user
+     - subject is required
+     - content is required
+   - get all
+     - page size is required defaults to 10
+     - page is required defaults to 1
+     - isDeleted is required defaults to false (not deleted)
+     - must have a logged in user
+   - updateSubject
+     - must have a logged in user
+     - new subject is required
+     - checks if post author is the currentuser else cannot be updated
+   - updateContent
+     - must have logged in usre
+     - new content is required
+     - checks if post author is the currentuser else cannot be updated
+   - updateAttachment
+     - must have logged in user
+     - new attachment is required
+     - checks if post author is the currentuser else cannot be updated
+   - deleteById
+     - must have logged in user
+     - post id is required
+     - checks if post author is the currentuser else cannot be deleted
+   - getAllByUser
+     - must have a logged in user
+     - page is required defaults to 1
+     - pageSize is required defaults to 10
+     - isDeleted is required defaults to false (not deleted)
+
 # How to run
 1. Install golang-migrate for database migration
 ```go
