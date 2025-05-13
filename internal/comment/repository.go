@@ -5,7 +5,7 @@ import "github.com/jmoiron/sqlx"
 type Repository interface {
 	save(authorId, postId int, content string) (id int64, err error)
 
-	findAll(currentUserId, postId, limit, offset int) ([]Comment, error)
+	findAll(postId, limit, offset int) ([]Comment, error)
 
 	updateContent(currentUserId, postId, commentId int, newContent string) (affectedRows int64, err error)
 	updateAttachment(currentUserId, postId, commentId int, newAttachment string) (affectedRows int64, err error)
@@ -41,10 +41,10 @@ func (r RepositoryImpl) save(authorId, postId int, content string) (id int64, er
 	return id, nil
 }
 
-func (r RepositoryImpl) findAll(currentUserId, postId, limit, offset int) ([]Comment, error) {
+func (r RepositoryImpl) findAll(postId, limit, offset int) ([]Comment, error) {
 	comments := make([]Comment, limit)
 
-	err := r.db.Select(&comments, "SELECT * FROM comment WHERE author_id != ? AND post_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", currentUserId, postId, limit, offset)
+	err := r.db.Select(&comments, "SELECT * FROM comment WHERE post_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", postId, limit, offset)
 	if err != nil {
 		return nil, err
 	}

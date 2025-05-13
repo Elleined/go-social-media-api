@@ -38,7 +38,7 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 		r.GET("", c.getAll)
 
 		r.PATCH("/:commentId/content", c.updateContent)
-		r.PATCH("/:commentId/attachment", c.getAll)
+		r.PATCH("/:commentId/attachment", c.updateAttachment)
 
 		r.DELETE("/:commentId", c.deleteById)
 	}
@@ -53,19 +53,17 @@ func (c ControllerImpl) save(e *gin.Context) {
 		return
 	}
 
-	commentRequest := struct {
-		PostId  int    `json:"post_id" binding:"required"`
-		Content string `json:"content"  binding:"required"`
-	}{}
-
-	if err := e.ShouldBindJSON(&commentRequest); err != nil {
+	postId, err := strconv.Atoi(e.Param("id"))
+	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't save comment malformed request" + err.Error(),
+			"message": "can't get all comment " + err.Error(),
 		})
 		return
 	}
 
-	id, err := c.service.save(currentUserId, commentRequest.PostId, commentRequest.Content)
+	content := e.Query("content")
+
+	id, err := c.service.save(currentUserId, postId, content)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "can't save comment " + err.Error(),
@@ -77,14 +75,6 @@ func (c ControllerImpl) save(e *gin.Context) {
 }
 
 func (c ControllerImpl) getAll(e *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
-	if err != nil {
-		e.JSON(http.StatusUnauthorized, gin.H{
-			"message": "something wrong with jwt " + err.Error(),
-		})
-		return
-	}
-
 	postId, err := strconv.Atoi(e.Param("id"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
@@ -104,7 +94,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 		return
 	}
 
-	comments, err := c.service.getAll(currentUserId, postId, limit, offset)
+	comments, err := c.service.getAll(postId, limit, offset)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "can't get all comment " + err.Error(),

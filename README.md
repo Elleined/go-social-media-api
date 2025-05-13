@@ -7,8 +7,7 @@ This project uses the dependencies:
 6. golang/x/crpyto: For bcrypt encryption
 
 # Features to be added
-1. Reactions
-2. Comments
+1. Comment Reactions
 3. Upload files with go-file-server-api project
 
 # For improvement
@@ -16,7 +15,9 @@ This project uses the dependencies:
 2. Unit testing for all modules
 3. Integration testing for all modules
 4. Proper error messages
-5. Add pessimistic/ preventive validations
+5. Implement robust pagination
+6. Filtering of active and inactive post and comment
+7. Add pessimistic/ preventive validations
    - has()
    - isAlreadyExists()
    - exists()

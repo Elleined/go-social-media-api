@@ -8,7 +8,7 @@ import (
 type Service interface {
 	save(authorId, postId int, content string) (id int64, err error)
 
-	getAll(currentUserId, postId, limit, offset int) ([]Comment, error)
+	getAll(postId, limit, offset int) ([]Comment, error)
 
 	updateContent(currentUserId, postId, commentId int, newContent string) (affectedRows int64, err error)
 	updateAttachment(currentUserId, postId, commentId int, newAttachment string) (affectedRows int64, err error)
@@ -47,11 +47,7 @@ func (s ServiceImpl) save(authorId, postId int, content string) (id int64, err e
 	return id, nil
 }
 
-func (s ServiceImpl) getAll(currentUserId, postId, limit, offset int) ([]Comment, error) {
-	if currentUserId <= 0 {
-		return nil, errors.New("currentUserId is required")
-	}
-
+func (s ServiceImpl) getAll(postId, limit, offset int) ([]Comment, error) {
 	if postId <= 0 {
 		return nil, errors.New("postId is required")
 	}
@@ -64,7 +60,7 @@ func (s ServiceImpl) getAll(currentUserId, postId, limit, offset int) ([]Comment
 		return nil, errors.New("offset is required")
 	}
 
-	comments, err := s.repository.findAll(currentUserId, postId, limit, offset)
+	comments, err := s.repository.findAll(postId, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +130,7 @@ func (s ServiceImpl) deleteById(currentUserId, postId, commentId int) (affectedR
 	if commentId <= 0 {
 		return 0, errors.New("commentId is required")
 	}
-	
+
 	affectedRows, err = s.repository.deleteById(currentUserId, postId, commentId)
 	if err != nil {
 		return 0, err
