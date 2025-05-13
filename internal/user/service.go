@@ -2,7 +2,7 @@ package user
 
 import (
 	"errors"
-	"golang.org/x/crypto/bcrypt"
+	pd "social-media-application/internal/user/password"
 	"social-media-application/utils"
 	"strings"
 )
@@ -23,7 +23,7 @@ type (
 
 		login(username, password string) (jwt string, err error)
 	}
-	
+
 	ServiceImpl struct {
 		repository Repository
 	}
@@ -52,7 +52,7 @@ func (s ServiceImpl) save(firstName, lastName, email, password string) (id int64
 		return 0, errors.New("password is required")
 	}
 
-	hashedPassword, err := hashPassword(password)
+	hashedPassword, err := pd.Encrypt(password)
 	if err != nil {
 		return 0, err
 	}
@@ -143,7 +143,7 @@ func (s ServiceImpl) changePassword(userId int, newPassword string) (affectedRow
 		return 0, errors.New("new password is required")
 	}
 
-	hashedPassword, err := hashPassword(newPassword)
+	hashedPassword, err := pd.Encrypt(newPassword)
 	if err != nil {
 		return 0, err
 	}
@@ -170,7 +170,7 @@ func (s ServiceImpl) login(username string, password string) (jwt string, err er
 		return "", errors.New("invalid credentials " + err.Error())
 	}
 
-	if checkPasswordHash(password, user.Password) {
+	if pd.IsPasswordMatch(password, user.Password) {
 		return "", errors.New("invalid credentials. password")
 	}
 
@@ -185,13 +185,4 @@ func (s ServiceImpl) login(username string, password string) (jwt string, err er
 	}
 
 	return jwt, nil
-}
-
-func hashPassword(password string) (hashedPassword string, err error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-	return string(bytes), err
-}
-
-func checkPasswordHash(password, hash string) bool {
-	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) != nil
 }

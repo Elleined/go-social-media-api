@@ -25,7 +25,7 @@ This project uses the dependencies:
 ## User
    - save
      - prevents duplicate email
-     - strong password (8 length, 1 uppercase, 1 lowercase, 1 special character)
+     - strong password (8 length, 1 uppercase, 1 lowercase, 1 special character, 1 digit)
    - getAll
      - page is required defaults to 1
      - pageSize is required defaults to 10
