@@ -13,8 +13,7 @@ This project uses the dependencies:
 # For improvement
 2. Unit testing for all modules
 3. Integration testing for all modules
-4. Proper error messages from service to controller
-5. Implement robust pagination
+4. Implement robust pagination
 
 # Validations
 ## User
