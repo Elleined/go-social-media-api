@@ -99,7 +99,15 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 		return
 	}
 
-	posts, err := c.service.findAll(currentUserId, limit, offset)
+	isDeleted, err := strconv.ParseBool(e.DefaultQuery("isDeleted", "false"))
+	if err != nil {
+		e.JSON(http.StatusInternalServerError, gin.H{
+			"message": "isDeleted is required " + err.Error(),
+		})
+		return
+	}
+
+	posts, err := c.service.getAll(currentUserId, isDeleted, limit, offset)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "can't get all post " + err.Error(),
@@ -121,8 +129,8 @@ func (c ControllerImpl) getAllBy(e *gin.Context) {
 
 	page := e.DefaultQuery("page", "1")
 	pageSize := e.DefaultQuery("pageSize", "10")
-	limit, offset, err := utils.Paginate(page, pageSize)
 
+	limit, offset, err := utils.Paginate(page, pageSize)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "something wrong with pagination " + err.Error(),
@@ -130,7 +138,15 @@ func (c ControllerImpl) getAllBy(e *gin.Context) {
 		return
 	}
 
-	posts, err := c.service.findAllBy(currentUserId, limit, offset)
+	isDeleted, err := strconv.ParseBool(e.DefaultQuery("isDeleted", "false"))
+	if err != nil {
+		e.JSON(http.StatusInternalServerError, gin.H{
+			"message": "isDeleted is required " + err.Error(),
+		})
+		return
+	}
+
+	posts, err := c.service.getAllBy(currentUserId, isDeleted, limit, offset)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "can't get all by " + err.Error(),

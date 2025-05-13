@@ -16,7 +16,6 @@ This project uses the dependencies:
 3. Integration testing for all modules
 4. Proper error messages
 5. Implement robust pagination
-6. Filtering of active and inactive post and comment
 7. Add pessimistic/ preventive validations
    - has()
    - isAlreadyExists()

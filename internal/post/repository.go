@@ -7,8 +7,8 @@ import (
 type Repository interface {
 	save(authorId int, subject, content string) (id int64, err error)
 
-	findAll(currentUserId, limit, offset int) ([]Post, error)
-	findAllBy(currentUserId, limit, offset int) ([]Post, error)
+	findAll(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error)
+	findAllBy(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error)
 
 	updateSubject(currentUserId, postId int, newSubject string) (affectedRows int64, err error)
 	updateContent(currentUserId, postId int, newContent string) (affectedRows int64, err error)
@@ -46,10 +46,10 @@ func (r RepositoryImpl) save(authorId int, subject, content string) (id int64, e
 	return id, nil
 }
 
-func (r RepositoryImpl) findAll(currentUserId, limit, offset int) ([]Post, error) {
+func (r RepositoryImpl) findAll(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error) {
 	posts := make([]Post, limit)
 
-	err := r.db.Select(&posts, "SELECT * FROM post WHERE author_id != ? ORDER BY created_at DESC LIMIT ? OFFSET ?", currentUserId, limit, offset)
+	err := r.db.Select(&posts, "SELECT * FROM post WHERE author_id != ? AND is_deleted = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", currentUserId, isDeleted, limit, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -57,10 +57,10 @@ func (r RepositoryImpl) findAll(currentUserId, limit, offset int) ([]Post, error
 	return posts, nil
 }
 
-func (r RepositoryImpl) findAllBy(currentUserId, limit, offset int) ([]Post, error) {
+func (r RepositoryImpl) findAllBy(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error) {
 	posts := make([]Post, limit)
 
-	err := r.db.Select(&posts, "SELECT * FROM post WHERE author_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", currentUserId, limit, offset)
+	err := r.db.Select(&posts, "SELECT * FROM post WHERE author_id = ? AND is_deleted = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", currentUserId, isDeleted, limit, offset)
 	if err != nil {
 		return nil, err
 	}

@@ -94,7 +94,15 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 		return
 	}
 
-	comments, err := c.service.getAll(postId, limit, offset)
+	isDeleted, err := strconv.ParseBool(e.DefaultQuery("isDeleted", "false"))
+	if err != nil {
+		e.JSON(http.StatusInternalServerError, gin.H{
+			"message": "isDeleted is required " + err.Error(),
+		})
+		return
+	}
+
+	comments, err := c.service.getAll(postId, isDeleted, limit, offset)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "can't get all comment " + err.Error(),
