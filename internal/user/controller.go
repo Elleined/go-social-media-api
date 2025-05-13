@@ -41,8 +41,8 @@ func (c *ControllerImpl) RegisterRoutes(e *gin.Engine) {
 		r.POST("/login", c.login)
 		r.POST("", c.save)
 
-		r.GET("/:id/id", c.getById)
-		r.GET("/:email/email", c.getByEmail)
+		r.GET("/id/:id", c.getById)
+		r.GET("/email/:email", c.getByEmail)
 		r.GET("", c.getAll)
 
 		r.DELETE("/:id", c.deleteById)

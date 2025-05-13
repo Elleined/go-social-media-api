@@ -22,10 +22,6 @@ This project uses the dependencies:
    - exists()
 
 # Validations
-- empty string is validated
-- negative integer are validated
-- empty json is validated
-
 ## User
    - save
      - prevents duplicate email
@@ -34,7 +30,15 @@ This project uses the dependencies:
      - page is required defaults to 1
      - pageSize is required defaults to 10
      - isActive is required defaults to true
-   - 
+   - updateStatus
+     - user id is required
+     - new status is required (true or false)
+   - updatePassword
+     - user id is required
+     - new password is required
+   - login
+     - username is required
+     - password is required
 ## Post
    - save
      - must have a logged in user
@@ -66,7 +70,55 @@ This project uses the dependencies:
      - page is required defaults to 1
      - pageSize is required defaults to 10
      - isDeleted is required defaults to false (not deleted)
-
+## Post reaction
+   - save
+     - must have a logged in user
+     - post id is required
+     - emoji id is required
+     - returns error if logged in user already reacted to the post
+   - getAll
+      - must have a logged in user
+      - post id is required
+   - getAllByEmoji
+      - must have a logged in user
+      - post id is required
+      - emoji id is required
+   - Update
+      - must have a logged in user
+      - post id is required
+      - new emoji id is required
+      - returns error if logged in user doesn't already reacted to the post
+   - Delete
+      - must have a logged in user
+      - post id is required
+      - returns error if logged in user doesn't already reacted to the post
+## Comment
+   - save
+     - must have a logged in user
+     - post id is required
+     - content is required
+   - getAll
+     - must have a logged in user
+     - post id is required
+     - isDeleted is required defaults to false (not deleted)
+   - updateContent
+      - must have a logged in user
+      - post id is required
+      - new content is required
+      - checks if post has the comment
+      - checks if logged in user is the author of the comment
+   - updateAttachment
+      - must have a logged in user
+      - post id is required
+      - new attachment is required
+      - checks if post has the comment
+      - checks if logged in user is the author of the comment
+   - deleteById
+      - must have a logged in user
+      - post id is required
+      - comment id is required
+      - checks if post has the comment
+      - checks if logged in user the author of the comment
 # How to run
 1. Install golang-migrate for database migration
 ```go

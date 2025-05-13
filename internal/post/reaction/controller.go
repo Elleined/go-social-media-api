@@ -38,7 +38,7 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 		r.GET("", c.findAll)
 		r.GET("/emoji/:emojiId", c.findAllByEmoji)
 
-		r.PATCH("/:emojiId", c.update)
+		r.PATCH("/emoji/:emojiId", c.update)
 		r.DELETE("", c.delete)
 	}
 }
@@ -52,19 +52,23 @@ func (c ControllerImpl) save(e *gin.Context) {
 		return
 	}
 
-	reactionRequest := struct {
-		PostId  int `json:"post_id"`
-		EmojiId int `json:"emoji_id"`
-	}{}
-
-	if err := e.BindJSON(&reactionRequest); err != nil {
+	postId, err := strconv.Atoi(e.Param("id"))
+	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't save reaction " + err.Error(),
+			"message": "can't save posts " + err.Error(),
 		})
 		return
 	}
 
-	id, err := c.service.save(currentUserId, reactionRequest.PostId, reactionRequest.EmojiId)
+	emojiId, err := strconv.Atoi(e.Query("emojiId"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "can't save posts " + err.Error(),
+		})
+		return
+	}
+
+	id, err := c.service.save(currentUserId, postId, emojiId)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "can't save reaction " + err.Error(),
