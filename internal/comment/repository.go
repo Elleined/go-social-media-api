@@ -93,10 +93,10 @@ func (r RepositoryImpl) updateAttachment(currentUserId, postId, commentId int, n
 }
 
 func (r RepositoryImpl) deleteById(currentUserId, postId, commentId int) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE comment SET is_deleted = true WHERE id = :commentId AND author_id = :authorId AND post_id = :postId", map[string]any{
-		"authorId":  currentUserId,
-		"postId":    postId,
-		"commentId": commentId,
+	result, err := r.db.NamedExec("UPDATE comment SET is_deleted = true WHERE id = :commentId AND author_id = :currentUserId AND post_id = :postId", map[string]any{
+		"currentUserId": currentUserId,
+		"postId":        postId,
+		"commentId":     commentId,
 	})
 	if err != nil {
 		return 0, err

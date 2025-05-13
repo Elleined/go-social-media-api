@@ -29,6 +29,15 @@ func (s ServiceImpl) save(name string) (id int64, err error) {
 		return 0, errors.New("name is required")
 	}
 
+	exists, err := s.repository.isAlreadyExists(name)
+	if err != nil {
+		return 0, err
+	}
+
+	if exists {
+		return 0, errors.New("name already exists")
+	}
+
 	id, err = s.repository.save(name)
 	if err != nil {
 		return 0, err
@@ -55,6 +64,15 @@ func (s ServiceImpl) update(emojiId int, newName string) (affectedRows int64, er
 		return 0, errors.New("name is required")
 	}
 
+	exists, err := s.repository.isAlreadyExists(newName)
+	if err != nil {
+		return 0, err
+	}
+
+	if exists {
+		return 0, errors.New("name already exists")
+	}
+
 	affectedRows, err = s.repository.update(emojiId, newName)
 	if err != nil {
 		return 0, err
@@ -67,7 +85,7 @@ func (s ServiceImpl) delete(emojiId int) (affectedRows int64, err error) {
 	if emojiId <= 0 {
 		return 0, errors.New("emojiId is required")
 	}
-	
+
 	affectedRows, err = s.repository.delete(emojiId)
 	if err != nil {
 		return 0, err

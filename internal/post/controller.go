@@ -182,6 +182,7 @@ func (c ControllerImpl) updateSubject(e *gin.Context) {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "cannot update post subject " + err.Error(),
 		})
+		return
 	}
 
 	e.JSON(http.StatusOK, subject)

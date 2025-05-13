@@ -92,6 +92,10 @@ func (s ServiceImpl) updateContent(currentUserId, postId, commentId int, newCont
 		return 0, err
 	}
 
+	if affectedRows <= 0 {
+		return 0, errors.New("can't delete by id! current user doesn't have this comment")
+	}
+
 	return affectedRows, nil
 }
 
@@ -117,6 +121,10 @@ func (s ServiceImpl) updateAttachment(currentUserId, postId, commentId int, newA
 		return 0, err
 	}
 
+	if affectedRows <= 0 {
+		return 0, errors.New("can't delete by id! current user doesn't have this comment")
+	}
+
 	return affectedRows, nil
 }
 
@@ -136,6 +144,10 @@ func (s ServiceImpl) deleteById(currentUserId, postId, commentId int) (affectedR
 	affectedRows, err = s.repository.deleteById(currentUserId, postId, commentId)
 	if err != nil {
 		return 0, err
+	}
+
+	if affectedRows <= 0 {
+		return 0, errors.New("can't delete by id! current user doesn't have this comment")
 	}
 
 	return affectedRows, nil

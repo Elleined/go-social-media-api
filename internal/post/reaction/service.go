@@ -98,6 +98,15 @@ func (s ServiceImpl) update(reactorId, postId, newEmojiId int) (affectedRows int
 		return 0, errors.New("new emoji id is required")
 	}
 
+	isAlreadyReacted, err := s.repository.isAlreadyReacted(reactorId, postId)
+	if err != nil {
+		return 0, err
+	}
+
+	if !isAlreadyReacted {
+		return 0, errors.New("can't update post reaction! current user doesn't reacted to this post")
+	}
+
 	affectedRows, err = s.repository.update(reactorId, postId, newEmojiId)
 	if err != nil {
 		return 0, err
@@ -119,9 +128,9 @@ func (s ServiceImpl) delete(reactorId, postId int) (affectedRows int64, err erro
 	if err != nil {
 		return 0, err
 	}
-	
+
 	if !isAlreadyReacted {
-		return 0, errors.New("reactor does not react in this post")
+		return 0, errors.New("can't delete post reaction! current user doesn't reacted to this post")
 	}
 
 	affectedRows, err = s.repository.delete(reactorId, postId)

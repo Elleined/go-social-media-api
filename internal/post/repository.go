@@ -16,6 +16,8 @@ type (
 		updateAttachment(currentUserId, postId int, newAttachment string) (affectedRows int64, err error)
 
 		deleteById(currentUserId, postId int) (affectedRows int64, err error)
+
+		hasPost(currentUserId, postId int) (exists bool, err error)
 	}
 
 	RepositoryImpl struct {
@@ -126,9 +128,9 @@ func (r RepositoryImpl) updateAttachment(currentUserId, postId int, newAttachmen
 }
 
 func (r RepositoryImpl) deleteById(currentUserId, postId int) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE post SET is_deleted = true WHERE id = :postId AND author_id = :authorId", map[string]any{
-		"postId":   postId,
-		"authorId": currentUserId,
+	result, err := r.db.NamedExec("UPDATE post SET is_deleted = true WHERE id = :postId AND author_id = :currentUserId", map[string]any{
+		"postId":        postId,
+		"currentUserId": currentUserId,
 	})
 
 	if err != nil {
@@ -141,4 +143,13 @@ func (r RepositoryImpl) deleteById(currentUserId, postId int) (affectedRows int6
 	}
 
 	return affectedRows, nil
+}
+
+func (r RepositoryImpl) hasPost(currentUserId, postId int) (exists bool, err error) {
+	err = r.db.Get(&exists, "SELECT EXISTS(SELECT 1 FROM post WHERE author_id = ? AND post_id = ?)", currentUserId, postId)
+	if err != nil {
+		return exists, err
+	}
+
+	return exists, nil
 }

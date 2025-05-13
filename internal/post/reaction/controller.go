@@ -151,6 +151,7 @@ func (c ControllerImpl) update(e *gin.Context) {
 		e.JSON(http.StatusBadRequest, gin.H{
 			"message": "can't update post reaction " + err.Error(),
 		})
+		return
 	}
 
 	_, err = c.service.update(currentUserId, postId, newEmojiId)
@@ -158,6 +159,7 @@ func (c ControllerImpl) update(e *gin.Context) {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "can't update post reaction " + err.Error(),
 		})
+		return
 	}
 
 	e.JSON(http.StatusOK, gin.H{

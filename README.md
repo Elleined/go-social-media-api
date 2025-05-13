@@ -14,7 +14,7 @@ This project uses the dependencies:
 1. Add logs in repository and service layers
 2. Unit testing for all modules
 3. Integration testing for all modules
-4. Proper error messages
+4. Proper error messages from service to controller
 5. Implement robust pagination
 7. Add pessimistic/ preventive validations
    - has()
@@ -52,19 +52,19 @@ This project uses the dependencies:
    - updateSubject
      - must have a logged in user
      - new subject is required
-     - checks if post author is the currentuser else cannot be updated
+     - checks if post author is the currentuser else cannot be updated (only checks for affected rows)
    - updateContent
      - must have logged in usre
      - new content is required
-     - checks if post author is the currentuser else cannot be updated
+     - checks if post author is the currentuser else cannot be updated (only checks for affected rows)
    - updateAttachment
      - must have logged in user
      - new attachment is required
-     - checks if post author is the currentuser else cannot be updated
+     - checks if post author is the currentuser else cannot be updated (only checks for affected rows)
    - deleteById
      - must have logged in user
      - post id is required
-     - checks if post author is the currentuser else cannot be deleted
+     - checks if post author is the currentuser else cannot be deleted (only checks for affected rows)
    - getAllByUser
      - must have a logged in user
      - page is required defaults to 1
@@ -105,20 +105,17 @@ This project uses the dependencies:
       - must have a logged in user
       - post id is required
       - new content is required
-      - checks if post has the comment
-      - checks if logged in user is the author of the comment
+      - checks if logged in user is the author of the comment (only checks for affected rows)
    - updateAttachment
       - must have a logged in user
       - post id is required
       - new attachment is required
-      - checks if post has the comment
-      - checks if logged in user is the author of the comment
+      - checks if logged in user is the author of the comment (only checks for affected rows)
    - deleteById
       - must have a logged in user
       - post id is required
       - comment id is required
-      - checks if post has the comment
-      - checks if logged in user the author of the comment
+      - checks if logged in user the author of the comment (only checks for affected rows)
 ## Emoji
    - save
      - must have a logged in user

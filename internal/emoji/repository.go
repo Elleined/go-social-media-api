@@ -10,6 +10,8 @@ type (
 		findAll() ([]Emoji, error)
 		update(emojiId int, newName string) (affectedRows int64, err error)
 		delete(emojiId int) (affectedRows int64, err error)
+
+		isAlreadyExists(name string) (bool, error)
 	}
 
 	RepositoryImpl struct {
@@ -81,4 +83,14 @@ func (r RepositoryImpl) delete(emojiId int) (affectedRows int64, err error) {
 	}
 
 	return affectedRows, nil
+}
+
+func (r RepositoryImpl) isAlreadyExists(name string) (bool, error) {
+	var exists bool
+	err := r.db.Get(&exists, "SELECT EXISTS(SELECT 1 FROM emoji WHERE name = ?)", name)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
 }
