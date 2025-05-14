@@ -54,7 +54,7 @@ func (r RepositoryImpl) save(authorId int, subject, content string) (id int64, e
 
 func (r RepositoryImpl) findAll(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error) {
 	var total int
-	err := r.db.Get(&total, "SELECT COUNT(*) FROM post WHERE author_id != ? AND is_deleted = ? ORDER BY created_at DESC", currentUserId, isDeleted)
+	err := r.db.Get(&total, "SELECT COUNT(*) FROM post WHERE author_id != ? AND is_deleted = ?", currentUserId, isDeleted)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (r RepositoryImpl) findAll(currentUserId int, isDeleted bool, pageRequest *
 
 func (r RepositoryImpl) findAllBy(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error) {
 	var total int
-	err := r.db.Get(&total, "SELECT COUNT(*) FROM post WHERE author_id = ? AND is_deleted = ? ORDER BY created_at DESC", currentUserId, isDeleted)
+	err := r.db.Get(&total, "SELECT COUNT(*) FROM post WHERE author_id = ? AND is_deleted = ?", currentUserId, isDeleted)
 	if err != nil {
 		return nil, err
 	}

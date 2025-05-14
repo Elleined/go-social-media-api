@@ -115,6 +115,10 @@ func (s ServiceImpl) update(reactorId, postId, newEmojiId int) (affectedRows int
 		return 0, err
 	}
 
+	if affectedRows <= 0 {
+		return 0, errors.New("no affected rows")
+	}
+
 	return affectedRows, nil
 }
 
@@ -139,6 +143,10 @@ func (s ServiceImpl) delete(reactorId, postId int) (affectedRows int64, err erro
 	affectedRows, err = s.repository.delete(reactorId, postId)
 	if err != nil {
 		return 0, err
+	}
+
+	if affectedRows <= 0 {
+		return 0, errors.New("no affected rows")
 	}
 
 	return affectedRows, nil

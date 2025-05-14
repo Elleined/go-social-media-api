@@ -4,9 +4,10 @@ import (
 	"github.com/jmoiron/sqlx"
 	"os"
 	"social-media-application/internal/comment"
+	cr "social-media-application/internal/comment/reaction"
 	"social-media-application/internal/emoji"
 	"social-media-application/internal/post"
-	"social-media-application/internal/post/reaction"
+	pr "social-media-application/internal/post/reaction"
 	"social-media-application/internal/user"
 	mw "social-media-application/middlewares"
 	"social-media-application/utils"
@@ -87,9 +88,9 @@ func main() {
 	postController.RegisterRoutes(r)
 
 	// Initialize post reaction module
-	postReactionRepository := reaction.NewRepository(db)
-	postReactionService := reaction.NewService(postReactionRepository)
-	postReactionController := reaction.NewController(postReactionService)
+	postReactionRepository := pr.NewRepository(db)
+	postReactionService := pr.NewService(postReactionRepository)
+	postReactionController := pr.NewController(postReactionService)
 	postReactionController.RegisterRoutes(r)
 
 	// Initialize comment module
@@ -97,6 +98,12 @@ func main() {
 	commentService := comment.NewService(commentRepository)
 	commentController := comment.NewController(commentService)
 	commentController.RegisterRoutes(r)
+
+	// Initialize comment reaction module
+	commentReactionRepository := cr.NewRepository(db)
+	commentReactionService := cr.NewService(commentReactionRepository)
+	commentReactionController := cr.NewController(commentReactionService)
+	commentReactionController.RegisterRoutes(r)
 
 	err = r.Run(os.Getenv("PORT"))
 	if err != nil {

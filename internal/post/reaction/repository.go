@@ -51,7 +51,7 @@ func (r RepositoryImpl) save(reactorId, postId, emojiId int) (id int64, err erro
 
 func (r RepositoryImpl) findAll(postId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
 	var total int
-	err := r.db.Get(&total, "SELECT COUNT(*) FROM post_reaction WHERE post_id = ? ORDER BY created_at DESC", postId)
+	err := r.db.Get(&total, "SELECT COUNT(*) FROM post_reaction WHERE post_id = ?", postId)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (r RepositoryImpl) findAll(postId int, pageRequest *paging.PageRequest) (*p
 
 func (r RepositoryImpl) findAllByEmoji(postId int, emojiId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
 	var total int
-	err := r.db.Get(&total, "SELECT COUNT(*) FROM post_reaction WHERE post_id = ? AND emoji_id = ? ORDER BY created_at DESC", postId, emojiId)
+	err := r.db.Get(&total, "SELECT COUNT(*) FROM post_reaction WHERE post_id = ? AND emoji_id = ?", postId, emojiId)
 
 	reactions := make([]Reaction, 10)
 	err = r.db.Select(&reactions, "SELECT * FROM post_reaction WHERE post_id = ? AND emoji_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", postId, emojiId, pageRequest.PageSize, pageRequest.Offset())

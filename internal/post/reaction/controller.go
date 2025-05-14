@@ -130,7 +130,7 @@ func (c ControllerImpl) findAllByEmoji(e *gin.Context) {
 	pageRequest, err := paging.NewPageRequestStr(e.DefaultQuery("page", "1"), e.DefaultQuery("pageSize", "10"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "get all by emoji failed " + err.Error(),
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}

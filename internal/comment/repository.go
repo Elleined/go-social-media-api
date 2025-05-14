@@ -48,7 +48,7 @@ func (r RepositoryImpl) save(authorId, postId int, content string) (id int64, er
 
 func (r RepositoryImpl) findAll(postId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Comment], error) {
 	var total int
-	err := r.db.Get(&total, "SELECT COUNT(*) FROM comment WHERE post_id = ? AND is_deleted = ? ORDER BY created_at DESC", postId, isDeleted)
+	err := r.db.Get(&total, "SELECT COUNT(*) FROM comment WHERE post_id = ? AND is_deleted = ?", postId, isDeleted)
 
 	comments := make([]Comment, request.PageSize)
 	err = r.db.Select(&comments, "SELECT * FROM comment WHERE post_id = ? AND is_deleted = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", postId, isDeleted, request.PageSize, request.Offset())

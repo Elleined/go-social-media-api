@@ -1,10 +1,11 @@
-This project uses the dependencies:
+# This project uses the dependencies:
 1. Gin: REST API ENDPOINTS
 2. godotenv: .ENV FILES
 3. sqlx: DATABASE INTERACTION
 4. golang-migrate (CLI TOOL and Dependency): DATABASE MIGRATION
 5. go-sql-driver/mysql: MySQL DRIVER
 6. golang/x/crpyto: For bcrypt encryption
+7. golang-jwt/jwt/v5: For JWT
 
 # Features to be added
 1. Comment Reactions
@@ -14,6 +15,7 @@ This project uses the dependencies:
 1. API testing for all modules
 2. Unit testing for all modules
 3. Integration testing for all modules
+4. Customize paging with specified field and sorting order
 
 # Validations
 ## User
