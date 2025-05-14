@@ -1,13 +1,16 @@
 package reaction
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/jmoiron/sqlx"
+	"social-media-application/internal/paging"
+)
 
 type (
 	Repository interface {
 		save(reactorId, postId, emojiId int) (id int64, err error)
 
-		findAll(postId int) ([]Reaction, error)
-		findAllByEmoji(postId int, emojiId int) ([]Reaction, error)
+		findAll(postId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error)
+		findAllByEmoji(postId int, emojiId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error)
 
 		update(reactorId, postId, newEmojiId int) (affectedRows int64, err error)
 
@@ -46,26 +49,33 @@ func (r RepositoryImpl) save(reactorId, postId, emojiId int) (id int64, err erro
 	return id, nil
 }
 
-func (r RepositoryImpl) findAll(postId int) ([]Reaction, error) {
-	reactions := make([]Reaction, 10)
-
-	err := r.db.Select(&reactions, "SELECT * FROM post_reaction WHERE post_id = ? ORDER BY created_at DESC", postId)
+func (r RepositoryImpl) findAll(postId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
+	var total int
+	err := r.db.Get(&total, "SELECT COUNT(*) FROM post_reaction WHERE post_id = ? ORDER BY created_at DESC", postId)
 	if err != nil {
 		return nil, err
 	}
 
-	return reactions, nil
+	reactions := make([]Reaction, 10)
+	err = r.db.Select(&reactions, "SELECT * FROM post_reaction WHERE post_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", postId, pageRequest.PageSize, pageRequest.Offset())
+	if err != nil {
+		return nil, err
+	}
+
+	return paging.NewPage(reactions, pageRequest, total), nil
 }
 
-func (r RepositoryImpl) findAllByEmoji(postId int, emojiId int) ([]Reaction, error) {
-	reactions := make([]Reaction, 10)
+func (r RepositoryImpl) findAllByEmoji(postId int, emojiId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
+	var total int
+	err := r.db.Get(&total, "SELECT COUNT(*) FROM post_reaction WHERE post_id = ? AND emoji_id = ? ORDER BY created_at DESC", postId, emojiId)
 
-	err := r.db.Select(&reactions, "SELECT * FROM post_reaction WHERE post_id = ? AND emoji_id = ? ORDER BY created_at DESC", postId, emojiId)
+	reactions := make([]Reaction, 10)
+	err = r.db.Select(&reactions, "SELECT * FROM post_reaction WHERE post_id = ? AND emoji_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", postId, emojiId, pageRequest.PageSize, pageRequest.Offset())
 	if err != nil {
 		return nil, err
 	}
 
-	return reactions, nil
+	return paging.NewPage(reactions, pageRequest, total), nil
 }
 
 func (r RepositoryImpl) update(reactorId, postId, newEmojiId int) (affectedRows int64, err error) {

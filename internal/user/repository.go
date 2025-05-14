@@ -76,13 +76,13 @@ func (r *RepositoryImpl) findByEmail(email string) (User, error) {
 
 func (r *RepositoryImpl) findAll(isActive bool, pageRequest *paging.PageRequest) (*paging.Page[User], error) {
 	var total int
-	err := r.db.Get(&total, "SELECT COUNT(*) FROM user WHERE is_active = ?", isActive)
+	err := r.db.Get(&total, "SELECT COUNT(*) FROM user WHERE is_active = ? ORDER BY created_at DESC", isActive)
 	if err != nil {
 		return nil, err
 	}
 
 	users := make([]User, pageRequest.PageSize)
-	err = r.db.Select(&users, "SELECT * FROM user WHERE is_active = ? LIMIT ? OFFSET ?", isActive, pageRequest.PageSize, pageRequest.Offset())
+	err = r.db.Select(&users, "SELECT * FROM user WHERE is_active = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", isActive, pageRequest.PageSize, pageRequest.Offset())
 	if err != nil {
 		return nil, err
 	}

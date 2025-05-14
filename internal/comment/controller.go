@@ -86,17 +86,6 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 		return
 	}
 
-	page := e.DefaultQuery("page", "1")
-	pageSize := e.DefaultQuery("pageSize", "10")
-
-	limit, offset, err := paging.Paginate(page, pageSize)
-	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "get all failed " + err.Error(),
-		})
-		return
-	}
-
 	isDeleted, err := strconv.ParseBool(e.DefaultQuery("isDeleted", "false"))
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
@@ -105,7 +94,15 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 		return
 	}
 
-	comments, err := c.service.getAll(postId, isDeleted, limit, offset)
+	pageRequest, err := paging.NewPageRequestStr(e.DefaultQuery("page", "1"), e.DefaultQuery("pageSize", "10"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all failed " + err.Error(),
+		})
+		return
+	}
+
+	comments, err := c.service.getAll(postId, isDeleted, pageRequest)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all failed " + err.Error(),

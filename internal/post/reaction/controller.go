@@ -3,6 +3,7 @@ package reaction
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"social-media-application/internal/paging"
 	"social-media-application/utils"
 	"strconv"
 )
@@ -90,7 +91,15 @@ func (c ControllerImpl) findAll(e *gin.Context) {
 		return
 	}
 
-	reactions, err := c.service.findAll(postId)
+	pageRequest, err := paging.NewPageRequestStr(e.DefaultQuery("page", "1"), e.DefaultQuery("pageSize", "10"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all failed " + err.Error(),
+		})
+		return
+	}
+
+	reactions, err := c.service.getAll(postId, pageRequest)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all failed " + err.Error(),
@@ -118,7 +127,15 @@ func (c ControllerImpl) findAllByEmoji(e *gin.Context) {
 		return
 	}
 
-	reactions, err := c.service.findAllByEmoji(postId, emojiId)
+	pageRequest, err := paging.NewPageRequestStr(e.DefaultQuery("page", "1"), e.DefaultQuery("pageSize", "10"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all by emoji failed " + err.Error(),
+		})
+		return
+	}
+
+	reactions, err := c.service.getAllByEmoji(postId, emojiId, pageRequest)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all by emoji failed " + err.Error(),

@@ -2,6 +2,7 @@ package comment
 
 import (
 	"errors"
+	"social-media-application/internal/paging"
 	"strings"
 )
 
@@ -9,7 +10,7 @@ type (
 	Service interface {
 		save(authorId, postId int, content string) (id int64, err error)
 
-		getAll(postId int, isDeleted bool, limit, offset int) ([]Comment, error)
+		getAll(postId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Comment], error)
 
 		updateContent(currentUserId, postId, commentId int, newContent string) (affectedRows int64, err error)
 		updateAttachment(currentUserId, postId, commentId int, newAttachment string) (affectedRows int64, err error)
@@ -49,20 +50,12 @@ func (s ServiceImpl) save(authorId, postId int, content string) (id int64, err e
 	return id, nil
 }
 
-func (s ServiceImpl) getAll(postId int, isDeleted bool, limit, offset int) ([]Comment, error) {
+func (s ServiceImpl) getAll(postId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Comment], error) {
 	if postId <= 0 {
 		return nil, errors.New("postId is required")
 	}
 
-	if limit < 0 {
-		return nil, errors.New("limit is required")
-	}
-
-	if offset < 0 {
-		return nil, errors.New("offset is required")
-	}
-
-	comments, err := s.repository.findAll(postId, isDeleted, limit, offset)
+	comments, err := s.repository.findAll(postId, isDeleted, request)
 	if err != nil {
 		return nil, err
 	}

@@ -1,12 +1,15 @@
 package comment
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/jmoiron/sqlx"
+	"social-media-application/internal/paging"
+)
 
 type (
 	Repository interface {
 		save(authorId, postId int, content string) (id int64, err error)
 
-		findAll(postId int, isDeleted bool, limit, offset int) ([]Comment, error)
+		findAll(postId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Comment], error)
 
 		updateContent(currentUserId, postId, commentId int, newContent string) (affectedRows int64, err error)
 		updateAttachment(currentUserId, postId, commentId int, newAttachment string) (affectedRows int64, err error)
@@ -43,15 +46,17 @@ func (r RepositoryImpl) save(authorId, postId int, content string) (id int64, er
 	return id, nil
 }
 
-func (r RepositoryImpl) findAll(postId int, isDeleted bool, limit, offset int) ([]Comment, error) {
-	comments := make([]Comment, limit)
+func (r RepositoryImpl) findAll(postId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Comment], error) {
+	var total int
+	err := r.db.Get(&total, "SELECT COUNT(*) FROM comment WHERE post_id = ? AND is_deleted = ? ORDER BY created_at DESC", postId, isDeleted)
 
-	err := r.db.Select(&comments, "SELECT * FROM comment WHERE post_id = ? AND is_deleted = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", postId, isDeleted, limit, offset)
+	comments := make([]Comment, request.PageSize)
+	err = r.db.Select(&comments, "SELECT * FROM comment WHERE post_id = ? AND is_deleted = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", postId, isDeleted, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
 
-	return comments, nil
+	return paging.NewPage(comments, request, total), nil
 }
 
 func (r RepositoryImpl) updateContent(currentUserId, postId, commentId int, newContent string) (affectedRows int64, err error) {

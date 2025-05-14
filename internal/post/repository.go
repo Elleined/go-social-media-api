@@ -9,7 +9,7 @@ type (
 	Repository interface {
 		save(authorId int, subject, content string) (id int64, err error)
 
-		findAll(currentUserId int, isDeleted bool, pageable *paging.PageRequest) (*paging.Page[Post], error)
+		findAll(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error)
 
 		findAllBy(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error)
 

@@ -11,9 +11,9 @@ This project uses the dependencies:
 3. Upload files with go-file-server-api project
 
 # For improvement
+1. API testing for all modules
 2. Unit testing for all modules
 3. Integration testing for all modules
-4. Implement robust pagination
 
 # Validations
 ## User

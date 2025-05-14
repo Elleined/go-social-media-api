@@ -1,13 +1,16 @@
 package reaction
 
-import "errors"
+import (
+	"errors"
+	"social-media-application/internal/paging"
+)
 
 type (
 	Service interface {
 		save(reactorId, postId, emojiId int) (id int64, err error)
 
-		findAll(postId int) ([]Reaction, error)
-		findAllByEmoji(postId int, emojiId int) ([]Reaction, error)
+		getAll(postId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error)
+		getAllByEmoji(postId int, emojiId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error)
 
 		update(reactorId, postId, newEmojiId int) (affectedRows int64, err error)
 
@@ -55,12 +58,12 @@ func (s ServiceImpl) save(reactorId, postId, emojiId int) (id int64, err error) 
 	return id, nil
 }
 
-func (s ServiceImpl) findAll(postId int) ([]Reaction, error) {
+func (s ServiceImpl) getAll(postId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
 	if postId <= 0 {
 		return nil, errors.New("post id is required")
 	}
 
-	reactions, err := s.repository.findAll(postId)
+	reactions, err := s.repository.findAll(postId, pageRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +71,7 @@ func (s ServiceImpl) findAll(postId int) ([]Reaction, error) {
 	return reactions, nil
 }
 
-func (s ServiceImpl) findAllByEmoji(postId int, emojiId int) ([]Reaction, error) {
+func (s ServiceImpl) getAllByEmoji(postId int, emojiId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
 	if postId <= 0 {
 		return nil, errors.New("post id is required")
 	}
@@ -77,7 +80,7 @@ func (s ServiceImpl) findAllByEmoji(postId int, emojiId int) ([]Reaction, error)
 		return nil, errors.New("emoji id is required")
 	}
 
-	reactions, err := s.repository.findAllByEmoji(postId, emojiId)
+	reactions, err := s.repository.findAllByEmoji(postId, emojiId, pageRequest)
 	if err != nil {
 		return nil, err
 	}

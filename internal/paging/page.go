@@ -9,10 +9,10 @@ type Page[T any] struct {
 	HasPrevious   bool `json:"has_previous"`
 }
 
-func NewPage[T any](content []T, pageable *PageRequest, totalElements int) *Page[T] {
-	p := pageable
+func NewPage[T any](content []T, pageRequest *PageRequest, totalElements int) *Page[T] {
+	p := pageRequest
 
-	hasPrevious := pageable.PageNumber > 1
+	hasPrevious := pageRequest.PageNumber > 1
 	hasNext := p.Offset()+p.PageSize < totalElements
 	totalPages := (totalElements + p.PageSize - 1) / p.PageSize
 
