@@ -1,6 +1,12 @@
 package commentreaction
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"social-media-application/internal/paging"
+	"social-media-application/utils"
+	"strconv"
+)
 
 type (
 	Controller interface {
@@ -28,30 +34,218 @@ func NewController(service Service) Controller {
 }
 
 func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
+	r := e.Group("/users/posts/:id/comments/:commentId/reactions")
+	{
+		r.POST("", c.save)
 
+		r.GET("", c.getAll)
+		r.GET("/emoji/:emojiId", c.getAllByEmoji)
+
+		r.PATCH("/emoji/:emojiId`", c.update)
+		r.DELETE("", c.delete)
+	}
 }
 
 func (c ControllerImpl) save(e *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
+	if err != nil {
+		e.JSON(http.StatusUnauthorized, gin.H{
+			"message": "saved failed " + err.Error(),
+		})
+		return
+	}
+
+	postId, err := strconv.Atoi(e.Param("id"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "saved failed " + err.Error(),
+		})
+		return
+	}
+
+	commentId, err := strconv.Atoi(e.Param("commentId"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "saved failed " + err.Error(),
+		})
+		return
+	}
+
+	emojiId, err := strconv.Atoi(e.Query("emojiId"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "saved failed " + err.Error(),
+		})
+		return
+	}
+
+	id, err := c.service.save(currentUserId, postId, commentId, emojiId)
+	if err != nil {
+		e.JSON(http.StatusInternalServerError, gin.H{
+			"message": "saved failed " + err.Error(),
+		})
+		return
+	}
+
+	e.JSON(http.StatusCreated, id)
 }
 
 func (c ControllerImpl) getAll(e *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	postId, err := strconv.Atoi(e.Param("id"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all failed " + err.Error(),
+		})
+		return
+	}
+
+	commentId, err := strconv.Atoi(e.Param("commentId"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all failed " + err.Error(),
+		})
+		return
+	}
+
+	pageRequest, err := paging.NewPageRequestStr(e.DefaultQuery("page", "1"), e.DefaultQuery("pageSize", "10"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all failed " + err.Error(),
+		})
+		return
+	}
+
+	reactions, err := c.service.findAll(postId, commentId, pageRequest)
+	if err != nil {
+		e.JSON(http.StatusInternalServerError, gin.H{
+			"message": "get all failed " + err.Error(),
+		})
+		return
+	}
+
+	e.JSON(http.StatusOK, reactions)
 }
 
 func (c ControllerImpl) getAllByEmoji(e *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	postId, err := strconv.Atoi(e.Param("id"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all by emoji failed " + err.Error(),
+		})
+		return
+	}
+
+	commentId, err := strconv.Atoi(e.Param("commentId"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all by emoji failed " + err.Error(),
+		})
+		return
+	}
+
+	emojiId, err := strconv.Atoi(e.Param("emojiId"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all by emoji failed " + err.Error(),
+		})
+		return
+	}
+
+	pageRequest, err := paging.NewPageRequestStr(e.DefaultQuery("page", "1"), e.DefaultQuery("pageSize", "10"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all by emoji failed " + err.Error(),
+		})
+		return
+	}
+
+	reactions, err := c.service.findAllByEmoji(postId, commentId, emojiId, pageRequest)
+	if err != nil {
+		e.JSON(http.StatusInternalServerError, gin.H{
+			"message": "get all by emoji failed " + err.Error(),
+		})
+		return
+	}
+
+	e.JSON(http.StatusOK, reactions)
 }
 
 func (c ControllerImpl) update(e *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
+	if err != nil {
+		e.JSON(http.StatusUnauthorized, gin.H{
+			"message": "get all by emoji failed " + err.Error(),
+		})
+		return
+	}
+
+	postId, err := strconv.Atoi(e.Param("id"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "saved failed " + err.Error(),
+		})
+		return
+	}
+
+	commentId, err := strconv.Atoi(e.Param("commentId"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "saved failed " + err.Error(),
+		})
+		return
+	}
+
+	emojiId, err := strconv.Atoi(e.Query("emojiId"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "saved failed " + err.Error(),
+		})
+		return
+	}
+
+	_, err = c.service.update(currentUserId, postId, commentId, emojiId)
+	if err != nil {
+		e.JSON(http.StatusInternalServerError, gin.H{
+			"message": "saved failed " + err.Error(),
+		})
+		return
+	}
+
+	e.JSON(http.StatusOK, emojiId)
 }
 
 func (c ControllerImpl) delete(e *gin.Context) {
-	//TODO implement me
-	panic("implement me")
+	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
+	if err != nil {
+		e.JSON(http.StatusUnauthorized, gin.H{
+			"message": "delete failed " + err.Error(),
+		})
+		return
+	}
+
+	postId, err := strconv.Atoi(e.Param("id"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "delete failed " + err.Error(),
+		})
+		return
+	}
+
+	commentId, err := strconv.Atoi(e.Param("commentId"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "delete failed " + err.Error(),
+		})
+		return
+	}
+
+	_, err = c.service.delete(currentUserId, postId, commentId)
+	if err != nil {
+		e.JSON(http.StatusInternalServerError, gin.H{
+			"message": "delete failed " + err.Error(),
+		})
+		return
+	}
+
+	e.JSON(http.StatusNoContent, nil)
 }

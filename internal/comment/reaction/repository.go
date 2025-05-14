@@ -92,7 +92,7 @@ func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, pageReque
 		JOIN post p ON p.id = c.post_id
 		WHERE p.id = ?
 		AND c.id = ?
-		AND cr.id = ?
+		AND cr.emoji_id = ?
 	`
 	err := r.db.Get(&total, query, postId, commentId, emojiId)
 	if err != nil {
@@ -107,7 +107,7 @@ func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, pageReque
 		JOIN post p ON p.id = c.post_id
 		WHERE p.id = ?
 		AND c.id = ?
-		AND cr.id = ?
+		AND cr.emoji_id = ?
 		ORDER BY cr.created_at DESC
 		LIMIT ?
 		OFFSET ?
