@@ -2,6 +2,7 @@ package post
 
 import (
 	"errors"
+	"social-media-application/internal/paging"
 	"strings"
 )
 
@@ -9,8 +10,8 @@ type (
 	Service interface {
 		save(authorId int, subject, content string) (id int64, err error)
 
-		getAll(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error)
-		getAllBy(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error)
+		getAll(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error)
+		getAllBy(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error)
 
 		updateSubject(currentUserId int, postId int, newSubject string) (affectedRows int64, err error)
 		updateContent(currentUserId, postId int, newContent string) (affectedRows int64, err error)
@@ -45,16 +46,12 @@ func (s ServiceImpl) save(authorId int, subject, content string) (id int64, err 
 	return id, nil
 }
 
-func (s ServiceImpl) getAll(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error) {
-	if limit < 0 {
-		return nil, errors.New("limit is required")
+func (s ServiceImpl) getAll(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error) {
+	if currentUserId <= 0 {
+		return nil, errors.New("author id is required")
 	}
 
-	if offset < 0 {
-		return nil, errors.New("offset is required")
-	}
-
-	posts, err := s.repository.findAll(currentUserId, isDeleted, limit, offset)
+	posts, err := s.repository.findAll(currentUserId, isDeleted, pageRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -62,20 +59,12 @@ func (s ServiceImpl) getAll(currentUserId int, isDeleted bool, limit, offset int
 	return posts, nil
 }
 
-func (s ServiceImpl) getAllBy(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error) {
+func (s ServiceImpl) getAllBy(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error) {
 	if currentUserId <= 0 {
 		return nil, errors.New("author id is required")
 	}
 
-	if limit < 0 {
-		return nil, errors.New("limit is required")
-	}
-
-	if offset < 0 {
-		return nil, errors.New("offset is required")
-	}
-
-	posts, err := s.repository.findAllBy(currentUserId, isDeleted, limit, offset)
+	posts, err := s.repository.findAllBy(currentUserId, isDeleted, pageRequest)
 	if err != nil {
 		return nil, err
 	}

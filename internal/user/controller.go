@@ -3,7 +3,7 @@ package user
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"social-media-application/utils"
+	"social-media-application/internal/paging"
 	"strconv"
 )
 
@@ -115,13 +115,18 @@ func (c *ControllerImpl) getByEmail(e *gin.Context) {
 }
 
 func (c *ControllerImpl) getAll(e *gin.Context) {
-	page := e.DefaultQuery("page", "1")
-	pageSize := e.DefaultQuery("pageSize", "10")
-
-	limit, offset, err := utils.Paginate(page, pageSize)
+	page, err := strconv.Atoi(e.DefaultQuery("page", "1"))
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "something wrong with pagination " + err.Error(),
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all failed " + err.Error(),
+		})
+		return
+	}
+
+	pageSize, err := strconv.Atoi(e.DefaultQuery("pageSize", "10"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
@@ -134,7 +139,15 @@ func (c *ControllerImpl) getAll(e *gin.Context) {
 		return
 	}
 
-	users, err := c.service.getAll(isActive, limit, offset)
+	pageRequest, err := paging.NewPageRequest(page, pageSize)
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all failed " + err.Error(),
+		})
+		return
+	}
+
+	users, err := c.service.getAll(isActive, pageRequest)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all failed " + err.Error(),

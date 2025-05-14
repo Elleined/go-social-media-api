@@ -2,14 +2,16 @@ package post
 
 import (
 	"github.com/jmoiron/sqlx"
+	"social-media-application/internal/paging"
 )
 
 type (
 	Repository interface {
 		save(authorId int, subject, content string) (id int64, err error)
 
-		findAll(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error)
-		findAllBy(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error)
+		findAll(currentUserId int, isDeleted bool, pageable *paging.PageRequest) (*paging.Page[Post], error)
+
+		findAllBy(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error)
 
 		updateSubject(currentUserId, postId int, newSubject string) (affectedRows int64, err error)
 		updateContent(currentUserId, postId int, newContent string) (affectedRows int64, err error)
@@ -50,26 +52,36 @@ func (r RepositoryImpl) save(authorId int, subject, content string) (id int64, e
 	return id, nil
 }
 
-func (r RepositoryImpl) findAll(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error) {
-	posts := make([]Post, limit)
-
-	err := r.db.Select(&posts, "SELECT * FROM post WHERE author_id != ? AND is_deleted = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", currentUserId, isDeleted, limit, offset)
+func (r RepositoryImpl) findAll(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error) {
+	var total int
+	err := r.db.Get(&total, "SELECT COUNT(*) FROM post WHERE author_id != ? AND is_deleted = ? ORDER BY created_at DESC", currentUserId, isDeleted)
 	if err != nil {
 		return nil, err
 	}
 
-	return posts, nil
+	posts := make([]Post, pageRequest.PageSize)
+	err = r.db.Select(&posts, "SELECT * FROM post WHERE author_id != ? AND is_deleted = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", currentUserId, isDeleted, pageRequest.PageSize, pageRequest.Offset())
+	if err != nil {
+		return nil, err
+	}
+
+	return paging.NewPage(posts, pageRequest, total), nil
 }
 
-func (r RepositoryImpl) findAllBy(currentUserId int, isDeleted bool, limit, offset int) ([]Post, error) {
-	posts := make([]Post, limit)
-
-	err := r.db.Select(&posts, "SELECT * FROM post WHERE author_id = ? AND is_deleted = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", currentUserId, isDeleted, limit, offset)
+func (r RepositoryImpl) findAllBy(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error) {
+	var total int
+	err := r.db.Get(&total, "SELECT COUNT(*) FROM post WHERE author_id = ? AND is_deleted = ? ORDER BY created_at DESC", currentUserId, isDeleted)
 	if err != nil {
 		return nil, err
 	}
 
-	return posts, nil
+	posts := make([]Post, pageRequest.PageSize)
+	err = r.db.Select(&posts, "SELECT * FROM post WHERE author_id = ? AND is_deleted = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", currentUserId, isDeleted, pageRequest.PageSize, pageRequest.Offset())
+	if err != nil {
+		return nil, err
+	}
+
+	return paging.NewPage(posts, pageRequest, total), nil
 }
 
 func (r RepositoryImpl) updateSubject(currentUserId int, postId int, newSubject string) (affectedRows int64, err error) {
@@ -146,7 +158,7 @@ func (r RepositoryImpl) deleteById(currentUserId, postId int) (affectedRows int6
 }
 
 func (r RepositoryImpl) hasPost(currentUserId, postId int) (exists bool, err error) {
-	err = r.db.Get(&exists, "SELECT EXISTS(SELECT 1 FROM post WHERE author_id = ? AND post_id = ?)", currentUserId, postId)
+	err = r.db.Get(&exists, "SELECT EXISTS(SELECT 1 FROM post WHERE author_id = ? AND id = ?)", currentUserId, postId)
 	if err != nil {
 		return exists, err
 	}

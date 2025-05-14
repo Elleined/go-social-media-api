@@ -3,6 +3,7 @@ package post
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"social-media-application/internal/paging"
 	"social-media-application/utils"
 	"strconv"
 )
@@ -91,12 +92,17 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 		return
 	}
 
-	page := e.DefaultQuery("page", "1")
-	pageSize := e.DefaultQuery("pageSize", "10")
-
-	limit, offset, err := utils.Paginate(page, pageSize)
+	page, err := strconv.Atoi(e.DefaultQuery("page", "1"))
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all failed " + err.Error(),
+		})
+		return
+	}
+
+	pageSize, err := strconv.Atoi(e.DefaultQuery("pageSize", "10"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all failed " + err.Error(),
 		})
 		return
@@ -104,13 +110,21 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 
 	isDeleted, err := strconv.ParseBool(e.DefaultQuery("isDeleted", "false"))
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		e.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
 
-	posts, err := c.service.getAll(currentUserId, isDeleted, limit, offset)
+	pageRequest, err := paging.NewPageRequest(page, pageSize)
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all failed " + err.Error(),
+		})
+		return
+	}
+
+	pagedPosts, err := c.service.getAll(currentUserId, isDeleted, pageRequest)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all failed " + err.Error(),
@@ -118,7 +132,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 		return
 	}
 
-	e.JSON(http.StatusOK, posts)
+	e.JSON(http.StatusOK, pagedPosts)
 }
 
 func (c ControllerImpl) getAllBy(e *gin.Context) {
@@ -130,13 +144,18 @@ func (c ControllerImpl) getAllBy(e *gin.Context) {
 		return
 	}
 
-	page := e.DefaultQuery("page", "1")
-	pageSize := e.DefaultQuery("pageSize", "10")
-
-	limit, offset, err := utils.Paginate(page, pageSize)
+	page, err := strconv.Atoi(e.DefaultQuery("page", "1"))
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "get all by failed " + err.Error(),
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all failed " + err.Error(),
+		})
+		return
+	}
+
+	pageSize, err := strconv.Atoi(e.DefaultQuery("pageSize", "10"))
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
@@ -149,7 +168,15 @@ func (c ControllerImpl) getAllBy(e *gin.Context) {
 		return
 	}
 
-	posts, err := c.service.getAllBy(currentUserId, isDeleted, limit, offset)
+	pageRequest, err := paging.NewPageRequest(page, pageSize)
+	if err != nil {
+		e.JSON(http.StatusBadRequest, gin.H{
+			"message": "get all failed " + err.Error(),
+		})
+		return
+	}
+
+	posts, err := c.service.getAllBy(currentUserId, isDeleted, pageRequest)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all by failed " + err.Error(),

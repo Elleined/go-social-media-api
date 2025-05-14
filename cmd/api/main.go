@@ -98,12 +98,6 @@ func main() {
 	commentController := comment.NewController(commentService)
 	commentController.RegisterRoutes(r)
 
-	// Initialize comment reaction module
-	commentReactionRepository := reaction.NewRepository(db)
-	commentReactionService := reaction.NewService(commentReactionRepository)
-	commentReactionController := reaction.NewController(commentReactionService)
-	commentReactionController.RegisterRoutes(r)
-
 	err = r.Run(os.Getenv("PORT"))
 	if err != nil {
 		panic("cannot start server" + err.Error())

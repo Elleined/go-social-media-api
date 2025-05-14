@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"social-media-application/internal/paging"
 	pd "social-media-application/internal/user/password"
 	"social-media-application/utils"
 	"strings"
@@ -14,7 +15,7 @@ type (
 		getById(id int) (User, error)
 		getByEmail(email string) (User, error)
 
-		getAll(isActive bool, limit, offset int) ([]User, error)
+		getAll(isActive bool, pageRequest *paging.PageRequest) (*paging.Page[User], error)
 
 		deleteById(id int) (affectedRows int64, err error)
 
@@ -100,16 +101,8 @@ func (s ServiceImpl) getByEmail(email string) (User, error) {
 	return user, nil
 }
 
-func (s ServiceImpl) getAll(isActive bool, limit, offset int) ([]User, error) {
-	if limit < 0 {
-		return nil, errors.New("limit is required")
-	}
-
-	if offset < 0 {
-		return nil, errors.New("offset is required")
-	}
-
-	users, err := s.repository.findAll(isActive, limit, offset)
+func (s ServiceImpl) getAll(isActive bool, pageRequest *paging.PageRequest) (*paging.Page[User], error) {
+	users, err := s.repository.findAll(isActive, pageRequest)
 	if err != nil {
 		return nil, err
 	}

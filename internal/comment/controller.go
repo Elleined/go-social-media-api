@@ -3,6 +3,7 @@ package comment
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"social-media-application/internal/paging"
 	"social-media-application/utils"
 	"strconv"
 )
@@ -88,7 +89,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 	page := e.DefaultQuery("page", "1")
 	pageSize := e.DefaultQuery("pageSize", "10")
 
-	limit, offset, err := utils.Paginate(page, pageSize)
+	limit, offset, err := paging.Paginate(page, pageSize)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all failed " + err.Error(),

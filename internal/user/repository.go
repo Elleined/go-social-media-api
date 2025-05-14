@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/jmoiron/sqlx"
+	"social-media-application/internal/paging"
 )
 
 type (
@@ -11,7 +12,7 @@ type (
 		findById(id int) (User, error)
 		findByEmail(email string) (User, error)
 
-		findAll(isActive bool, limit, offset int) ([]User, error)
+		findAll(isActive bool, pageRequest *paging.PageRequest) (*paging.Page[User], error)
 
 		deleteById(id int) (affectedRows int64, err error)
 
@@ -73,15 +74,20 @@ func (r *RepositoryImpl) findByEmail(email string) (User, error) {
 	return user, nil
 }
 
-func (r *RepositoryImpl) findAll(isActive bool, limit, offset int) ([]User, error) {
-	users := make([]User, limit)
-
-	err := r.db.Select(&users, "SELECT * FROM user WHERE is_active = ? LIMIT ? OFFSET ?", isActive, limit, offset)
+func (r *RepositoryImpl) findAll(isActive bool, pageRequest *paging.PageRequest) (*paging.Page[User], error) {
+	var total int
+	err := r.db.Get(&total, "SELECT COUNT(*) FROM user WHERE is_active = ?", isActive)
 	if err != nil {
 		return nil, err
 	}
 
-	return users, nil
+	users := make([]User, pageRequest.PageSize)
+	err = r.db.Select(&users, "SELECT * FROM user WHERE is_active = ? LIMIT ? OFFSET ?", isActive, pageRequest.PageSize, pageRequest.Offset())
+	if err != nil {
+		return nil, err
+	}
+
+	return paging.NewPage(users, pageRequest, total), nil
 }
 
 func (r *RepositoryImpl) deleteById(id int) (affectedRows int64, err error) {
