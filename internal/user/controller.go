@@ -115,22 +115,6 @@ func (c *ControllerImpl) getByEmail(e *gin.Context) {
 }
 
 func (c *ControllerImpl) getAll(e *gin.Context) {
-	page, err := strconv.Atoi(e.DefaultQuery("page", "1"))
-	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "get all failed " + err.Error(),
-		})
-		return
-	}
-
-	pageSize, err := strconv.Atoi(e.DefaultQuery("pageSize", "10"))
-	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "get all failed " + err.Error(),
-		})
-		return
-	}
-
 	isActive, err := strconv.ParseBool(e.DefaultQuery("isActive", "true"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
@@ -139,7 +123,7 @@ func (c *ControllerImpl) getAll(e *gin.Context) {
 		return
 	}
 
-	pageRequest, err := paging.NewPageRequest(page, pageSize)
+	pageRequest, err := paging.NewPageRequestStr(e.DefaultQuery("page", "1"), e.DefaultQuery("pageSize", "10"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all failed " + err.Error(),
@@ -152,6 +136,7 @@ func (c *ControllerImpl) getAll(e *gin.Context) {
 		e.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all failed " + err.Error(),
 		})
+		return
 	}
 
 	e.JSON(http.StatusOK, users)

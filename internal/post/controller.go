@@ -92,22 +92,6 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 		return
 	}
 
-	page, err := strconv.Atoi(e.DefaultQuery("page", "1"))
-	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "get all failed " + err.Error(),
-		})
-		return
-	}
-
-	pageSize, err := strconv.Atoi(e.DefaultQuery("pageSize", "10"))
-	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "get all failed " + err.Error(),
-		})
-		return
-	}
-
 	isDeleted, err := strconv.ParseBool(e.DefaultQuery("isDeleted", "false"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
@@ -116,7 +100,7 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 		return
 	}
 
-	pageRequest, err := paging.NewPageRequest(page, pageSize)
+	pageRequest, err := paging.NewPageRequestStr(e.DefaultQuery("page", "1"), e.DefaultQuery("pageSize", "10"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all failed " + err.Error(),
@@ -144,22 +128,6 @@ func (c ControllerImpl) getAllBy(e *gin.Context) {
 		return
 	}
 
-	page, err := strconv.Atoi(e.DefaultQuery("page", "1"))
-	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "get all failed " + err.Error(),
-		})
-		return
-	}
-
-	pageSize, err := strconv.Atoi(e.DefaultQuery("pageSize", "10"))
-	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "get all failed " + err.Error(),
-		})
-		return
-	}
-
 	isDeleted, err := strconv.ParseBool(e.DefaultQuery("isDeleted", "false"))
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{
@@ -168,7 +136,7 @@ func (c ControllerImpl) getAllBy(e *gin.Context) {
 		return
 	}
 
-	pageRequest, err := paging.NewPageRequest(page, pageSize)
+	pageRequest, err := paging.NewPageRequestStr(e.DefaultQuery("page", "1"), e.DefaultQuery("pageSize", "10"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all failed " + err.Error(),

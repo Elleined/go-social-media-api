@@ -1,13 +1,35 @@
 package paging
 
-import "errors"
+import (
+	"errors"
+	"strconv"
+)
 
 type PageRequest struct {
 	PageNumber int
 	PageSize   int
 }
 
-func NewPageRequest(pageNumber int, pageSize int) (*PageRequest, error) {
+func NewPageRequestStr(pageNumber, pageSize string) (*PageRequest, error) {
+	pageNumberInt, err := strconv.Atoi(pageNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	pageSizeInt, err := strconv.Atoi(pageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	pageRequest, err := NewPageRequest(pageNumberInt, pageSizeInt)
+	if err != nil {
+		return nil, err
+	}
+
+	return pageRequest, nil
+}
+
+func NewPageRequest(pageNumber, pageSize int) (*PageRequest, error) {
 	if pageNumber <= 0 {
 		return nil, errors.New("page is required")
 	}
