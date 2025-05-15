@@ -9,10 +9,7 @@
 8. resty: For external API Calls
 
 # Features to be added
-1. Upload files with go-file-server-api project
-2. automatic creation of uploadpath + post and comment
-3. file structure of uploaded files
-4. reimplement file server api file naming
+1. automatic creation of uploadpath + post and comment
 
 # For improvement
 1. API testing for all modules

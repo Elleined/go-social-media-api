@@ -10,14 +10,14 @@ import (
 
 type (
 	Controller interface {
-		save(e *gin.Context)
+		save(ctx *gin.Context)
 
-		getAll(e *gin.Context)
+		getAll(ctx *gin.Context)
 
-		updateContent(e *gin.Context)
-		updateAttachment(e *gin.Context)
+		updateContent(ctx *gin.Context)
+		updateAttachment(ctx *gin.Context)
 
-		deleteById(e *gin.Context)
+		deleteById(ctx *gin.Context)
 
 		RegisterRoutes(e *gin.Engine)
 	}
@@ -47,56 +47,56 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 	}
 }
 
-func (c ControllerImpl) save(e *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
+func (c ControllerImpl) save(ctx *gin.Context) {
+	currentUserId, err := utils.GetCurrentUserId(ctx.GetHeader("Authorization"))
 	if err != nil {
-		e.JSON(http.StatusUnauthorized, gin.H{
+		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
 
-	postId, err := strconv.Atoi(e.Param("id"))
+	postId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
 
-	content := e.Query("content")
+	content := ctx.Query("content")
 
 	id, err := c.service.save(currentUserId, postId, content)
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusOK, id)
+	ctx.JSON(http.StatusOK, id)
 }
 
-func (c ControllerImpl) getAll(e *gin.Context) {
-	postId, err := strconv.Atoi(e.Param("id"))
+func (c ControllerImpl) getAll(ctx *gin.Context) {
+	postId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
 
-	isDeleted, err := strconv.ParseBool(e.DefaultQuery("isDeleted", "false"))
+	isDeleted, err := strconv.ParseBool(ctx.DefaultQuery("isDeleted", "false"))
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
 
-	pageRequest, err := paging.NewPageRequestStr(e.DefaultQuery("page", "1"), e.DefaultQuery("pageSize", "10"))
+	pageRequest, err := paging.NewPageRequestStr(ctx.DefaultQuery("page", "1"), ctx.DefaultQuery("pageSize", "10"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all failed " + err.Error(),
 		})
 		return
@@ -104,111 +104,111 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 
 	comments, err := c.service.getAll(postId, isDeleted, pageRequest)
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusOK, comments)
+	ctx.JSON(http.StatusOK, comments)
 }
 
-func (c ControllerImpl) updateContent(e *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
+func (c ControllerImpl) updateContent(ctx *gin.Context) {
+	currentUserId, err := utils.GetCurrentUserId(ctx.GetHeader("Authorization"))
 	if err != nil {
-		e.JSON(http.StatusUnauthorized, gin.H{
+		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "update content failed " + err.Error(),
 		})
 		return
 	}
 
-	postId, err := strconv.Atoi(e.Param("id"))
+	postId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "update content failed " + err.Error(),
 		})
 		return
 	}
 
-	commentId, err := strconv.Atoi(e.Param("commentId"))
+	commentId, err := strconv.Atoi(ctx.Param("commentId"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "update content failed " + err.Error(),
 		})
 		return
 	}
 
-	newContent := e.Query("newContent")
+	newContent := ctx.Query("newContent")
 
 	_, err = c.service.updateContent(currentUserId, postId, commentId, newContent)
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "update content failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusOK, newContent)
+	ctx.JSON(http.StatusOK, newContent)
 }
 
-func (c ControllerImpl) updateAttachment(e *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
+func (c ControllerImpl) updateAttachment(ctx *gin.Context) {
+	currentUserId, err := utils.GetCurrentUserId(ctx.GetHeader("Authorization"))
 	if err != nil {
-		e.JSON(http.StatusUnauthorized, gin.H{
+		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "update attachment failed " + err.Error(),
 		})
 		return
 	}
 
-	postId, err := strconv.Atoi(e.Param("id"))
+	postId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "update attachment failed " + err.Error(),
 		})
 		return
 	}
 
-	commentId, err := strconv.Atoi(e.Param("commentId"))
+	commentId, err := strconv.Atoi(ctx.Param("commentId"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "update attachment failed " + err.Error(),
 		})
 		return
 	}
 
-	newAttachment := e.Query("newAttachment")
+	newAttachment := ctx.Query("newAttachment")
 
 	_, err = c.service.updateAttachment(currentUserId, postId, commentId, newAttachment)
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "update attachment failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusOK, newAttachment)
+	ctx.JSON(http.StatusOK, newAttachment)
 }
 
-func (c ControllerImpl) deleteById(e *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
+func (c ControllerImpl) deleteById(ctx *gin.Context) {
+	currentUserId, err := utils.GetCurrentUserId(ctx.GetHeader("Authorization"))
 	if err != nil {
-		e.JSON(http.StatusUnauthorized, gin.H{
+		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}
 
-	postId, err := strconv.Atoi(e.Param("id"))
+	postId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}
 
-	commentId, err := strconv.Atoi(e.Param("commentId"))
+	commentId, err := strconv.Atoi(ctx.Param("commentId"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "delete by id failed " + err.Error(),
 		})
 		return
@@ -216,11 +216,11 @@ func (c ControllerImpl) deleteById(e *gin.Context) {
 
 	_, err = c.service.deleteById(currentUserId, postId, commentId)
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusNoContent, nil)
+	ctx.JSON(http.StatusNoContent, nil)
 }

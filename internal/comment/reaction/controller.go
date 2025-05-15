@@ -10,14 +10,14 @@ import (
 
 type (
 	Controller interface {
-		save(e *gin.Context)
+		save(ctx *gin.Context)
 
-		getAll(e *gin.Context)
-		getAllByEmoji(e *gin.Context)
+		getAll(ctx *gin.Context)
+		getAllByEmoji(ctx *gin.Context)
 
-		update(e *gin.Context)
+		update(ctx *gin.Context)
 
-		delete(e *gin.Context)
+		delete(ctx *gin.Context)
 
 		RegisterRoutes(r *gin.Engine)
 	}
@@ -46,34 +46,34 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 	}
 }
 
-func (c ControllerImpl) save(e *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
+func (c ControllerImpl) save(ctx *gin.Context) {
+	currentUserId, err := utils.GetCurrentUserId(ctx.GetHeader("Authorization"))
 	if err != nil {
-		e.JSON(http.StatusUnauthorized, gin.H{
+		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
 
-	postId, err := strconv.Atoi(e.Param("id"))
+	postId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
 
-	commentId, err := strconv.Atoi(e.Param("commentId"))
+	commentId, err := strconv.Atoi(ctx.Param("commentId"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
 
-	emojiId, err := strconv.Atoi(e.Query("emojiId"))
+	emojiId, err := strconv.Atoi(ctx.Query("emojiId"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "saved failed " + err.Error(),
 		})
 		return
@@ -81,35 +81,35 @@ func (c ControllerImpl) save(e *gin.Context) {
 
 	id, err := c.service.save(currentUserId, postId, commentId, emojiId)
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusCreated, id)
+	ctx.JSON(http.StatusCreated, id)
 }
 
-func (c ControllerImpl) getAll(e *gin.Context) {
-	postId, err := strconv.Atoi(e.Param("id"))
+func (c ControllerImpl) getAll(ctx *gin.Context) {
+	postId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
 
-	commentId, err := strconv.Atoi(e.Param("commentId"))
+	commentId, err := strconv.Atoi(ctx.Param("commentId"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
 
-	pageRequest, err := paging.NewPageRequestStr(e.DefaultQuery("page", "1"), e.DefaultQuery("pageSize", "10"))
+	pageRequest, err := paging.NewPageRequestStr(ctx.DefaultQuery("page", "1"), ctx.DefaultQuery("pageSize", "10"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all failed " + err.Error(),
 		})
 		return
@@ -117,43 +117,43 @@ func (c ControllerImpl) getAll(e *gin.Context) {
 
 	reactions, err := c.service.findAll(postId, commentId, pageRequest)
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusOK, reactions)
+	ctx.JSON(http.StatusOK, reactions)
 }
 
-func (c ControllerImpl) getAllByEmoji(e *gin.Context) {
-	postId, err := strconv.Atoi(e.Param("id"))
+func (c ControllerImpl) getAllByEmoji(ctx *gin.Context) {
+	postId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all by emoji failed " + err.Error(),
 		})
 		return
 	}
 
-	commentId, err := strconv.Atoi(e.Param("commentId"))
+	commentId, err := strconv.Atoi(ctx.Param("commentId"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all by emoji failed " + err.Error(),
 		})
 		return
 	}
 
-	emojiId, err := strconv.Atoi(e.Param("emojiId"))
+	emojiId, err := strconv.Atoi(ctx.Param("emojiId"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all by emoji failed " + err.Error(),
 		})
 		return
 	}
 
-	pageRequest, err := paging.NewPageRequestStr(e.DefaultQuery("page", "1"), e.DefaultQuery("pageSize", "10"))
+	pageRequest, err := paging.NewPageRequestStr(ctx.DefaultQuery("page", "1"), ctx.DefaultQuery("pageSize", "10"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all by emoji failed " + err.Error(),
 		})
 		return
@@ -161,43 +161,43 @@ func (c ControllerImpl) getAllByEmoji(e *gin.Context) {
 
 	reactions, err := c.service.findAllByEmoji(postId, commentId, emojiId, pageRequest)
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all by emoji failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusOK, reactions)
+	ctx.JSON(http.StatusOK, reactions)
 }
 
-func (c ControllerImpl) update(e *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
+func (c ControllerImpl) update(ctx *gin.Context) {
+	currentUserId, err := utils.GetCurrentUserId(ctx.GetHeader("Authorization"))
 	if err != nil {
-		e.JSON(http.StatusUnauthorized, gin.H{
+		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "get all by emoji failed " + err.Error(),
 		})
 		return
 	}
 
-	postId, err := strconv.Atoi(e.Param("id"))
+	postId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
 
-	commentId, err := strconv.Atoi(e.Param("commentId"))
+	commentId, err := strconv.Atoi(ctx.Param("commentId"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
 
-	emojiId, err := strconv.Atoi(e.Param("emojiId"))
+	emojiId, err := strconv.Atoi(ctx.Param("emojiId"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "saved failed " + err.Error(),
 		})
 		return
@@ -205,35 +205,35 @@ func (c ControllerImpl) update(e *gin.Context) {
 
 	_, err = c.service.update(currentUserId, postId, commentId, emojiId)
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusOK, emojiId)
+	ctx.JSON(http.StatusOK, emojiId)
 }
 
-func (c ControllerImpl) delete(e *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(e.GetHeader("Authorization"))
+func (c ControllerImpl) delete(ctx *gin.Context) {
+	currentUserId, err := utils.GetCurrentUserId(ctx.GetHeader("Authorization"))
 	if err != nil {
-		e.JSON(http.StatusUnauthorized, gin.H{
+		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "delete failed " + err.Error(),
 		})
 		return
 	}
 
-	postId, err := strconv.Atoi(e.Param("id"))
+	postId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "delete failed " + err.Error(),
 		})
 		return
 	}
 
-	commentId, err := strconv.Atoi(e.Param("commentId"))
+	commentId, err := strconv.Atoi(ctx.Param("commentId"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "delete failed " + err.Error(),
 		})
 		return
@@ -241,11 +241,11 @@ func (c ControllerImpl) delete(e *gin.Context) {
 
 	_, err = c.service.delete(currentUserId, postId, commentId)
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "delete failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusNoContent, nil)
+	ctx.JSON(http.StatusNoContent, nil)
 }

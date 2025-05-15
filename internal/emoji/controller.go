@@ -8,10 +8,10 @@ import (
 
 type (
 	Controller interface {
-		save(e *gin.Context)
-		getAll(e *gin.Context)
-		update(e *gin.Context)
-		delete(e *gin.Context)
+		save(ctx *gin.Context)
+		getAll(ctx *gin.Context)
+		update(ctx *gin.Context)
+		delete(ctx *gin.Context)
 
 		RegisterRoutes(e *gin.Engine)
 	}
@@ -37,57 +37,57 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 	}
 }
 
-func (c ControllerImpl) save(e *gin.Context) {
-	name := e.Query("name")
+func (c ControllerImpl) save(ctx *gin.Context) {
+	name := ctx.Query("name")
 
 	id, err := c.service.save(name)
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "saved failed" + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusOK, id)
+	ctx.JSON(http.StatusOK, id)
 }
 
-func (c ControllerImpl) getAll(e *gin.Context) {
+func (c ControllerImpl) getAll(ctx *gin.Context) {
 	emojis, err := c.service.getAll()
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusOK, emojis)
+	ctx.JSON(http.StatusOK, emojis)
 }
 
-func (c ControllerImpl) update(e *gin.Context) {
-	id, err := strconv.Atoi(e.Param("id"))
+func (c ControllerImpl) update(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "update failed " + err.Error(),
 		})
 		return
 	}
 
-	name := e.Query("name")
+	name := ctx.Query("name")
 	_, err = c.service.update(id, name)
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "update failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusOK, name)
+	ctx.JSON(http.StatusOK, name)
 }
 
-func (c ControllerImpl) delete(e *gin.Context) {
-	id, err := strconv.Atoi(e.Param("id"))
+func (c ControllerImpl) delete(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "delete by id failed " + err.Error(),
 		})
 		return
@@ -95,11 +95,11 @@ func (c ControllerImpl) delete(e *gin.Context) {
 
 	_, err = c.service.delete(id)
 	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "delete by id failed " + err.Error(),
 		})
 		return
 	}
 
-	e.JSON(http.StatusNoContent, nil)
+	ctx.JSON(http.StatusNoContent, nil)
 }
