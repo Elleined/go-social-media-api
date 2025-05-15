@@ -56,7 +56,7 @@ func (r RepositoryImpl) findAll(postId, commentId int, pageRequest *paging.PageR
 		JOIN comment c ON c.id = cr.comment_id
 		JOIN post p ON p.id = c.post_id
 		WHERE p.id = ?
-		AND c.id = ?
+		AND cr.comment_id = ?
 	`
 	err := r.db.Get(&total, query, postId, commentId)
 	if err != nil {
@@ -70,7 +70,7 @@ func (r RepositoryImpl) findAll(postId, commentId int, pageRequest *paging.PageR
 		JOIN comment c ON c.id = cr.comment_id
 		JOIN post p ON p.id = c.post_id
 		WHERE p.id = ?
-		AND c.id = ?
+		AND cr.comment_id = ?
 		ORDER BY cr.created_at DESC
 		LIMIT ?
 		OFFSET ?
@@ -91,7 +91,7 @@ func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, pageReque
 		JOIN comment c ON c.id = cr.comment_id
 		JOIN post p ON p.id = c.post_id
 		WHERE p.id = ?
-		AND c.id = ?
+		AND cr.comment_id = ?
 		AND cr.emoji_id = ?
 	`
 	err := r.db.Get(&total, query, postId, commentId, emojiId)
@@ -106,7 +106,7 @@ func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, pageReque
 		JOIN comment c ON c.id = cr.comment_id
 		JOIN post p ON p.id = c.post_id
 		WHERE p.id = ?
-		AND c.id = ?
+		AND cr.comment_id = ?
 		AND cr.emoji_id = ?
 		ORDER BY cr.created_at DESC
 		LIMIT ?
@@ -127,7 +127,7 @@ func (r RepositoryImpl) update(reactorId, postId, commentId, newEmojiId int) (af
 		JOIN post p ON p.id = c.post_id
 		SET cr.emoji_id = :newEmojiId
 		WHERE p.id = :postId
-		AND c.id = :commentId
+		AND cr.comment_id = :commentId
 		AND cr.reactor_id = :reactorId
 	`
 	result, err := r.db.NamedExec(query, map[string]any{
@@ -155,7 +155,7 @@ func (r RepositoryImpl) delete(reactorId, postId, commentId int) (affectedRows i
 		JOIN comment c ON c.id = cr.comment_id
 		JOIN post p ON p.id = c.post_id
 		WHERE p.id = :postId
-		AND c.id = :commentId
+		AND cr.comment_id = :commentId
 		AND cr.reactor_id = :reactorId
 	`
 	result, err := r.db.NamedExec(query, map[string]any{
@@ -183,7 +183,7 @@ func (r RepositoryImpl) isAlreadyReacted(reactorId, postId, commentId int) (bool
 			JOIN comment c ON c.id = cr.comment_id
 			JOIN post p ON p.id = c.post_id
 			WHERE p.id = ?
-			AND c.id = ?
+			AND cr.comment_id = ?
 			AND cr.reactor_id = ?
 		)
 	`

@@ -195,7 +195,7 @@ func (c ControllerImpl) update(e *gin.Context) {
 		return
 	}
 
-	emojiId, err := strconv.Atoi(e.Query("emojiId"))
+	emojiId, err := strconv.Atoi(e.Param("emojiId"))
 	if err != nil {
 		e.JSON(http.StatusBadRequest, gin.H{
 			"message": "saved failed " + err.Error(),
