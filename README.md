@@ -150,54 +150,14 @@
      - must have a logged in user
      - cannot delete if already been used as FK
 # How to run
-
-
-1. Install golang-migrate for database migration
-```go
--- windows
-irm get.scoop.sh | iex
-scoop install migrate
-
--- linux
-go install -tags 'mysql' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+1. CD to deployment > prod or dev
+2. Supply the correct environment variables
+3. Run database migration
 ```
-2. Create the database
-```sql
-CREATE DATABASE sma_db;
+docker compose up -d backend-migration
 ```
 
-3. Run the database migration file on root project folder
-```go
--- syntax
-migrate -path migrations -database "mysql://<username>:<password>@tcp(<host>:<port>)/<database_name>" up
-
--- usage
-migrate -path migrations -database "mysql://root:root@tcp(localhost:3307)/sma_db" up
+4. Run the project
 ```
-
-4. Download the dependencies and missing dependencies
-```go
-go mod download
-go mod tidy
+docker compose up -d backend
 ```
-
-4. Supply the proper environment variables in .env file present in root project
-```
-PORT=:8000
-
-DB_USERNAME=root
-DB_PASSWORD=root
-DB_HOST=localhost
-DB_PORT=3307
-DB_NAME=sma_db
-
-# Generate this with `openssl rand -base64 32`
-JWT_SECRET_KEY=7nnoasdFD58zhjVO+GjQLhpRl6ps2x9+bZVfolJJlpI=
-```
-
-5. Add `GIN_MODE=VALUE` release or debug in IDE environment or host machine.
-    - The default mode is release.
-    - When GIN_MODE value is not supplied or set to release it will be release mode
-    - Should explicitly declare in debug mode when in development
-
-6. Run the project
