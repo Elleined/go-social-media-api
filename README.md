@@ -10,12 +10,15 @@
 
 # Features to be added
 1. Upload files with go-file-server-api project
+2. automatic creation of uploadpath + post and comment
+3. file structure of uploaded files
 
 # For improvement
 1. API testing for all modules
 2. Unit testing for all modules
 3. Integration testing for all modules
 4. Customize paging with specified field and sorting order
+5. Rename gin.Context to ctx
 
 # Validations
 ## User
