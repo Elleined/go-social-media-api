@@ -1,11 +1,8 @@
 package post
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"mime/multipart"
 	"net/http"
-	"social-media-application/internal/file"
 	"social-media-application/internal/paging"
 	"social-media-application/utils"
 	"strconv"
@@ -28,15 +25,13 @@ type (
 	}
 
 	ControllerImpl struct {
-		service    Service
-		fileClient *file.Client
+		service Service
 	}
 )
 
-func NewController(service Service, fileClient *file.Client) Controller {
+func NewController(service Service) Controller {
 	return &ControllerImpl{
-		service:    service,
-		fileClient: fileClient,
+		service: service,
 	}
 }
 
@@ -235,29 +230,7 @@ func (c ControllerImpl) updateAttachment(e *gin.Context) {
 		return
 	}
 
-	uploaded, header, err := e.Request.FormFile("file")
-	if err != nil {
-		e.JSON(http.StatusBadRequest, gin.H{
-			"message": "can't get the file from request" + err.Error(),
-		})
-		return
-	}
-	defer func(file multipart.File) {
-		err := file.Close()
-		if err != nil {
-			return
-		}
-	}(uploaded)
-
-	attachment, err := c.fileClient.Upload("post", uploaded, header)
-	if err != nil {
-		e.JSON(http.StatusInternalServerError, gin.H{
-			"message": "update attachment failed " + err.Error(),
-		})
-		return
-	}
-
-	fmt.Println(attachment)
+	attachment := e.Query("attachment")
 	_, err = c.service.updateAttachment(currentUserId, postId, attachment)
 	if err != nil {
 		e.JSON(http.StatusInternalServerError, gin.H{

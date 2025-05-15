@@ -1,14 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"github.com/go-resty/resty/v2"
 	"github.com/jmoiron/sqlx"
 	"os"
 	"social-media-application/internal/comment"
 	cr "social-media-application/internal/comment/reaction"
 	"social-media-application/internal/emoji"
-	"social-media-application/internal/file"
 	"social-media-application/internal/post"
 	pr "social-media-application/internal/post/reaction"
 	"social-media-application/internal/user"
@@ -72,13 +69,6 @@ func main() {
 	// Initialize middlewares
 	r.Use(mw.SecurityHeaders)
 
-	// Initialize Resty and File Server API Client
-	client := resty.New().
-		SetBaseURL(fmt.Sprintf("http://%s:%s", os.Getenv("FSA_HOST"), os.Getenv("FSA_PORT"))).
-		SetHeader("Content-Type", "application/json").
-		SetHeader("Accept", "application/json")
-	fileClient := file.NewFileClient(client)
-
 	// Initialize user module
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
@@ -94,7 +84,7 @@ func main() {
 	// Initialize post module
 	postRepository := post.NewRepository(db)
 	postService := post.NewService(postRepository)
-	postController := post.NewController(postService, fileClient)
+	postController := post.NewController(postService)
 	postController.RegisterRoutes(r)
 
 	// Initialize post reaction module

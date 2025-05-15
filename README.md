@@ -12,6 +12,7 @@
 1. Upload files with go-file-server-api project
 2. automatic creation of uploadpath + post and comment
 3. file structure of uploaded files
+4. reimplement file server api file naming
 
 # For improvement
 1. API testing for all modules
@@ -154,6 +155,19 @@
      - must have a logged in user
      - cannot delete if already been used as FK
 # How to run
+## dev
+1. CD to deployment > prod or dev
+2. Supply the correct environment variables
+3. Run database migration
+```
+docker compose up -d backend-migration
+```
+4. Run the file-server-api
+```
+docker compose up -d file-server
+```
+
+## prod
 1. CD to deployment > prod or dev
 2. Supply the correct environment variables
 3. Run database migration

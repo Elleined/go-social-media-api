@@ -1,38 +1,4 @@
 services:
-  backend:
-    image: elleined/go-social-media-api:${SMA_IMAGE_TAG}
-    container_name: ${SMA_CONTAINER_NAME}
-    restart: always
-    environment:
-      - GIN_MODE=release
-      - PORT=:${SMA_PORT}
-      - DB_USERNAME=${MYSQL_USER}
-      - DB_PASSWORD=${MYSQL_PASSWORD}
-      - DB_HOST=${MYSQL_CONTAINER_NAME}
-      - DB_PORT=${MYSQL_PORT}
-      - DB_NAME=${MYSQL_DATABASE}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - FSA_HOST=${FSA_CONTAINER_NAME}
-      - FSA_PORT=${FSA_PORT}
-    ports:
-      - "${SMA_PORT}:${SMA_PORT}"
-    networks:
-      - sma-network
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-    healthcheck:
-      test: [ "CMD", "wget", "--spider", "http://${SMA_CONTAINER_NAME}:${SMA_PORT}"]
-      interval: 30s
-      timeout: 20s
-      retries: 3
-      start_period: 120s
-    depends_on:
-      mysql-server:
-        condition: service_healthy
-      file-server:
-        condition: service_healthy
-
   file-server:
     image: elleined/go-file-server-api:${FSA_IMAGE_TAG}
     container_name: ${FSA_CONTAINER_NAME}
