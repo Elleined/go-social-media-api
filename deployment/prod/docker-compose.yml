@@ -12,6 +12,8 @@ services:
       - DB_PORT=${MYSQL_PORT}
       - DB_NAME=${MYSQL_DATABASE}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - FSA_HOST=${FSA_CONTAINER_NAME}
+      - FSA_PORT=${FSA_PORT}
     ports:
       - "${SMA_PORT}:${SMA_PORT}"
     networks:
