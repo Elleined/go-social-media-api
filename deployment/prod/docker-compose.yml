@@ -1,0 +1,106 @@
+services:
+  backend:
+    image: elleined/go-social-media-api:${SMA_IMAGE_TAG}
+    container_name: ${SMA_CONTAINER_NAME}
+    restart: always
+    environment:
+      - GIN_MODE=release
+      - PORT=:${SMA_PORT}
+      - DB_USERNAME=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_HOST=${MYSQL_CONTAINER_NAME}
+      - DB_PORT=${MYSQL_PORT}
+      - DB_NAME=${MYSQL_DATABASE}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    ports:
+      - "${SMA_PORT}:${SMA_PORT}"
+    networks:
+      - sma-network
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "http://${SMA_CONTAINER_NAME}:${SMA_PORT}"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 120s
+    depends_on:
+      backend-migration:
+        condition: service_healthy
+      file-server:
+        condition: service_healthy
+
+  file-server:
+    image: elleined/go-file-server-api:${FSA_IMAGE_TAG}
+    container_name: ${FSA_CONTAINER_NAME}
+    restart: always
+    environment:
+      - PORT=:${FSA_PORT}
+      - UPLOAD_ROOT_FOLDER=${UPLOAD_ROOT_FOLDER}
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE}
+      - MAX_FILE_SIZE_TYPE=${MAX_FILE_SIZE_TYPE}
+      - ALLOWED_FILE_EXTENSIONS=${ALLOWED_FILE_EXTENSIONS}
+    ports:
+      - "${FSA_PORT}:${FSA_PORT}"
+    networks:
+      - sma-network
+    volumes:
+      - ${FSA_BIND_MOUNT}:${UPLOAD_ROOT_FOLDER}
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "http://${FSA_CONTAINER_NAME}:${FSA_PORT}"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 120s
+
+  backend-migration:
+    image: migrate/migrate
+    container_name: backend-migration
+    restart: no
+    networks:
+      - sma-network
+    volumes:
+      - ${MIGRATION_SOURCE}:${MIGRATION_DESTINATION}
+    entrypoint: ["migrate", "-path", "${MIGRATION_DESTINATION}", "-database", "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(${MYSQL_CONTAINER_NAME}:${MYSQL_PORT})/${MYSQL_DATABASE}", "up"]
+    depends_on:
+      mysql-server:
+        condition: service_healthy
+
+  mysql-server:
+    image: mysql:8.0.39
+    container_name: ${MYSQL_CONTAINER_NAME}
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - "${MYSQL_OUTSIDE_PORT}:${MYSQL_PORT}"
+    networks:
+      - sma-network
+    volumes:
+      - sma-volume:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER}", "--password=${MYSQL_PASSWORD}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  sma-volume:
+    external: false
+    name: sma-volume
+
+networks:
+  sma-network:
+    name: sma-network
+    external: false
+    ipam:
+      driver: default

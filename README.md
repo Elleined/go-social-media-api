@@ -8,8 +8,7 @@
 7. golang-jwt/jwt/v5: For JWT
 
 # Features to be added
-1. Comment Reactions
-3. Upload files with go-file-server-api project
+1. Upload files with go-file-server-api project
 
 # For improvement
 1. API testing for all modules
@@ -112,6 +111,33 @@
       - post id is required
       - comment id is required
       - checks if logged in user the author of the comment (only checks for affected rows)
+## Comment reaction
+- save
+     - must have a logged in user
+     - post id is required
+     - comment id is required
+     - emoji id is required
+     - returns error if logged in user already reacted to the comment
+- getAll
+     - must have a logged in user
+     - post id is required
+     - comment id is required
+- getAllByEmoji
+     - must have a logged in user
+     - post id is required
+     - comment id is required
+     - emoji id is required
+- Update
+     - must have a logged in user
+     - post id is required
+     - comment id is required
+     - new emoji id is required
+     - returns error if logged in user doesn't already reacted to the comment
+- Delete
+     - must have a logged in user
+     - post id is required
+     - comment id is required
+     - returns error if logged in user doesn't already reacted to the comment
 ## Emoji
    - save
      - must have a logged in user
@@ -124,6 +150,8 @@
      - must have a logged in user
      - cannot delete if already been used as FK
 # How to run
+
+
 1. Install golang-migrate for database migration
 ```go
 -- windows
