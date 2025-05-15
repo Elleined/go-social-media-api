@@ -9,7 +9,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func GetConnection() (*sqlx.DB, error) {
+func InitMySQLConnection() (*sqlx.DB, error) {
 	// dsn Data Source Name
 	dsn := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?parseTime=true&charset=utf8mb4&loc=UTC&timeout=10s&readTimeout=10s&writeTimeout=10s",

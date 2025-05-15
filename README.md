@@ -6,6 +6,7 @@
 5. go-sql-driver/mysql: MySQL DRIVER
 6. golang/x/crpyto: For bcrypt encryption
 7. golang-jwt/jwt/v5: For JWT
+8. resty: For external API Calls
 
 # Features to be added
 1. Upload files with go-file-server-api project

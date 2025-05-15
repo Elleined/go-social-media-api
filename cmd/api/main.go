@@ -6,6 +6,7 @@ import (
 	"social-media-application/internal/comment"
 	cr "social-media-application/internal/comment/reaction"
 	"social-media-application/internal/emoji"
+	"social-media-application/internal/file"
 	"social-media-application/internal/post"
 	pr "social-media-application/internal/post/reaction"
 	"social-media-application/internal/user"
@@ -36,7 +37,7 @@ func init() {
 
 func main() {
 	// Initialize Database Connection
-	db, err := utils.GetConnection()
+	db, err := utils.InitMySQLConnection()
 	if err != nil {
 		log.Panic().Msg("cannot connect to database")
 	}
@@ -69,6 +70,10 @@ func main() {
 	// Initialize middlewares
 	r.Use(mw.SecurityHeaders)
 
+	// Initialize Resty and File Server API Client
+	resty := file.InitRestyClient()
+	fileServerApiClient := file.NewFileServerAPIClient(resty)
+
 	// Initialize user module
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
@@ -83,7 +88,7 @@ func main() {
 
 	// Initialize post module
 	postRepository := post.NewRepository(db)
-	postService := post.NewService(postRepository)
+	postService := post.NewService(postRepository, fileServerApiClient)
 	postController := post.NewController(postService)
 	postController.RegisterRoutes(r)
 

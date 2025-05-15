@@ -2,6 +2,7 @@ package post
 
 import (
 	"errors"
+	"social-media-application/internal/file"
 	"social-media-application/internal/paging"
 	"strings"
 )
@@ -22,8 +23,16 @@ type (
 
 	ServiceImpl struct {
 		repository Repository
+		fileClient *file.Client
 	}
 )
+
+func NewService(repository Repository, fileClient *file.Client) Service {
+	return &ServiceImpl{
+		repository: repository,
+		fileClient: fileClient,
+	}
+}
 
 func (s ServiceImpl) save(authorId int, subject, content string) (id int64, err error) {
 	if authorId <= 0 {
@@ -166,10 +175,4 @@ func (s ServiceImpl) deleteById(currentUserId, postId int) (affectedRows int64, 
 	}
 
 	return affectedRows, nil
-}
-
-func NewService(repository Repository) Service {
-	return &ServiceImpl{
-		repository: repository,
-	}
 }
