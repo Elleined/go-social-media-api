@@ -9,8 +9,8 @@ type (
 	Service interface {
 		save(reactorId, postId, commentId, emojiId int) (id int64, err error)
 
-		findAll(postId, commentId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error)
-		findAllByEmoji(postId, commentId, emojiId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error)
+		findAll(postId, commentId int, request *paging.PageRequest) (*paging.Page[Reaction], error)
+		findAllByEmoji(postId, commentId, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error)
 
 		update(reactorId, postId, commentId, newEmojiId int) (affectedRows int64, err error)
 
@@ -58,7 +58,7 @@ func (s ServiceImpl) save(reactorId, postId, commentId, emojiId int) (id int64, 
 	return id, nil
 }
 
-func (s ServiceImpl) findAll(postId, commentId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (s ServiceImpl) findAll(postId, commentId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
 	if postId <= 0 {
 		return nil, errors.New("postId is required")
 	}
@@ -67,7 +67,7 @@ func (s ServiceImpl) findAll(postId, commentId int, pageRequest *paging.PageRequ
 		return nil, errors.New("commentId is required")
 	}
 
-	reactions, err := s.repository.findAll(postId, commentId, pageRequest)
+	reactions, err := s.repository.findAll(postId, commentId, request)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (s ServiceImpl) findAll(postId, commentId int, pageRequest *paging.PageRequ
 	return reactions, nil
 }
 
-func (s ServiceImpl) findAllByEmoji(postId, commentId, emojiId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (s ServiceImpl) findAllByEmoji(postId, commentId, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
 	if postId <= 0 {
 		return nil, errors.New("postId is required")
 	}
@@ -88,7 +88,7 @@ func (s ServiceImpl) findAllByEmoji(postId, commentId, emojiId int, pageRequest 
 		return nil, errors.New("emojiId is required")
 	}
 
-	reactions, err := s.repository.findAllByEmoji(postId, commentId, emojiId, pageRequest)
+	reactions, err := s.repository.findAllByEmoji(postId, commentId, emojiId, request)
 	if err != nil {
 		return nil, err
 	}
