@@ -1,8 +1,11 @@
 package comment
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
+	"log"
 	"social-media-application/internal/paging"
+	"social-media-application/utils"
 )
 
 type (
@@ -47,11 +50,22 @@ func (r RepositoryImpl) save(authorId, postId int, content string) (id int64, er
 }
 
 func (r RepositoryImpl) findAll(postId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Comment], error) {
+	if !utils.IsInDBTag(request.Field, Comment{}) {
+		request.Field = "created_at"
+		log.Println("WARNING: field is not in database! defaulted to", request.Field)
+	}
+
+	if !utils.IsInSortingOrder(request.SortBy) {
+		request.SortBy = "DESC"
+		log.Println("WARNING: sortBy is not valid! defaulted to", request.SortBy)
+	}
+
 	var total int
 	err := r.db.Get(&total, "SELECT COUNT(*) FROM comment WHERE post_id = ? AND is_deleted = ?", postId, isDeleted)
 
 	comments := make([]Comment, request.PageSize)
-	err = r.db.Select(&comments, "SELECT * FROM comment WHERE post_id = ? AND is_deleted = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", postId, isDeleted, request.PageSize, request.Offset())
+	query := fmt.Sprintf("SELECT * FROM comment WHERE post_id = ? AND is_deleted = ? ORDER BY %s %s LIMIT ? OFFSET ?", request.Field, request.SortBy)
+	err = r.db.Select(&comments, query, postId, isDeleted, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}

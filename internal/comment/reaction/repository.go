@@ -1,8 +1,11 @@
 package commentreaction
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
+	"log"
 	"social-media-application/internal/paging"
+	"social-media-application/utils"
 )
 
 type (
@@ -49,6 +52,16 @@ func (r RepositoryImpl) save(reactorId, postId, commentId, emojiId int) (id int6
 }
 
 func (r RepositoryImpl) findAll(postId, commentId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
+	if !utils.IsInDBTag(request.Field, Reaction{}) {
+		request.Field = "created_at"
+		log.Println("WARNING: field is not in database! defaulted to", request.Field)
+	}
+
+	if !utils.IsInSortingOrder(request.SortBy) {
+		request.SortBy = "DESC"
+		log.Println("WARNING: sortBy is not valid! defaulted to", request.SortBy)
+	}
+
 	var total int
 	query := `
 		SELECT COUNT(*) 
@@ -64,17 +77,17 @@ func (r RepositoryImpl) findAll(postId, commentId int, request *paging.PageReque
 	}
 
 	reactions := make([]Reaction, request.PageSize)
-	query = `
+	query = fmt.Sprintf(`
 		SELECT cr.* 
 		FROM comment_reaction cr
 		JOIN comment c ON c.id = cr.comment_id
 		JOIN post p ON p.id = c.post_id
 		WHERE p.id = ?
 		AND cr.comment_id = ?
-		ORDER BY cr.created_at DESC
+		ORDER BY cr.%s %s
 		LIMIT ?
 		OFFSET ?
-	`
+	`, request.Field, request.SortBy)
 	err = r.db.Select(&reactions, query, postId, commentId, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
@@ -84,6 +97,16 @@ func (r RepositoryImpl) findAll(postId, commentId int, request *paging.PageReque
 }
 
 func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
+	if !utils.IsInDBTag(request.Field, Reaction{}) {
+		request.Field = "created_at"
+		log.Println("WARNING: field is not in database! defaulted to", request.Field)
+	}
+
+	if !utils.IsInSortingOrder(request.SortBy) {
+		request.SortBy = "DESC"
+		log.Println("WARNING: sortBy is not valid! defaulted to", request.SortBy)
+	}
+
 	var total int
 	query := `
 		SELECT COUNT(*) 
@@ -100,7 +123,7 @@ func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, request *
 	}
 
 	reactions := make([]Reaction, request.PageSize)
-	query = `
+	query = fmt.Sprintf(`
 		SELECT cr.* 
 		FROM comment_reaction cr
 		JOIN comment c ON c.id = cr.comment_id
@@ -108,10 +131,10 @@ func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, request *
 		WHERE p.id = ?
 		AND cr.comment_id = ?
 		AND cr.emoji_id = ?
-		ORDER BY cr.created_at DESC
+		ORDER BY cr.%s %s
 		LIMIT ?
 		OFFSET ?
-	`
+	`, request.Field, request.SortBy)
 	err = r.db.Select(&reactions, query, postId, commentId, emojiId, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
