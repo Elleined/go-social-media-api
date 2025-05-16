@@ -16,7 +16,6 @@
 2. Unit testing for all modules
 3. Integration testing for all modules
 4. Customize paging with specified field and sorting order
-5. Rename gin.Context to ctx
 
 # Validations
 ## User
