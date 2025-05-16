@@ -1,8 +1,11 @@
 package user
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
+	"log"
 	"social-media-application/internal/paging"
+	"social-media-application/utils"
 )
 
 type (
@@ -12,7 +15,7 @@ type (
 		findById(id int) (User, error)
 		findByEmail(email string) (User, error)
 
-		findAll(isActive bool, pageRequest *paging.PageRequest) (*paging.Page[User], error)
+		findAll(isActive bool, request *paging.PageRequest) (*paging.Page[User], error)
 
 		deleteById(id int) (affectedRows int64, err error)
 
@@ -74,20 +77,31 @@ func (r *RepositoryImpl) findByEmail(email string) (User, error) {
 	return user, nil
 }
 
-func (r *RepositoryImpl) findAll(isActive bool, pageRequest *paging.PageRequest) (*paging.Page[User], error) {
+func (r *RepositoryImpl) findAll(isActive bool, request *paging.PageRequest) (*paging.Page[User], error) {
+	if !utils.IsInDBTag(request.Field, User{}) {
+		request.Field = "created_at"
+		log.Println("WARNING: field is not in database! defaulted to", request.Field)
+	}
+
+	if !utils.IsInSortingOrder(request.SortBy) {
+		request.SortBy = "DESC"
+		log.Println("WARNING: sortBy is not valid! defaulted to", request.SortBy)
+	}
+
 	var total int
 	err := r.db.Get(&total, "SELECT COUNT(*) FROM user WHERE is_active = ?", isActive)
 	if err != nil {
 		return nil, err
 	}
 
-	users := make([]User, pageRequest.PageSize)
-	err = r.db.Select(&users, "SELECT * FROM user WHERE is_active = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", isActive, pageRequest.PageSize, pageRequest.Offset())
+	users := make([]User, request.PageSize)
+	query := fmt.Sprintf("SELECT * FROM user WHERE is_active = ? ORDER BY %s %s LIMIT ? OFFSET ?", request.Field, request.SortBy)
+	err = r.db.Select(&users, query, isActive, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
 
-	return paging.NewPage(users, pageRequest, total), nil
+	return paging.NewPage(users, request, total), nil
 }
 
 func (r *RepositoryImpl) deleteById(id int) (affectedRows int64, err error) {

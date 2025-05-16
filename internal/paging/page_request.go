@@ -3,14 +3,17 @@ package paging
 import (
 	"errors"
 	"strconv"
+	"strings"
 )
 
 type PageRequest struct {
 	PageNumber int
 	PageSize   int
+	Field      string
+	SortBy     string
 }
 
-func NewPageRequestStr(pageNumber, pageSize string) (*PageRequest, error) {
+func NewPageRequestStr(pageNumber, pageSize, field, sortBy string) (*PageRequest, error) {
 	pageNumberInt, err := strconv.Atoi(pageNumber)
 	if err != nil {
 		return nil, err
@@ -21,7 +24,7 @@ func NewPageRequestStr(pageNumber, pageSize string) (*PageRequest, error) {
 		return nil, err
 	}
 
-	pageRequest, err := NewPageRequest(pageNumberInt, pageSizeInt)
+	pageRequest, err := NewPageRequest(pageNumberInt, pageSizeInt, field, sortBy)
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +32,7 @@ func NewPageRequestStr(pageNumber, pageSize string) (*PageRequest, error) {
 	return pageRequest, nil
 }
 
-func NewPageRequest(pageNumber, pageSize int) (*PageRequest, error) {
+func NewPageRequest(pageNumber, pageSize int, field, sortBy string) (*PageRequest, error) {
 	if pageNumber <= 0 {
 		return nil, errors.New("page is required")
 	}
@@ -38,9 +41,21 @@ func NewPageRequest(pageNumber, pageSize int) (*PageRequest, error) {
 		return nil, errors.New("page size is required")
 	}
 
+	trimmedField := strings.TrimSpace(field)
+	if trimmedField == "" {
+		return nil, errors.New("field cannot be empty")
+	}
+
+	trimmedSortBy := strings.TrimSpace(sortBy)
+	if trimmedSortBy == "" {
+		return nil, errors.New("sortBy cannot be empty")
+	}
+
 	return &PageRequest{
 		PageNumber: pageNumber,
 		PageSize:   pageSize,
+		Field:      strings.ToLower(trimmedField),
+		SortBy:     strings.ToUpper(trimmedSortBy),
 	}, nil
 }
 

@@ -6,15 +6,16 @@
 5. go-sql-driver/mysql: MySQL DRIVER
 6. golang/x/crpyto: For bcrypt encryption
 7. golang-jwt/jwt/v5: For JWT
-8. resty: For external API Calls
 
 # Features to be added
 1. automatic creation of uploadpath + post and comment
+2. rename all pageRequest to request
 
 # For improvement
 1. API testing for all modules
 2. Unit testing for all modules
 3. Integration testing for all modules
+4. Add redis caching
 4. Customize paging with specified field and sorting order
 
 # Validations

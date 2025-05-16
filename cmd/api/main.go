@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/jmoiron/sqlx"
+	"log"
 	"os"
 	"social-media-application/internal/comment"
 	cr "social-media-application/internal/comment/reaction"
@@ -15,7 +16,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/rs/zerolog/log"
 )
 
 func init() {
@@ -38,7 +38,7 @@ func main() {
 	// Initialize Database Connection
 	db, err := utils.InitMySQLConnection()
 	if err != nil {
-		log.Panic().Msg("cannot connect to database")
+		panic("can't connect to database")
 	}
 	defer func(db *sqlx.DB) {
 		err := db.Close()
@@ -62,7 +62,7 @@ func main() {
 	// Only trust API calls from localhost
 	err = r.SetTrustedProxies([]string{"127.0.0.1"})
 	if err != nil {
-		log.Fatal().Err(err).Msg("cannot set trusted proxies")
+		log.Fatal("can't set trusted proxies")
 		return
 	}
 

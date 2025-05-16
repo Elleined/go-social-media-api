@@ -11,9 +11,9 @@ func IsInDBTag(field string, structure any) bool {
 	return slices.Contains(databaseTags, field)
 }
 
-func IsInSortingOrder(sortOrder string) bool {
+func IsInSortingOrder(sortBy string) bool {
 	sortingOrders := []string{"ASC", "DESC"}
-	return slices.Contains(sortingOrders, strings.ToUpper(sortOrder))
+	return slices.Contains(sortingOrders, strings.ToUpper(sortBy))
 }
 
 func extractDatabaseTags(i interface{}) []string {

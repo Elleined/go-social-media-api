@@ -15,7 +15,7 @@ type (
 		getById(id int) (User, error)
 		getByEmail(email string) (User, error)
 
-		getAll(isActive bool, pageRequest *paging.PageRequest) (*paging.Page[User], error)
+		getAll(isActive bool, request *paging.PageRequest) (*paging.Page[User], error)
 
 		deleteById(id int) (affectedRows int64, err error)
 
@@ -101,8 +101,8 @@ func (s ServiceImpl) getByEmail(email string) (User, error) {
 	return user, nil
 }
 
-func (s ServiceImpl) getAll(isActive bool, pageRequest *paging.PageRequest) (*paging.Page[User], error) {
-	users, err := s.repository.findAll(isActive, pageRequest)
+func (s ServiceImpl) getAll(isActive bool, request *paging.PageRequest) (*paging.Page[User], error) {
+	users, err := s.repository.findAll(isActive, request)
 	if err != nil {
 		return nil, err
 	}
