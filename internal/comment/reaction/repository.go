@@ -1,6 +1,7 @@
 package commentreaction
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"social-media-application/internal/paging"
 )
@@ -48,7 +49,7 @@ func (r RepositoryImpl) save(reactorId, postId, commentId, emojiId int) (id int6
 	return id, nil
 }
 
-func (r RepositoryImpl) findAll(postId, commentId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (r RepositoryImpl) findAll(postId, commentId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
 	var total int
 	query := `
 		SELECT COUNT(*) 
@@ -63,27 +64,27 @@ func (r RepositoryImpl) findAll(postId, commentId int, pageRequest *paging.PageR
 		return nil, err
 	}
 
-	reactions := make([]Reaction, pageRequest.PageSize)
-	query = `
+	reactions := make([]Reaction, request.PageSize)
+	query = fmt.Sprintf(`
 		SELECT cr.* 
 		FROM comment_reaction cr
 		JOIN comment c ON c.id = cr.comment_id
 		JOIN post p ON p.id = c.post_id
 		WHERE p.id = ?
 		AND cr.comment_id = ?
-		ORDER BY cr.created_at DESC
+		ORDER BY cr.%s %s
 		LIMIT ?
 		OFFSET ?
-	`
-	err = r.db.Select(&reactions, query, postId, commentId, pageRequest.PageSize, pageRequest.Offset())
+	`, request.Field, request.SortBy)
+	err = r.db.Select(&reactions, query, postId, commentId, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
 
-	return paging.NewPage(reactions, pageRequest, total), nil
+	return paging.NewPage(reactions, request, total), nil
 }
 
-func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
 	var total int
 	query := `
 		SELECT COUNT(*) 
@@ -99,8 +100,8 @@ func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, pageReque
 		return nil, err
 	}
 
-	reactions := make([]Reaction, pageRequest.PageSize)
-	query = `
+	reactions := make([]Reaction, request.PageSize)
+	query = fmt.Sprintf(`
 		SELECT cr.* 
 		FROM comment_reaction cr
 		JOIN comment c ON c.id = cr.comment_id
@@ -108,16 +109,16 @@ func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, pageReque
 		WHERE p.id = ?
 		AND cr.comment_id = ?
 		AND cr.emoji_id = ?
-		ORDER BY cr.created_at DESC
+		ORDER BY cr.%s %s
 		LIMIT ?
 		OFFSET ?
-	`
-	err = r.db.Select(&reactions, query, postId, commentId, emojiId, pageRequest.PageSize, pageRequest.Offset())
+	`, request.Field, request.SortBy)
+	err = r.db.Select(&reactions, query, postId, commentId, emojiId, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
 
-	return paging.NewPage(reactions, pageRequest, total), nil
+	return paging.NewPage(reactions, request, total), nil
 }
 
 func (r RepositoryImpl) update(reactorId, postId, commentId, newEmojiId int) (affectedRows int64, err error) {
