@@ -16,7 +16,6 @@
 2. Unit testing for all modules
 3. Integration testing for all modules
 4. Add redis caching
-4. Customize paging with specified field and sorting order
 
 # Validations
 ## User

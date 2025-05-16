@@ -100,7 +100,11 @@ func (c ControllerImpl) getAll(ctx *gin.Context) {
 		return
 	}
 
-	pageRequest, err := paging.NewPageRequestStr(ctx.DefaultQuery("page", "1"), ctx.DefaultQuery("pageSize", "10"))
+	page := ctx.DefaultQuery("page", "1")
+	pageSize := ctx.DefaultQuery("pageSize", "10")
+	field := ctx.DefaultQuery("field", "created_at")
+	sortBy := ctx.DefaultQuery("sortBy", "DESC")
+	request, err := paging.NewPageRequestStr(page, pageSize, field, sortBy)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all failed " + err.Error(),
@@ -108,7 +112,7 @@ func (c ControllerImpl) getAll(ctx *gin.Context) {
 		return
 	}
 
-	pagedPosts, err := c.service.getAll(currentUserId, isDeleted, pageRequest)
+	posts, err := c.service.getAll(currentUserId, isDeleted, request)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all failed " + err.Error(),
@@ -116,7 +120,7 @@ func (c ControllerImpl) getAll(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, pagedPosts)
+	ctx.JSON(http.StatusOK, posts)
 }
 
 func (c ControllerImpl) getAllBy(ctx *gin.Context) {
@@ -136,7 +140,11 @@ func (c ControllerImpl) getAllBy(ctx *gin.Context) {
 		return
 	}
 
-	pageRequest, err := paging.NewPageRequestStr(ctx.DefaultQuery("page", "1"), ctx.DefaultQuery("pageSize", "10"))
+	page := ctx.DefaultQuery("page", "1")
+	pageSize := ctx.DefaultQuery("pageSize", "10")
+	field := ctx.DefaultQuery("field", "created_at")
+	sortBy := ctx.DefaultQuery("sortBy", "DESC")
+	request, err := paging.NewPageRequestStr(page, pageSize, field, sortBy)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all failed " + err.Error(),
@@ -144,7 +152,7 @@ func (c ControllerImpl) getAllBy(ctx *gin.Context) {
 		return
 	}
 
-	posts, err := c.service.getAllBy(currentUserId, isDeleted, pageRequest)
+	posts, err := c.service.getAllBy(currentUserId, isDeleted, request)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all by failed " + err.Error(),

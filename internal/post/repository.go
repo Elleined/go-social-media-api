@@ -1,17 +1,20 @@
 package post
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
+	"log"
 	"social-media-application/internal/paging"
+	"social-media-application/utils"
 )
 
 type (
 	Repository interface {
 		save(authorId int, subject, content string) (id int64, err error)
 
-		findAll(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error)
+		findAll(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error)
 
-		findAllBy(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error)
+		findAllBy(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error)
 
 		updateSubject(currentUserId, postId int, newSubject string) (affectedRows int64, err error)
 		updateContent(currentUserId, postId int, newContent string) (affectedRows int64, err error)
@@ -52,36 +55,58 @@ func (r RepositoryImpl) save(authorId int, subject, content string) (id int64, e
 	return id, nil
 }
 
-func (r RepositoryImpl) findAll(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error) {
+func (r RepositoryImpl) findAll(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error) {
+	if !utils.IsInDBTag(request.Field, Post{}) {
+		request.Field = "created_at"
+		log.Println("WARNING: field is not in database! defaulted to", request.Field)
+	}
+
+	if !utils.IsInSortingOrder(request.SortBy) {
+		request.SortBy = "DESC"
+		log.Println("WARNING: sortBy is not valid! defaulted to", request.SortBy)
+	}
+
 	var total int
 	err := r.db.Get(&total, "SELECT COUNT(*) FROM post WHERE author_id != ? AND is_deleted = ?", currentUserId, isDeleted)
 	if err != nil {
 		return nil, err
 	}
 
-	posts := make([]Post, pageRequest.PageSize)
-	err = r.db.Select(&posts, "SELECT * FROM post WHERE author_id != ? AND is_deleted = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", currentUserId, isDeleted, pageRequest.PageSize, pageRequest.Offset())
+	posts := make([]Post, request.PageSize)
+	query := fmt.Sprintf("SELECT * FROM post WHERE author_id != ? AND is_deleted = ? ORDER BY %s %s LIMIT ? OFFSET ?", request.Field, request.SortBy)
+	err = r.db.Select(&posts, query, currentUserId, isDeleted, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
 
-	return paging.NewPage(posts, pageRequest, total), nil
+	return paging.NewPage(posts, request, total), nil
 }
 
-func (r RepositoryImpl) findAllBy(currentUserId int, isDeleted bool, pageRequest *paging.PageRequest) (*paging.Page[Post], error) {
+func (r RepositoryImpl) findAllBy(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error) {
+	if !utils.IsInDBTag(request.Field, Post{}) {
+		request.Field = "created_at"
+		log.Println("WARNING: field is not in database! defaulted to", request.Field)
+	}
+
+	if !utils.IsInSortingOrder(request.SortBy) {
+		request.SortBy = "DESC"
+		log.Println("WARNING: sortBy is not valid! defaulted to", request.SortBy)
+	}
+
 	var total int
 	err := r.db.Get(&total, "SELECT COUNT(*) FROM post WHERE author_id = ? AND is_deleted = ?", currentUserId, isDeleted)
 	if err != nil {
 		return nil, err
 	}
 
-	posts := make([]Post, pageRequest.PageSize)
-	err = r.db.Select(&posts, "SELECT * FROM post WHERE author_id = ? AND is_deleted = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", currentUserId, isDeleted, pageRequest.PageSize, pageRequest.Offset())
+	posts := make([]Post, request.PageSize)
+	query := fmt.Sprintf("SELECT * FROM post WHERE author_id = ? AND is_deleted = ? ORDER BY %s %s LIMIT ? OFFSET ?", request.Field, request.SortBy)
+	err = r.db.Select(&posts, query, currentUserId, isDeleted, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
 
-	return paging.NewPage(posts, pageRequest, total), nil
+	return paging.NewPage(posts, request, total), nil
 }
 
 func (r RepositoryImpl) updateSubject(currentUserId int, postId int, newSubject string) (affectedRows int64, err error) {

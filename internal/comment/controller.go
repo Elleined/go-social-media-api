@@ -94,7 +94,11 @@ func (c ControllerImpl) getAll(ctx *gin.Context) {
 		return
 	}
 
-	pageRequest, err := paging.NewPageRequestStr(ctx.DefaultQuery("page", "1"), ctx.DefaultQuery("pageSize", "10"))
+	page := ctx.DefaultQuery("page", "1")
+	pageSize := ctx.DefaultQuery("pageSize", "10")
+	field := ctx.DefaultQuery("field", "created_at")
+	sortBy := ctx.DefaultQuery("sortBy", "DESC")
+	request, err := paging.NewPageRequestStr(page, pageSize, field, sortBy)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all failed " + err.Error(),
@@ -102,7 +106,7 @@ func (c ControllerImpl) getAll(ctx *gin.Context) {
 		return
 	}
 
-	comments, err := c.service.getAll(postId, isDeleted, pageRequest)
+	comments, err := c.service.getAll(postId, isDeleted, request)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all failed " + err.Error(),
