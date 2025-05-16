@@ -9,8 +9,8 @@ type (
 	Service interface {
 		save(reactorId, postId, emojiId int) (id int64, err error)
 
-		getAll(postId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error)
-		getAllByEmoji(postId int, emojiId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error)
+		getAll(postId int, request *paging.PageRequest) (*paging.Page[Reaction], error)
+		getAllByEmoji(postId int, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error)
 
 		update(reactorId, postId, newEmojiId int) (affectedRows int64, err error)
 
@@ -58,12 +58,12 @@ func (s ServiceImpl) save(reactorId, postId, emojiId int) (id int64, err error) 
 	return id, nil
 }
 
-func (s ServiceImpl) getAll(postId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (s ServiceImpl) getAll(postId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
 	if postId <= 0 {
 		return nil, errors.New("post id is required")
 	}
 
-	reactions, err := s.repository.findAll(postId, pageRequest)
+	reactions, err := s.repository.findAll(postId, request)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (s ServiceImpl) getAll(postId int, pageRequest *paging.PageRequest) (*pagin
 	return reactions, nil
 }
 
-func (s ServiceImpl) getAllByEmoji(postId int, emojiId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (s ServiceImpl) getAllByEmoji(postId int, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
 	if postId <= 0 {
 		return nil, errors.New("post id is required")
 	}
@@ -80,7 +80,7 @@ func (s ServiceImpl) getAllByEmoji(postId int, emojiId int, pageRequest *paging.
 		return nil, errors.New("emoji id is required")
 	}
 
-	reactions, err := s.repository.findAllByEmoji(postId, emojiId, pageRequest)
+	reactions, err := s.repository.findAllByEmoji(postId, emojiId, request)
 	if err != nil {
 		return nil, err
 	}
