@@ -1,16 +1,19 @@
 package reaction
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
+	"log"
 	"social-media-application/internal/paging"
+	"social-media-application/utils"
 )
 
 type (
 	Repository interface {
 		save(reactorId, postId, emojiId int) (id int64, err error)
 
-		findAll(postId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error)
-		findAllByEmoji(postId int, emojiId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error)
+		findAll(postId int, request *paging.PageRequest) (*paging.Page[Reaction], error)
+		findAllByEmoji(postId int, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error)
 
 		update(reactorId, postId, newEmojiId int) (affectedRows int64, err error)
 
@@ -49,7 +52,17 @@ func (r RepositoryImpl) save(reactorId, postId, emojiId int) (id int64, err erro
 	return id, nil
 }
 
-func (r RepositoryImpl) findAll(postId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (r RepositoryImpl) findAll(postId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
+	if !utils.IsInDBTag(request.Field, Reaction{}) {
+		request.Field = "created_at"
+		log.Println("WARNING: field is not in database! defaulted to", request.Field)
+	}
+
+	if !utils.IsInSortingOrder(request.SortBy) {
+		request.SortBy = "DESC"
+		log.Println("WARNING: sortBy is not valid! defaulted to", request.SortBy)
+	}
+
 	var total int
 	err := r.db.Get(&total, "SELECT COUNT(*) FROM post_reaction WHERE post_id = ?", postId)
 	if err != nil {
@@ -57,25 +70,37 @@ func (r RepositoryImpl) findAll(postId int, pageRequest *paging.PageRequest) (*p
 	}
 
 	reactions := make([]Reaction, 10)
-	err = r.db.Select(&reactions, "SELECT * FROM post_reaction WHERE post_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", postId, pageRequest.PageSize, pageRequest.Offset())
+	query := fmt.Sprintf("SELECT * FROM post_reaction WHERE post_id = ? ORDER BY %s %s LIMIT ? OFFSET ?", request.Field, request.SortBy)
+	err = r.db.Select(&reactions, query, postId, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
 
-	return paging.NewPage(reactions, pageRequest, total), nil
+	return paging.NewPage(reactions, request, total), nil
 }
 
-func (r RepositoryImpl) findAllByEmoji(postId int, emojiId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (r RepositoryImpl) findAllByEmoji(postId int, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
+	if !utils.IsInDBTag(request.Field, Reaction{}) {
+		request.Field = "created_at"
+		log.Println("WARNING: field is not in database! defaulted to", request.Field)
+	}
+
+	if !utils.IsInSortingOrder(request.SortBy) {
+		request.SortBy = "DESC"
+		log.Println("WARNING: sortBy is not valid! defaulted to", request.SortBy)
+	}
+
 	var total int
 	err := r.db.Get(&total, "SELECT COUNT(*) FROM post_reaction WHERE post_id = ? AND emoji_id = ?", postId, emojiId)
 
 	reactions := make([]Reaction, 10)
-	err = r.db.Select(&reactions, "SELECT * FROM post_reaction WHERE post_id = ? AND emoji_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", postId, emojiId, pageRequest.PageSize, pageRequest.Offset())
+	query := fmt.Sprintf("SELECT * FROM post_reaction WHERE post_id = ? AND emoji_id = ? ORDER BY %s %s LIMIT ? OFFSET ?", request.Field, request.SortBy)
+	err = r.db.Select(&reactions, query, postId, emojiId, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
 
-	return paging.NewPage(reactions, pageRequest, total), nil
+	return paging.NewPage(reactions, request, total), nil
 }
 
 func (r RepositoryImpl) update(reactorId, postId, newEmojiId int) (affectedRows int64, err error) {

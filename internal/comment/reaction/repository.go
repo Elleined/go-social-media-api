@@ -48,7 +48,7 @@ func (r RepositoryImpl) save(reactorId, postId, commentId, emojiId int) (id int6
 	return id, nil
 }
 
-func (r RepositoryImpl) findAll(postId, commentId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (r RepositoryImpl) findAll(postId, commentId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
 	var total int
 	query := `
 		SELECT COUNT(*) 
@@ -63,7 +63,7 @@ func (r RepositoryImpl) findAll(postId, commentId int, request *paging.PageReque
 		return nil, err
 	}
 
-	reactions := make([]Reaction, request.PageSize)
+	reactions := make([]Reaction, pageRequest.PageSize)
 	query = `
 		SELECT cr.* 
 		FROM comment_reaction cr
@@ -75,15 +75,15 @@ func (r RepositoryImpl) findAll(postId, commentId int, request *paging.PageReque
 		LIMIT ?
 		OFFSET ?
 	`
-	err = r.db.Select(&reactions, query, postId, commentId, request.PageSize, request.Offset())
+	err = r.db.Select(&reactions, query, postId, commentId, pageRequest.PageSize, pageRequest.Offset())
 	if err != nil {
 		return nil, err
 	}
 
-	return paging.NewPage(reactions, request, total), nil
+	return paging.NewPage(reactions, pageRequest, total), nil
 }
 
-func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, pageRequest *paging.PageRequest) (*paging.Page[Reaction], error) {
 	var total int
 	query := `
 		SELECT COUNT(*) 
@@ -99,7 +99,7 @@ func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, request *
 		return nil, err
 	}
 
-	reactions := make([]Reaction, request.PageSize)
+	reactions := make([]Reaction, pageRequest.PageSize)
 	query = `
 		SELECT cr.* 
 		FROM comment_reaction cr
@@ -112,12 +112,12 @@ func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, request *
 		LIMIT ?
 		OFFSET ?
 	`
-	err = r.db.Select(&reactions, query, postId, commentId, emojiId, request.PageSize, request.Offset())
+	err = r.db.Select(&reactions, query, postId, commentId, emojiId, pageRequest.PageSize, pageRequest.Offset())
 	if err != nil {
 		return nil, err
 	}
 
-	return paging.NewPage(reactions, request, total), nil
+	return paging.NewPage(reactions, pageRequest, total), nil
 }
 
 func (r RepositoryImpl) update(reactorId, postId, commentId, newEmojiId int) (affectedRows int64, err error) {
