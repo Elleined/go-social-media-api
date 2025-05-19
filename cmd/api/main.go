@@ -11,6 +11,7 @@ import (
 	pr "social-media-application/internal/post/reaction"
 	"social-media-application/internal/user"
 	mw "social-media-application/middlewares"
+	"social-media-application/social_login/microsoft"
 	"social-media-application/utils"
 	"strings"
 
@@ -51,6 +52,11 @@ func main() {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+
+	// Initialize Social Logins
+	microsoftConfig := microsoft.InitMSLogin()
+	microsoftController := microsoft.NewController(microsoftConfig)
+	microsoftController.RegisterRoutes(r)
 
 	// root endpoint
 	r.GET("/", func(c *gin.Context) {
