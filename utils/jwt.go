@@ -9,10 +9,12 @@ import (
 )
 
 func GenerateJWT(currentUserId int) (string, error) {
+	now := time.Now()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
-			"currentUserId": currentUserId,
-			"exp":           time.Now().Add(time.Hour * 24).Unix(),
+			"sub": currentUserId,
+			"iat": now,
+			"exp": now.Add(15 * time.Minute).Unix(),
 		})
 
 	tokenString, err := token.SignedString(getSecretKey())
@@ -81,7 +83,7 @@ func parseClaims(token *jwt.Token) (currentUserId int, err error) {
 	}
 
 	// JWT numbers are parsed as float64
-	currentUserIdFloat, ok := claims["currentUserId"].(float64)
+	currentUserIdFloat, ok := claims["sub"].(float64)
 	if !ok {
 		return 0, err
 	}
