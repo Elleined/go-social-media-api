@@ -15,6 +15,8 @@ func GenerateJWT(currentUserId int) (string, error) {
 			"sub": currentUserId,
 			"iat": now,
 			"exp": now.Add(15 * time.Minute).Unix(),
+			"iss": os.Getenv("JWT_ISSUER"),
+			"aud": os.Getenv("JWT_AUDIENCE"),
 		})
 
 	tokenString, err := token.SignedString(getSecretKey())
