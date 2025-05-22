@@ -33,5 +33,5 @@ func Encrypt(password string) (string, error) {
 }
 
 func IsPasswordMatch(password, hash string) bool {
-	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) != nil
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }
