@@ -29,7 +29,7 @@ func GenerateJWT(id int) (string, error) {
 	return token, nil
 }
 
-func GetCurrentUserId(authenticationHeader string) (int, error) {
+func GetSubject(authenticationHeader string) (int, error) {
 	sub, err := validateAndParse(authenticationHeader, "sub")
 	if err != nil {
 		return 0, err
@@ -54,8 +54,8 @@ func validateAndParse(authenticationHeader, key string) (any, error) {
 	return parseClaim(token, key), nil
 }
 
-// Authenticate: Bearer <adadsddsasdasddas> INPUT
-// assssdfasadsdas OUTPUT
+// INPUT: Authenticate: Bearer <token>
+// OUTPUT: token
 func extractTokenString(authenticationHeader string) (string, error) {
 	if strings.TrimSpace(authenticationHeader) == "" {
 		return "", errors.New("authorization header is required")

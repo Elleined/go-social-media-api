@@ -52,7 +52,7 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 }
 
 func (c ControllerImpl) save(ctx *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(ctx.GetHeader("Authorization"))
+	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "save failed " + err.Error(),
@@ -84,7 +84,7 @@ func (c ControllerImpl) save(ctx *gin.Context) {
 }
 
 func (c ControllerImpl) getAll(ctx *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(ctx.GetHeader("Authorization"))
+	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "get all failed " + err.Error(),
@@ -124,7 +124,7 @@ func (c ControllerImpl) getAll(ctx *gin.Context) {
 }
 
 func (c ControllerImpl) getAllBy(ctx *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(ctx.GetHeader("Authorization"))
+	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "get all by failed " + err.Error(),
@@ -164,7 +164,7 @@ func (c ControllerImpl) getAllBy(ctx *gin.Context) {
 }
 
 func (c ControllerImpl) updateSubject(ctx *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(ctx.GetHeader("Authorization"))
+	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "update subject failed " + err.Error(),
@@ -193,7 +193,7 @@ func (c ControllerImpl) updateSubject(ctx *gin.Context) {
 }
 
 func (c ControllerImpl) updateContent(ctx *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(ctx.GetHeader("Authorization"))
+	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "update content failed " + err.Error(),
@@ -222,7 +222,7 @@ func (c ControllerImpl) updateContent(ctx *gin.Context) {
 }
 
 func (c ControllerImpl) updateAttachment(ctx *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(ctx.GetHeader("Authorization"))
+	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "update attachment failed " + err.Error(),
@@ -251,7 +251,7 @@ func (c ControllerImpl) updateAttachment(ctx *gin.Context) {
 }
 
 func (c ControllerImpl) deleteById(ctx *gin.Context) {
-	currentUserId, err := utils.GetCurrentUserId(ctx.GetHeader("Authorization"))
+	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
 	if err != nil {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "delete by id failed " + err.Error(),
