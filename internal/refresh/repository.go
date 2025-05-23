@@ -13,18 +13,18 @@ type (
 	}
 
 	RepositoryImpl struct {
-		db *sqlx.DB
+		*sqlx.DB
 	}
 )
 
 func NewRepository(db *sqlx.DB) Repository {
 	return &RepositoryImpl{
-		db: db,
+		DB: db,
 	}
 }
 
-func (r RepositoryImpl) Save(token string, userId int) (id int64, err error) {
-	result, err := r.db.NamedExec("INSERT INTO refresh_token(token, expires_at, user_id) VALUES (:token, :expiresAt, :userId)", map[string]any{
+func (repository RepositoryImpl) Save(token string, userId int) (id int64, err error) {
+	result, err := repository.NamedExec("INSERT INTO refresh_token(token, expires_at, user_id) VALUES (:token, :expiresAt, :userId)", map[string]any{
 		"token":     token,
 		"expiresAt": time.Now().AddDate(0, 1, 0),
 		"userId":    userId,
@@ -41,9 +41,9 @@ func (r RepositoryImpl) Save(token string, userId int) (id int64, err error) {
 	return id, nil
 }
 
-func (r RepositoryImpl) FindByToken(token string, userId int) (Token, error) {
+func (repository RepositoryImpl) FindByToken(token string, userId int) (Token, error) {
 	var result Token
-	err := r.db.Get(&result, "SELECT * FROM refresh_token WHERE token = ? AND user_id = ?", token, userId)
+	err := repository.Get(&result, "SELECT * FROM refresh_token WHERE token = ? AND user_id = ?", token, userId)
 	if err != nil {
 		return Token{}, err
 	}
@@ -51,8 +51,8 @@ func (r RepositoryImpl) FindByToken(token string, userId int) (Token, error) {
 	return result, nil
 }
 
-func (r RepositoryImpl) Delete(token string, userId int) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE refresh_token SET expires_at = NOW() WHERE token = :token AND user_id = :userId", map[string]any{
+func (repository RepositoryImpl) Delete(token string, userId int) (affectedRows int64, err error) {
+	result, err := repository.NamedExec("UPDATE refresh_token SET expires_at = NOW() WHERE token = :token AND user_id = :userId", map[string]any{
 		"token":  token,
 		"userId": userId,
 	})
