@@ -21,18 +21,18 @@ type (
 	}
 
 	RepositoryImpl struct {
-		db *sqlx.DB
+		*sqlx.DB
 	}
 )
 
 func NewRepository(db *sqlx.DB) Repository {
 	return &RepositoryImpl{
-		db: db,
+		DB: db,
 	}
 }
 
-func (r RepositoryImpl) save(reactorId, postId, commentId, emojiId int) (id int64, err error) {
-	result, err := r.db.NamedExec("INSERT INTO comment_reaction(reactor_id, comment_id, emoji_id) VALUES (:reactorId, :commentId, :emojiId)", map[string]any{
+func (repository RepositoryImpl) save(reactorId, postId, commentId, emojiId int) (id int64, err error) {
+	result, err := repository.NamedExec("INSERT INTO comment_reaction(reactor_id, comment_id, emoji_id) VALUES (:reactorId, :commentId, :emojiId)", map[string]any{
 		"reactorId": reactorId,
 		"commentId": commentId,
 		"emojiId":   emojiId,
@@ -49,7 +49,7 @@ func (r RepositoryImpl) save(reactorId, postId, commentId, emojiId int) (id int6
 	return id, nil
 }
 
-func (r RepositoryImpl) findAll(postId, commentId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (repository RepositoryImpl) findAll(postId, commentId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
 	var total int
 	query := `
 		SELECT COUNT(*) 
@@ -59,7 +59,7 @@ func (r RepositoryImpl) findAll(postId, commentId int, request *paging.PageReque
 		WHERE p.id = ?
 		AND cr.comment_id = ?
 	`
-	err := r.db.Get(&total, query, postId, commentId)
+	err := repository.Get(&total, query, postId, commentId)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (r RepositoryImpl) findAll(postId, commentId int, request *paging.PageReque
 		LIMIT ?
 		OFFSET ?
 	`, request.Field, request.SortBy)
-	err = r.db.Select(&reactions, query, postId, commentId, request.PageSize, request.Offset())
+	err = repository.Select(&reactions, query, postId, commentId, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (r RepositoryImpl) findAll(postId, commentId int, request *paging.PageReque
 	return paging.NewPage(reactions, request, total), nil
 }
 
-func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (repository RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
 	var total int
 	query := `
 		SELECT COUNT(*) 
@@ -95,7 +95,7 @@ func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, request *
 		AND cr.comment_id = ?
 		AND cr.emoji_id = ?
 	`
-	err := r.db.Get(&total, query, postId, commentId, emojiId)
+	err := repository.Get(&total, query, postId, commentId, emojiId)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, request *
 		LIMIT ?
 		OFFSET ?
 	`, request.Field, request.SortBy)
-	err = r.db.Select(&reactions, query, postId, commentId, emojiId, request.PageSize, request.Offset())
+	err = repository.Select(&reactions, query, postId, commentId, emojiId, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (r RepositoryImpl) findAllByEmoji(postId, commentId, emojiId int, request *
 	return paging.NewPage(reactions, request, total), nil
 }
 
-func (r RepositoryImpl) update(reactorId, postId, commentId, newEmojiId int) (affectedRows int64, err error) {
+func (repository RepositoryImpl) update(reactorId, postId, commentId, newEmojiId int) (affectedRows int64, err error) {
 	query := `
 		UPDATE comment_reaction cr
 		JOIN comment c ON c.id = cr.comment_id
@@ -131,7 +131,7 @@ func (r RepositoryImpl) update(reactorId, postId, commentId, newEmojiId int) (af
 		AND cr.comment_id = :commentId
 		AND cr.reactor_id = :reactorId
 	`
-	result, err := r.db.NamedExec(query, map[string]any{
+	result, err := repository.NamedExec(query, map[string]any{
 		"reactorId":  reactorId,
 		"postId":     postId,
 		"commentId":  commentId,
@@ -149,7 +149,7 @@ func (r RepositoryImpl) update(reactorId, postId, commentId, newEmojiId int) (af
 	return affectedRows, err
 }
 
-func (r RepositoryImpl) delete(reactorId, postId, commentId int) (affectedRows int64, err error) {
+func (repository RepositoryImpl) delete(reactorId, postId, commentId int) (affectedRows int64, err error) {
 	query := `
 		DELETE cr
 		FROM comment_reaction cr
@@ -159,7 +159,7 @@ func (r RepositoryImpl) delete(reactorId, postId, commentId int) (affectedRows i
 		AND cr.comment_id = :commentId
 		AND cr.reactor_id = :reactorId
 	`
-	result, err := r.db.NamedExec(query, map[string]any{
+	result, err := repository.NamedExec(query, map[string]any{
 		"reactorId": reactorId,
 		"postId":    postId,
 		"commentId": commentId,
@@ -176,7 +176,7 @@ func (r RepositoryImpl) delete(reactorId, postId, commentId int) (affectedRows i
 	return affectedRows, err
 }
 
-func (r RepositoryImpl) isAlreadyReacted(reactorId, postId, commentId int) (bool, error) {
+func (repository RepositoryImpl) isAlreadyReacted(reactorId, postId, commentId int) (bool, error) {
 	var exists bool
 	query := `
 		SELECT EXISTS (
@@ -188,7 +188,7 @@ func (r RepositoryImpl) isAlreadyReacted(reactorId, postId, commentId int) (bool
 			AND cr.reactor_id = ?
 		)
 	`
-	err := r.db.Get(&exists, query, postId, commentId, reactorId)
+	err := repository.Get(&exists, query, postId, commentId, reactorId)
 	if err != nil {
 		return false, err
 	}

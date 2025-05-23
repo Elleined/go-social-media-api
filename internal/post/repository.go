@@ -26,18 +26,18 @@ type (
 	}
 
 	RepositoryImpl struct {
-		db *sqlx.DB
+		*sqlx.DB
 	}
 )
 
 func NewRepository(db *sqlx.DB) Repository {
 	return &RepositoryImpl{
-		db: db,
+		DB: db,
 	}
 }
 
-func (r RepositoryImpl) save(authorId int, subject, content string) (id int64, err error) {
-	result, err := r.db.NamedExec("INSERT INTO post (subject, content, author_id) VALUES (:subject, :content, :authorId)", map[string]any{
+func (repository RepositoryImpl) save(authorId int, subject, content string) (id int64, err error) {
+	result, err := repository.NamedExec("INSERT INTO post (subject, content, author_id) VALUES (:subject, :content, :authorId)", map[string]any{
 		"subject":  subject,
 		"content":  content,
 		"authorId": authorId,
@@ -55,7 +55,7 @@ func (r RepositoryImpl) save(authorId int, subject, content string) (id int64, e
 	return id, nil
 }
 
-func (r RepositoryImpl) findAll(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error) {
+func (repository RepositoryImpl) findAll(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error) {
 	if !utils.IsInDBTag(request.Field, Post{}) {
 		request.Field = "created_at"
 		log.Println("WARNING: field is not in database! defaulted to", request.Field)
@@ -67,14 +67,14 @@ func (r RepositoryImpl) findAll(currentUserId int, isDeleted bool, request *pagi
 	}
 
 	var total int
-	err := r.db.Get(&total, "SELECT COUNT(*) FROM post WHERE author_id != ? AND is_deleted = ?", currentUserId, isDeleted)
+	err := repository.Get(&total, "SELECT COUNT(*) FROM post WHERE author_id != ? AND is_deleted = ?", currentUserId, isDeleted)
 	if err != nil {
 		return nil, err
 	}
 
 	posts := make([]Post, request.PageSize)
 	query := fmt.Sprintf("SELECT * FROM post WHERE author_id != ? AND is_deleted = ? ORDER BY %s %s LIMIT ? OFFSET ?", request.Field, request.SortBy)
-	err = r.db.Select(&posts, query, currentUserId, isDeleted, request.PageSize, request.Offset())
+	err = repository.Select(&posts, query, currentUserId, isDeleted, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (r RepositoryImpl) findAll(currentUserId int, isDeleted bool, request *pagi
 	return paging.NewPage(posts, request, total), nil
 }
 
-func (r RepositoryImpl) findAllBy(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error) {
+func (repository RepositoryImpl) findAllBy(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error) {
 	if !utils.IsInDBTag(request.Field, Post{}) {
 		request.Field = "created_at"
 		log.Println("WARNING: field is not in database! defaulted to", request.Field)
@@ -94,14 +94,14 @@ func (r RepositoryImpl) findAllBy(currentUserId int, isDeleted bool, request *pa
 	}
 
 	var total int
-	err := r.db.Get(&total, "SELECT COUNT(*) FROM post WHERE author_id = ? AND is_deleted = ?", currentUserId, isDeleted)
+	err := repository.Get(&total, "SELECT COUNT(*) FROM post WHERE author_id = ? AND is_deleted = ?", currentUserId, isDeleted)
 	if err != nil {
 		return nil, err
 	}
 
 	posts := make([]Post, request.PageSize)
 	query := fmt.Sprintf("SELECT * FROM post WHERE author_id = ? AND is_deleted = ? ORDER BY %s %s LIMIT ? OFFSET ?", request.Field, request.SortBy)
-	err = r.db.Select(&posts, query, currentUserId, isDeleted, request.PageSize, request.Offset())
+	err = repository.Select(&posts, query, currentUserId, isDeleted, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
@@ -109,8 +109,8 @@ func (r RepositoryImpl) findAllBy(currentUserId int, isDeleted bool, request *pa
 	return paging.NewPage(posts, request, total), nil
 }
 
-func (r RepositoryImpl) updateSubject(currentUserId int, postId int, newSubject string) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE post SET subject = :subject WHERE id = :id AND author_id = :authorId", map[string]any{
+func (repository RepositoryImpl) updateSubject(currentUserId int, postId int, newSubject string) (affectedRows int64, err error) {
+	result, err := repository.NamedExec("UPDATE post SET subject = :subject WHERE id = :id AND author_id = :authorId", map[string]any{
 		"subject":  newSubject,
 		"id":       postId,
 		"authorId": currentUserId,
@@ -127,8 +127,8 @@ func (r RepositoryImpl) updateSubject(currentUserId int, postId int, newSubject 
 	return affectedRows, nil
 }
 
-func (r RepositoryImpl) updateContent(currentUserId, postId int, newContent string) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE post SET content = :content WHERE id = :id AND author_id = :authorId", map[string]any{
+func (repository RepositoryImpl) updateContent(currentUserId, postId int, newContent string) (affectedRows int64, err error) {
+	result, err := repository.NamedExec("UPDATE post SET content = :content WHERE id = :id AND author_id = :authorId", map[string]any{
 		"content":  newContent,
 		"id":       postId,
 		"authorId": currentUserId,
@@ -146,8 +146,8 @@ func (r RepositoryImpl) updateContent(currentUserId, postId int, newContent stri
 	return affectedRows, nil
 }
 
-func (r RepositoryImpl) updateAttachment(currentUserId, postId int, newAttachment string) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE post SET attachment = :attachment WHERE id = :postId AND author_id = :authorId", map[string]any{
+func (repository RepositoryImpl) updateAttachment(currentUserId, postId int, newAttachment string) (affectedRows int64, err error) {
+	result, err := repository.NamedExec("UPDATE post SET attachment = :attachment WHERE id = :postId AND author_id = :authorId", map[string]any{
 		"attachment": newAttachment,
 		"postId":     postId,
 		"authorId":   currentUserId,
@@ -164,8 +164,8 @@ func (r RepositoryImpl) updateAttachment(currentUserId, postId int, newAttachmen
 	return affectedRows, nil
 }
 
-func (r RepositoryImpl) deleteById(currentUserId, postId int) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE post SET is_deleted = true WHERE id = :postId AND author_id = :currentUserId", map[string]any{
+func (repository RepositoryImpl) deleteById(currentUserId, postId int) (affectedRows int64, err error) {
+	result, err := repository.NamedExec("UPDATE post SET is_deleted = true WHERE id = :postId AND author_id = :currentUserId", map[string]any{
 		"postId":        postId,
 		"currentUserId": currentUserId,
 	})
@@ -182,8 +182,8 @@ func (r RepositoryImpl) deleteById(currentUserId, postId int) (affectedRows int6
 	return affectedRows, nil
 }
 
-func (r RepositoryImpl) hasPost(currentUserId, postId int) (exists bool, err error) {
-	err = r.db.Get(&exists, "SELECT EXISTS(SELECT 1 FROM post WHERE author_id = ? AND id = ?)", currentUserId, postId)
+func (repository RepositoryImpl) hasPost(currentUserId, postId int) (exists bool, err error) {
+	err = repository.Get(&exists, "SELECT EXISTS(SELECT 1 FROM post WHERE author_id = ? AND id = ?)", currentUserId, postId)
 	if err != nil {
 		return exists, err
 	}

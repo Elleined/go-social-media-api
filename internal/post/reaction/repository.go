@@ -23,18 +23,18 @@ type (
 	}
 
 	RepositoryImpl struct {
-		db *sqlx.DB
+		*sqlx.DB
 	}
 )
 
 func NewRepository(db *sqlx.DB) Repository {
 	return &RepositoryImpl{
-		db: db,
+		DB: db,
 	}
 }
 
-func (r RepositoryImpl) save(reactorId, postId, emojiId int) (id int64, err error) {
-	result, err := r.db.NamedExec("INSERT INTO post_reaction (reactor_id, post_id, emoji_id) VALUES (:reactorId, :postId, :emojiId)", map[string]any{
+func (repository RepositoryImpl) save(reactorId, postId, emojiId int) (id int64, err error) {
+	result, err := repository.NamedExec("INSERT INTO post_reaction (reactor_id, post_id, emoji_id) VALUES (:reactorId, :postId, :emojiId)", map[string]any{
 		"reactorId": reactorId,
 		"postId":    postId,
 		"emojiId":   emojiId,
@@ -52,7 +52,7 @@ func (r RepositoryImpl) save(reactorId, postId, emojiId int) (id int64, err erro
 	return id, nil
 }
 
-func (r RepositoryImpl) findAll(postId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (repository RepositoryImpl) findAll(postId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
 	if !utils.IsInDBTag(request.Field, Reaction{}) {
 		request.Field = "created_at"
 		log.Println("WARNING: field is not in database! defaulted to", request.Field)
@@ -64,14 +64,14 @@ func (r RepositoryImpl) findAll(postId int, request *paging.PageRequest) (*pagin
 	}
 
 	var total int
-	err := r.db.Get(&total, "SELECT COUNT(*) FROM post_reaction WHERE post_id = ?", postId)
+	err := repository.Get(&total, "SELECT COUNT(*) FROM post_reaction WHERE post_id = ?", postId)
 	if err != nil {
 		return nil, err
 	}
 
 	reactions := make([]Reaction, 10)
 	query := fmt.Sprintf("SELECT * FROM post_reaction WHERE post_id = ? ORDER BY %s %s LIMIT ? OFFSET ?", request.Field, request.SortBy)
-	err = r.db.Select(&reactions, query, postId, request.PageSize, request.Offset())
+	err = repository.Select(&reactions, query, postId, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (r RepositoryImpl) findAll(postId int, request *paging.PageRequest) (*pagin
 	return paging.NewPage(reactions, request, total), nil
 }
 
-func (r RepositoryImpl) findAllByEmoji(postId int, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (repository RepositoryImpl) findAllByEmoji(postId int, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
 	if !utils.IsInDBTag(request.Field, Reaction{}) {
 		request.Field = "created_at"
 		log.Println("WARNING: field is not in database! defaulted to", request.Field)
@@ -91,11 +91,11 @@ func (r RepositoryImpl) findAllByEmoji(postId int, emojiId int, request *paging.
 	}
 
 	var total int
-	err := r.db.Get(&total, "SELECT COUNT(*) FROM post_reaction WHERE post_id = ? AND emoji_id = ?", postId, emojiId)
+	err := repository.Get(&total, "SELECT COUNT(*) FROM post_reaction WHERE post_id = ? AND emoji_id = ?", postId, emojiId)
 
 	reactions := make([]Reaction, 10)
 	query := fmt.Sprintf("SELECT * FROM post_reaction WHERE post_id = ? AND emoji_id = ? ORDER BY %s %s LIMIT ? OFFSET ?", request.Field, request.SortBy)
-	err = r.db.Select(&reactions, query, postId, emojiId, request.PageSize, request.Offset())
+	err = repository.Select(&reactions, query, postId, emojiId, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +103,8 @@ func (r RepositoryImpl) findAllByEmoji(postId int, emojiId int, request *paging.
 	return paging.NewPage(reactions, request, total), nil
 }
 
-func (r RepositoryImpl) update(reactorId, postId, newEmojiId int) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE post_reaction SET emoji_id = :newEmojiId WHERE reactor_id = :reactorId AND post_id = :postId", map[string]any{
+func (repository RepositoryImpl) update(reactorId, postId, newEmojiId int) (affectedRows int64, err error) {
+	result, err := repository.NamedExec("UPDATE post_reaction SET emoji_id = :newEmojiId WHERE reactor_id = :reactorId AND post_id = :postId", map[string]any{
 		"reactorId":  reactorId,
 		"postId":     postId,
 		"newEmojiId": newEmojiId,
@@ -122,8 +122,8 @@ func (r RepositoryImpl) update(reactorId, postId, newEmojiId int) (affectedRows 
 	return affectedRow, nil
 }
 
-func (r RepositoryImpl) delete(reactorId, postId int) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("DELETE FROM post_reaction WHERE reactor_id = :reactorId AND post_id = :postId", map[string]any{
+func (repository RepositoryImpl) delete(reactorId, postId int) (affectedRows int64, err error) {
+	result, err := repository.NamedExec("DELETE FROM post_reaction WHERE reactor_id = :reactorId AND post_id = :postId", map[string]any{
 		"reactorId": reactorId,
 		"postId":    postId,
 	})
@@ -139,9 +139,9 @@ func (r RepositoryImpl) delete(reactorId, postId int) (affectedRows int64, err e
 	return affectedRows, nil
 }
 
-func (r RepositoryImpl) isAlreadyReacted(reactorId, postId int) (bool, error) {
+func (repository RepositoryImpl) isAlreadyReacted(reactorId, postId int) (bool, error) {
 	var exists bool
-	err := r.db.Get(&exists, "SELECT EXISTS (SELECT 1 FROM post_reaction WHERE reactor_id = ? AND post_id = ?)", reactorId, postId)
+	err := repository.Get(&exists, "SELECT EXISTS (SELECT 1 FROM post_reaction WHERE reactor_id = ? AND post_id = ?)", reactorId, postId)
 	if err != nil {
 		return exists, err
 	}
