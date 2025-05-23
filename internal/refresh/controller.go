@@ -2,7 +2,6 @@ package refresh
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"net/http"
 	"social-media-application/utils"
 	"strconv"
@@ -82,7 +81,7 @@ func (c *ControllerImpl) refresh(ctx *gin.Context) {
 	}
 
 	// 3. Generate and save the new refresh token and return it
-	refreshToken, err := c.service.save(uuid.New().String(), oldRefreshToken.UserId)
+	refreshToken, err := c.service.save(oldRefreshToken.UserId)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "refresh failed! " + err.Error(),

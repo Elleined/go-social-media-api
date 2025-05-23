@@ -10,7 +10,7 @@ type (
 	Service interface {
 		isValid(token Token) error
 
-		save(token string, userId int) (id int64, err error)
+		save(userId int) (id int64, err error)
 
 		getBy(token string) (Token, error)
 		getAllBy(userId int) ([]Token, error)
@@ -42,16 +42,12 @@ func (s ServiceImpl) isValid(token Token) error {
 	return nil
 }
 
-func (s ServiceImpl) save(token string, userId int) (id int64, err error) {
-	if strings.TrimSpace(token) == "" {
-		return 0, errors.New("token is empty")
-	}
-
+func (s ServiceImpl) save(userId int) (id int64, err error) {
 	if userId <= 0 {
 		return 0, errors.New("userId is invalid")
 	}
 
-	id, err = s.save(token, userId)
+	id, err = s.save(userId)
 	if err != nil {
 		return 0, err
 	}
