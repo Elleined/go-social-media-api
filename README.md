@@ -1,3 +1,7 @@
+# Token
+1. Refresh Token 1 Month
+2. Access Token 15 Minutes
+
 # Validations
 ## User
    - save

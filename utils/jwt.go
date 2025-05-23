@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -13,11 +14,16 @@ import (
 // token referred as the jwt and its validated
 
 func GenerateJWT(id int) (string, error) {
+	expirationInMinute, err := strconv.Atoi(os.Getenv("JWT_EXPIRATION_IN_MINUTE"))
+	if err != nil {
+		return "", err
+	}
+
 	now := time.Now()
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": id,
 		"iat": now,
-		"exp": now.Add(15 * time.Minute).Unix(),
+		"exp": now.Add(time.Duration(expirationInMinute) * time.Minute).Unix(),
 		"iss": os.Getenv("JWT_ISSUER"),
 		"aud": os.Getenv("JWT_AUDIENCE"),
 	}).SignedString(getSecretKey())
