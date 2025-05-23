@@ -15,18 +15,18 @@ type (
 	}
 
 	RepositoryImpl struct {
-		db *sqlx.DB
+		*sqlx.DB
 	}
 )
 
 func NewRepository(db *sqlx.DB) Repository {
 	return &RepositoryImpl{
-		db: db,
+		DB: db,
 	}
 }
 
-func (r RepositoryImpl) save(name string) (id int64, err error) {
-	result, err := r.db.NamedExec("INSERT INTO emoji (name) VALUES (:name)", map[string]any{
+func (repository RepositoryImpl) save(name string) (id int64, err error) {
+	result, err := repository.NamedExec("INSERT INTO emoji (name) VALUES (:name)", map[string]any{
 		"name": name,
 	})
 	if err != nil {
@@ -41,10 +41,10 @@ func (r RepositoryImpl) save(name string) (id int64, err error) {
 	return id, nil
 }
 
-func (r RepositoryImpl) findAll() ([]Emoji, error) {
+func (repository RepositoryImpl) findAll() ([]Emoji, error) {
 	emojis := make([]Emoji, 10)
 
-	err := r.db.Select(&emojis, "SELECT * FROM emoji")
+	err := repository.Select(&emojis, "SELECT * FROM emoji")
 	if err != nil {
 		return nil, err
 	}
@@ -52,8 +52,8 @@ func (r RepositoryImpl) findAll() ([]Emoji, error) {
 	return emojis, nil
 }
 
-func (r RepositoryImpl) update(emojiId int, newName string) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE emoji SET name = :name WHERE id = :id", map[string]any{
+func (repository RepositoryImpl) update(emojiId int, newName string) (affectedRows int64, err error) {
+	result, err := repository.NamedExec("UPDATE emoji SET name = :name WHERE id = :id", map[string]any{
 		"name": newName,
 		"id":   emojiId,
 	})
@@ -69,8 +69,8 @@ func (r RepositoryImpl) update(emojiId int, newName string) (affectedRows int64,
 	return affectedRows, nil
 }
 
-func (r RepositoryImpl) delete(emojiId int) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("DELETE FROM emoji WHERE id = :id", map[string]any{
+func (repository RepositoryImpl) delete(emojiId int) (affectedRows int64, err error) {
+	result, err := repository.NamedExec("DELETE FROM emoji WHERE id = :id", map[string]any{
 		"id": emojiId,
 	})
 	if err != nil {
@@ -85,9 +85,9 @@ func (r RepositoryImpl) delete(emojiId int) (affectedRows int64, err error) {
 	return affectedRows, nil
 }
 
-func (r RepositoryImpl) isAlreadyExists(name string) (bool, error) {
+func (repository RepositoryImpl) isAlreadyExists(name string) (bool, error) {
 	var exists bool
-	err := r.db.Get(&exists, "SELECT EXISTS(SELECT 1 FROM emoji WHERE name = ?)", name)
+	err := repository.Get(&exists, "SELECT EXISTS(SELECT 1 FROM emoji WHERE name = ?)", name)
 	if err != nil {
 		return false, err
 	}
