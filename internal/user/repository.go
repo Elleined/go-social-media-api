@@ -26,18 +26,18 @@ type (
 	}
 
 	RepositoryImpl struct {
-		db *sqlx.DB
+		*sqlx.DB
 	}
 )
 
 func NewRepository(db *sqlx.DB) Repository {
 	return &RepositoryImpl{
-		db: db,
+		DB: db,
 	}
 }
 
 func (r *RepositoryImpl) save(firstName, lastName, email, password string) (id int64, err error) {
-	result, err := r.db.NamedExec(`INSERT INTO user (first_name, last_name, email, password) VALUES (:firstName, :lastName, :email, :password)`, map[string]any{
+	result, err := r.NamedExec(`INSERT INTO user (first_name, last_name, email, password) VALUES (:firstName, :lastName, :email, :password)`, map[string]any{
 		"firstName": firstName,
 		"lastName":  lastName,
 		"email":     email,
@@ -58,7 +58,7 @@ func (r *RepositoryImpl) save(firstName, lastName, email, password string) (id i
 func (r *RepositoryImpl) findById(id int) (User, error) {
 	var user User
 
-	err := r.db.Get(&user, "SELECT * FROM user WHERE id = ?", id)
+	err := r.Get(&user, "SELECT * FROM user WHERE id = ?", id)
 	if err != nil {
 		return User{}, err
 	}
@@ -69,7 +69,7 @@ func (r *RepositoryImpl) findById(id int) (User, error) {
 func (r *RepositoryImpl) findByEmail(email string) (User, error) {
 	var user User
 
-	err := r.db.Get(&user, "SELECT * FROM user WHERE email = ?", email)
+	err := r.Get(&user, "SELECT * FROM user WHERE email = ?", email)
 	if err != nil {
 		return User{}, err
 	}
@@ -89,14 +89,14 @@ func (r *RepositoryImpl) findAll(isActive bool, request *paging.PageRequest) (*p
 	}
 
 	var total int
-	err := r.db.Get(&total, "SELECT COUNT(*) FROM user WHERE is_active = ?", isActive)
+	err := r.Get(&total, "SELECT COUNT(*) FROM user WHERE is_active = ?", isActive)
 	if err != nil {
 		return nil, err
 	}
 
 	users := make([]User, request.PageSize)
 	query := fmt.Sprintf("SELECT * FROM user WHERE is_active = ? ORDER BY %s %s LIMIT ? OFFSET ?", request.Field, request.SortBy)
-	err = r.db.Select(&users, query, isActive, request.PageSize, request.Offset())
+	err = r.Select(&users, query, isActive, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (r *RepositoryImpl) findAll(isActive bool, request *paging.PageRequest) (*p
 }
 
 func (r *RepositoryImpl) deleteById(id int) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("DELETE FROM user WHERE id = :id", map[string]any{
+	result, err := r.NamedExec("DELETE FROM user WHERE id = :id", map[string]any{
 		"id": id,
 	})
 	if err != nil {
@@ -121,7 +121,7 @@ func (r *RepositoryImpl) deleteById(id int) (affectedRows int64, err error) {
 }
 
 func (r *RepositoryImpl) changeStatus(userId int, isActive bool) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE user SET is_active = :isActive WHERE id = :id", map[string]any{
+	result, err := r.NamedExec("UPDATE user SET is_active = :isActive WHERE id = :id", map[string]any{
 		"isActive": isActive,
 		"id":       userId,
 	})
@@ -138,7 +138,7 @@ func (r *RepositoryImpl) changeStatus(userId int, isActive bool) (affectedRows i
 }
 
 func (r *RepositoryImpl) changePassword(userId int, newPassword string) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE user SET password = :password WHERE id = :id", map[string]any{
+	result, err := r.NamedExec("UPDATE user SET password = :password WHERE id = :id", map[string]any{
 		"password": newPassword,
 		"id":       userId,
 	})
@@ -156,7 +156,7 @@ func (r *RepositoryImpl) changePassword(userId int, newPassword string) (affecte
 
 func (r *RepositoryImpl) isEmailExists(email string) (bool, error) {
 	var exists bool
-	err := r.db.Get(&exists, "SELECT EXISTS(SELECT 1 FROM user WHERE email = ?)", email)
+	err := r.Get(&exists, "SELECT EXISTS(SELECT 1 FROM user WHERE email = ?)", email)
 	if err != nil {
 		return exists, err
 	}
