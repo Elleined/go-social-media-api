@@ -9,6 +9,7 @@ import (
 	"social-media-application/internal/emoji"
 	"social-media-application/internal/post"
 	pr "social-media-application/internal/post/reaction"
+	"social-media-application/internal/refresh"
 	"social-media-application/internal/user"
 	mw "social-media-application/middlewares"
 	"social-media-application/utils"
@@ -68,6 +69,12 @@ func main() {
 
 	// Initialize middlewares
 	r.Use(mw.SecurityHeaders)
+
+	// Initialize refresh token module
+	refreshRepository := refresh.NewRepository(db)
+	refreshService := refresh.NewService(refreshRepository)
+	refreshController := refresh.NewController(refreshService)
+	refreshController.RegisterRoutes(r)
 
 	// Initialize user module
 	userRepository := user.NewRepository(db)
