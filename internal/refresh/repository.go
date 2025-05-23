@@ -8,11 +8,11 @@ import (
 type (
 	Repository interface {
 		save(token string, userId int) (id int64, err error)
-		findBy(token string, userId int) (Token, error)
+		findBy(token string) (Token, error)
 
 		findAllBy(userId int) ([]Token, error)
 
-		delete(token string, userId int) (affectedRows int64, err error)
+		revoke(id int, userId int) (affectedRows int64, err error)
 	}
 
 	RepositoryImpl struct {
@@ -44,9 +44,9 @@ func (repository RepositoryImpl) save(token string, userId int) (id int64, err e
 	return id, nil
 }
 
-func (repository RepositoryImpl) findBy(token string, userId int) (Token, error) {
+func (repository RepositoryImpl) findBy(token string) (Token, error) {
 	var result Token
-	err := repository.Get(&result, "SELECT * FROM refresh_token WHERE token = ? AND user_id = ?", token, userId)
+	err := repository.Get(&result, "SELECT * FROM refresh_token WHERE token = ?", token)
 	if err != nil {
 		return Token{}, err
 	}
@@ -64,9 +64,9 @@ func (repository RepositoryImpl) findAllBy(userId int) ([]Token, error) {
 	return tokens, nil
 }
 
-func (repository RepositoryImpl) delete(token string, userId int) (affectedRows int64, err error) {
-	result, err := repository.NamedExec("UPDATE refresh_token SET revoked_at = NOW() WHERE token = :token AND user_id = :userId", map[string]any{
-		"token":  token,
+func (repository RepositoryImpl) revoke(id int, userId int) (affectedRows int64, err error) {
+	result, err := repository.NamedExec("UPDATE refresh_token SET revoked_at = NOW() WHERE id = :id AND user_id = :userId", map[string]any{
+		"id":     id,
 		"userId": userId,
 	})
 	if err != nil {

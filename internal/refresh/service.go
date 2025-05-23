@@ -8,12 +8,14 @@ import (
 
 type (
 	Service interface {
-		isValid(token string, userId int) (bool, error)
+		isValid(token Token) error
+
 		save(token string, userId int) (id int64, err error)
 
+		getBy(token string) (Token, error)
 		getAllBy(userId int) ([]Token, error)
 
-		revoke(token string, userId int) (affectedRows int64, err error)
+		revoke(id int, userId int) (affectedRows int64, err error)
 	}
 
 	ServiceImpl struct {
@@ -27,30 +29,17 @@ func NewService(repository Repository) Service {
 	}
 }
 
-func (s ServiceImpl) isValid(token string, userId int) (bool, error) {
-	if strings.TrimSpace(token) == "" {
-		return false, errors.New("token is empty")
-	}
-
-	if userId <= 0 {
-		return false, errors.New("userId is invalid")
-	}
-
-	refresh, err := s.repository.findBy(token, userId)
-	if err != nil {
-		return false, err
-	}
-
-	if refresh.IsRevoked() {
+func (s ServiceImpl) isValid(token Token) error {
+	if token.IsRevoked() {
 		log.Print("Accessing illegal token") // add a panic, recover, and defer here to log
-		return false, errors.New("token is revoked")
+		return errors.New("token is revoked")
 	}
 
-	if refresh.IsExpired() {
-		return false, errors.New("token is expired")
+	if token.IsExpired() {
+		return errors.New("token is expired")
 	}
 
-	return true, nil
+	return nil
 }
 
 func (s ServiceImpl) save(token string, userId int) (id int64, err error) {
@@ -70,6 +59,19 @@ func (s ServiceImpl) save(token string, userId int) (id int64, err error) {
 	return id, nil
 }
 
+func (s ServiceImpl) getBy(token string) (Token, error) {
+	if strings.TrimSpace(token) == "" {
+		return Token{}, errors.New("token is empty")
+	}
+
+	refresh, err := s.repository.findBy(token)
+	if err != nil {
+		return Token{}, err
+	}
+
+	return refresh, nil
+}
+
 func (s ServiceImpl) getAllBy(userId int) ([]Token, error) {
 	if userId <= 0 {
 		return nil, errors.New("userId is invalid")
@@ -83,18 +85,18 @@ func (s ServiceImpl) getAllBy(userId int) ([]Token, error) {
 	return refreshTokens, nil
 }
 
-func (s ServiceImpl) revoke(token string, userId int) (affectedRows int64, err error) {
-	if strings.TrimSpace(token) == "" {
+func (s ServiceImpl) revoke(id int, userId int) (affectedRows int64, err error) {
+	if id <= 0 {
 		return 0, errors.New("token is empty")
 	}
 
-	if userId <= 0 {
-		return 0, errors.New("userId is invalid")
-	}
-
-	affectedRows, err = s.repository.delete(token, userId)
+	affectedRows, err = s.repository.revoke(id, userId)
 	if err != nil {
 		return 0, err
+	}
+
+	if affectedRows <= 0 {
+		return 0, errors.New("no affected rows")
 	}
 
 	return affectedRows, nil

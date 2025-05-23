@@ -8,7 +8,7 @@ import (
 type Token struct {
 	Id        int          `json:"id" db:"id"`
 	CreatedAt time.Time    `json:"created_at" db:"created_at"`
-	Token     string       `json:"token" db:"token"`
+	Token     string       `json:"-" db:"token"`
 	ExpiresAt sql.NullTime `json:"expires_at" db:"expires_at"`
 	RevokedAt sql.NullTime `json:"revoked_at" db:"revoked_at"`
 	UserId    int          `json:"user_id" db:"user_id"`
