@@ -8,7 +8,7 @@ import (
 
 type (
 	Repository interface {
-		save(userId int) (id int64, err error)
+		save(userId int) (token string, err error)
 		findBy(token string) (Token, error)
 
 		findAllBy(userId int) ([]Token, error)
@@ -27,22 +27,19 @@ func NewRepository(db *sqlx.DB) Repository {
 	}
 }
 
-func (repository RepositoryImpl) save(userId int) (id int64, err error) {
-	result, err := repository.NamedExec("INSERT INTO refresh_token(token, expires_at, user_id) VALUES (:token, :expiresAt, :userId)", map[string]any{
-		"token":     uuid.New().String(),
+func (repository RepositoryImpl) save(userId int) (token string, err error) {
+	token = uuid.New().String()
+
+	_, err = repository.NamedExec("INSERT INTO refresh_token(token, expires_at, user_id) VALUES (:token, :expiresAt, :userId)", map[string]any{
+		"token":     token,
 		"expiresAt": time.Now().AddDate(0, 1, 0),
 		"userId":    userId,
 	})
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	id, err = result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-
-	return id, nil
+	return token, nil
 }
 
 func (repository RepositoryImpl) findBy(token string) (Token, error) {

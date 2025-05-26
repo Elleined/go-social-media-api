@@ -78,7 +78,7 @@ func main() {
 
 	// Initialize user module
 	userRepository := user.NewRepository(db)
-	userService := user.NewService(userRepository)
+	userService := user.NewService(userRepository, refreshService)
 	userController := user.NewController(userService)
 	userController.RegisterRoutes(r)
 

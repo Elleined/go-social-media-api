@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 	"social-media-application/internal/paging"
+	"social-media-application/internal/refresh"
 	pd "social-media-application/internal/user/password"
 	"social-media-application/utils"
 	"strings"
@@ -26,13 +27,15 @@ type (
 	}
 
 	ServiceImpl struct {
-		repository Repository
+		repository     Repository
+		refreshService refresh.Service
 	}
 )
 
-func NewService(repository Repository) Service {
+func NewService(repository Repository, refreshService refresh.Service) Service {
 	return &ServiceImpl{
-		repository: repository,
+		repository:     repository,
+		refreshService: refreshService,
 	}
 }
 

@@ -10,7 +10,7 @@ type (
 	Service interface {
 		isValid(token Token) error
 
-		save(userId int) (id int64, err error)
+		save(userId int) (token string, err error)
 
 		getBy(token string) (Token, error)
 		getAllBy(userId int) ([]Token, error)
@@ -42,17 +42,17 @@ func (s ServiceImpl) isValid(token Token) error {
 	return nil
 }
 
-func (s ServiceImpl) save(userId int) (id int64, err error) {
+func (s ServiceImpl) save(userId int) (token string, err error) {
 	if userId <= 0 {
-		return 0, errors.New("userId is invalid")
+		return "", errors.New("userId is invalid")
 	}
 
-	id, err = s.save(userId)
+	token, err = s.repository.save(userId)
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	return id, nil
+	return token, nil
 }
 
 func (s ServiceImpl) getBy(token string) (Token, error) {

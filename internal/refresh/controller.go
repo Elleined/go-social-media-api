@@ -81,7 +81,7 @@ func (c *ControllerImpl) refresh(ctx *gin.Context) {
 	}
 
 	// 3. Generate and save the new refresh token and return it
-	refreshToken, err := c.service.save(oldRefreshToken.UserId)
+	newRefreshToken, err := c.service.save(oldRefreshToken.UserId)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "refresh failed! " + err.Error(),
@@ -99,7 +99,7 @@ func (c *ControllerImpl) refresh(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"refresh_token": refreshToken,
+		"refresh_token": newRefreshToken,
 		"access_token":  accessToken,
 		"message":       "saved the refresh token securely",
 	})
