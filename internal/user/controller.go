@@ -4,6 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"social-media-application/internal/paging"
+	"social-media-application/internal/refresh"
+	pd "social-media-application/internal/user/password"
+	"social-media-application/utils"
 	"strconv"
 )
 
@@ -27,13 +30,15 @@ type (
 	}
 
 	ControllerImpl struct {
-		service Service
+		service        Service
+		refreshService refresh.Service
 	}
 )
 
-func NewController(service Service) Controller {
+func NewController(service Service, refreshService refresh.Service) Controller {
 	return &ControllerImpl{
-		service: service,
+		service:        service,
+		refreshService: refreshService,
 	}
 }
 
@@ -238,10 +243,33 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 		return
 	}
 
-	jwt, token, err := c.service.login(loginRequest.Username, loginRequest.Password)
+	user, err := c.service.getByEmail(loginRequest.Username)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": "login failed " + err.Error(),
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "login failed! invalid credentials ",
+		})
+		return
+	}
+
+	if !pd.IsPasswordMatch(loginRequest.Password, user.Password) {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "login failed! invalid credentials",
+		})
+		return
+	}
+
+	jwt, err := utils.GenerateJWT(user.Id)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "login failed! " + err.Error(),
+		})
+		return
+	}
+
+	token, err := c.refreshService.Save(user.Id)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "login failed! " + err.Error(),
 		})
 		return
 	}

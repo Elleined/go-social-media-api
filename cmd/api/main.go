@@ -78,8 +78,8 @@ func main() {
 
 	// Initialize user module
 	userRepository := user.NewRepository(db)
-	userService := user.NewService(userRepository, refreshService)
-	userController := user.NewController(userService)
+	userService := user.NewService(userRepository)
+	userController := user.NewController(userService, refreshService)
 	userController.RegisterRoutes(r)
 
 	// Initialize emoji module

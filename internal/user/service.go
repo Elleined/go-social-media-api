@@ -3,9 +3,7 @@ package user
 import (
 	"errors"
 	"social-media-application/internal/paging"
-	"social-media-application/internal/refresh"
 	pd "social-media-application/internal/user/password"
-	"social-media-application/utils"
 	"strings"
 )
 
@@ -22,41 +20,33 @@ type (
 
 		changeStatus(userId int, isActive bool) (affectedRows int64, err error)
 		changePassword(userId int, newPassword string) (affectedRows int64, err error)
-
-		login(username, password string) (jwt, token string, err error)
 	}
 
 	ServiceImpl struct {
-		repository     Repository
-		refreshService refresh.Service
+		repository Repository
 	}
 )
 
-const (
-	BLANK = ""
-)
-
-func NewService(repository Repository, refreshService refresh.Service) Service {
+func NewService(repository Repository) Service {
 	return &ServiceImpl{
-		repository:     repository,
-		refreshService: refreshService,
+		repository: repository,
 	}
 }
 
 func (s ServiceImpl) save(firstName, lastName, email, password string) (id int64, err error) {
-	if strings.TrimSpace(firstName) == BLANK {
+	if strings.TrimSpace(firstName) == "" {
 		return 0, errors.New("first name is required")
 	}
 
-	if strings.TrimSpace(lastName) == BLANK {
+	if strings.TrimSpace(lastName) == "" {
 		return 0, errors.New("last name is required")
 	}
 
-	if strings.TrimSpace(email) == BLANK {
+	if strings.TrimSpace(email) == "" {
 		return 0, errors.New("email is required")
 	}
 
-	if strings.TrimSpace(password) == BLANK {
+	if strings.TrimSpace(password) == "" {
 		return 0, errors.New("password is required")
 	}
 
@@ -96,7 +86,7 @@ func (s ServiceImpl) getById(id int) (User, error) {
 }
 
 func (s ServiceImpl) getByEmail(email string) (User, error) {
-	if strings.TrimSpace(email) == BLANK {
+	if strings.TrimSpace(email) == "" {
 		return User{}, errors.New("email is required")
 	}
 
@@ -148,7 +138,7 @@ func (s ServiceImpl) changePassword(userId int, newPassword string) (affectedRow
 		return 0, errors.New("user id is required")
 	}
 
-	if strings.TrimSpace(newPassword) == BLANK {
+	if strings.TrimSpace(newPassword) == "" {
 		return 0, errors.New("new password is required")
 	}
 
@@ -163,35 +153,4 @@ func (s ServiceImpl) changePassword(userId int, newPassword string) (affectedRow
 	}
 
 	return affectedRows, nil
-}
-
-func (s ServiceImpl) login(username string, password string) (jwt, token string, err error) {
-	if strings.TrimSpace(username) == BLANK {
-		return BLANK, BLANK, errors.New("username is required")
-	}
-
-	if strings.TrimSpace(password) == BLANK {
-		return BLANK, BLANK, errors.New("password is required")
-	}
-
-	user, err := s.repository.findByEmail(username)
-	if err != nil {
-		return BLANK, BLANK, errors.New("invalid credentials " + err.Error())
-	}
-
-	if !pd.IsPasswordMatch(password, user.Password) {
-		return BLANK, BLANK, errors.New("invalid credentials ")
-	}
-
-	token, err = s.refreshService.Save(user.Id)
-	if err != nil {
-		return BLANK, BLANK, err
-	}
-	
-	jwt, err = utils.GenerateJWT(user.Id)
-	if err != nil {
-		return BLANK, BLANK, errors.New("cannot generate jwt: " + err.Error())
-	}
-
-	return jwt, token, nil
 }
