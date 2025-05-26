@@ -3,6 +3,8 @@ package refresh
 import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -28,11 +30,15 @@ func NewRepository(db *sqlx.DB) Repository {
 }
 
 func (repository RepositoryImpl) save(userId int) (token string, err error) {
-	token = uuid.New().String()
+	tokenExpiration, err := strconv.Atoi(os.Getenv("REFRESH_TOKEN_EXPIRATION_IN_DAYS"))
+	if err != nil {
+		return "", err
+	}
 
+	token = uuid.New().String()
 	_, err = repository.NamedExec("INSERT INTO refresh_token(token, expires_at, user_id) VALUES (:token, :expiresAt, :userId)", map[string]any{
 		"token":     token,
-		"expiresAt": time.Now().AddDate(0, 1, 0),
+		"expiresAt": time.Now().AddDate(0, 0, tokenExpiration),
 		"userId":    userId,
 	})
 	if err != nil {
