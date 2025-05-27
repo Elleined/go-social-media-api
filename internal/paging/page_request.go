@@ -7,10 +7,10 @@ import (
 )
 
 type PageRequest struct {
-	PageNumber int
-	PageSize   int
-	Field      string
-	SortBy     string
+	PageNumber int    `json:"page_number"`
+	PageSize   int    `json:"page_size"`
+	Field      string `json:"field"`
+	SortBy     string `json:"sort_by"`
 }
 
 func NewPageRequestStr(pageNumber, pageSize, field, sortBy string) (*PageRequest, error) {

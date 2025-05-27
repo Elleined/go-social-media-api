@@ -4,48 +4,65 @@ import (
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
 
-func GenerateJWT(currentUserId int) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
-		jwt.MapClaims{
-			"currentUserId": currentUserId,
-			"exp":           time.Now().Add(time.Hour * 24).Unix(),
-		})
+// authenticationHeader = Authorization: Bearer <jwt>
+// tokenString referred as the jwt but its not validated yet
+// token referred as the jwt and its validated
 
-	tokenString, err := token.SignedString(getSecretKey())
+func GenerateJWT(id int) (string, error) {
+	expirationInMinute, err := strconv.Atoi(os.Getenv("JWT_EXPIRATION_IN_MINUTE"))
 	if err != nil {
 		return "", err
 	}
 
-	return tokenString, nil
+	now := time.Now()
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": id,
+		"iat": now,
+		"exp": now.Add(time.Duration(expirationInMinute) * time.Minute).Unix(),
+		"iss": os.Getenv("JWT_ISSUER"),
+		"aud": os.Getenv("JWT_AUDIENCE"),
+	}).SignedString(getSecretKey())
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
-// authenticationHeader sample value Authorization: Bearer <token>
-func GetCurrentUserId(authenticationHeader string) (int, error) {
-	tokenString, err := extractJWT(authenticationHeader)
+func GetSubject(authenticationHeader string) (int, error) {
+	sub, err := validateAndParse(authenticationHeader, "sub")
 	if err != nil {
 		return 0, err
 	}
 
-	token, err := validate(tokenString)
-	if err != nil {
-		return 0, err
+	id, ok := sub.(float64)
+	if !ok {
+		return 0, errors.New("id is not a number")
 	}
 
-	currentUserId, err := parseClaims(token)
-	if err != nil {
-		return 0, err
-	}
-
-	return currentUserId, nil
+	return int(id), nil
 }
 
-// Sample authenticationHeader value "Authorization: Bearer <token>"
-// Token string return value sample eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30
-func extractJWT(authenticationHeader string) (tokenString string, err error) {
+// authenticationHeader sample value = Authorization: Bearer <token>
+// tokenString and token sample value = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30
+func validateAndParse(authenticationHeader, key string) (any, error) {
+	token, err := validate(authenticationHeader)
+	if err != nil {
+		return nil, err
+	}
+
+	return parseClaim(token, key), nil
+}
+
+// INPUT: Authenticate: Bearer <token>
+// OUTPUT: token
+func extractTokenString(authenticationHeader string) (string, error) {
 	if strings.TrimSpace(authenticationHeader) == "" {
 		return "", errors.New("authorization header is required")
 	}
@@ -58,8 +75,12 @@ func extractJWT(authenticationHeader string) (tokenString string, err error) {
 	return parts[1], nil
 }
 
-// Sample tokenString value eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30
-func validate(tokenString string) (*jwt.Token, error) {
+func validate(authenticationHeader string) (*jwt.Token, error) {
+	tokenString, err := extractTokenString(authenticationHeader)
+	if err != nil {
+		return nil, err
+	}
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
@@ -71,22 +92,20 @@ func validate(tokenString string) (*jwt.Token, error) {
 		return nil, err
 	}
 
+	exp, ok := parseClaim(token, "exp").(float64)
+	if !ok {
+		return nil, errors.New("invalid exp token claims")
+	}
+
+	if time.Now().After(time.Unix(int64(exp), 0)) {
+		return nil, errors.New("token expired")
+	}
+
 	return token, nil
 }
 
-func parseClaims(token *jwt.Token) (currentUserId int, err error) {
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return 0, err
-	}
-
-	// JWT numbers are parsed as float64
-	currentUserIdFloat, ok := claims["currentUserId"].(float64)
-	if !ok {
-		return 0, err
-	}
-
-	return int(currentUserIdFloat), nil
+func parseClaim(token *jwt.Token, key string) any {
+	return token.Claims.(jwt.MapClaims)[key]
 }
 
 func getSecretKey() []byte {

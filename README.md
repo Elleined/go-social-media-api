@@ -1,11 +1,6 @@
-# This project uses the dependencies:
-1. Gin: REST API ENDPOINTS
-2. godotenv: .ENV FILES
-3. sqlx: DATABASE INTERACTION
-4. golang-migrate (CLI TOOL and Dependency): DATABASE MIGRATION
-5. go-sql-driver/mysql: MySQL DRIVER
-6. golang/x/crpyto: For bcrypt encryption
-7. golang-jwt/jwt/v5: For JWT
+# Token
+1. Refresh Token 1 Month
+2. Access Token 15 Minutes
 
 # Validations
 ## User

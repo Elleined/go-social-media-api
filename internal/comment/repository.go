@@ -21,18 +21,18 @@ type (
 	}
 
 	RepositoryImpl struct {
-		db *sqlx.DB
+		*sqlx.DB
 	}
 )
 
 func NewRepository(db *sqlx.DB) Repository {
 	return &RepositoryImpl{
-		db: db,
+		DB: db,
 	}
 }
 
-func (r RepositoryImpl) save(authorId, postId int, content string) (id int64, err error) {
-	result, err := r.db.NamedExec("INSERT INTO comment (author_id, post_id, content) VALUE (:authorId, :postId, :content)", map[string]any{
+func (repository RepositoryImpl) save(authorId, postId int, content string) (id int64, err error) {
+	result, err := repository.NamedExec("INSERT INTO comment (author_id, post_id, content) VALUE (:authorId, :postId, :content)", map[string]any{
 		"authorId": authorId,
 		"postId":   postId,
 		"content":  content,
@@ -49,7 +49,7 @@ func (r RepositoryImpl) save(authorId, postId int, content string) (id int64, er
 	return id, nil
 }
 
-func (r RepositoryImpl) findAll(postId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Comment], error) {
+func (repository RepositoryImpl) findAll(postId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Comment], error) {
 	if !utils.IsInDBTag(request.Field, Comment{}) {
 		request.Field = "created_at"
 		log.Println("WARNING: field is not in database! defaulted to", request.Field)
@@ -61,11 +61,11 @@ func (r RepositoryImpl) findAll(postId int, isDeleted bool, request *paging.Page
 	}
 
 	var total int
-	err := r.db.Get(&total, "SELECT COUNT(*) FROM comment WHERE post_id = ? AND is_deleted = ?", postId, isDeleted)
+	err := repository.Get(&total, "SELECT COUNT(*) FROM comment WHERE post_id = ? AND is_deleted = ?", postId, isDeleted)
 
 	comments := make([]Comment, request.PageSize)
 	query := fmt.Sprintf("SELECT * FROM comment WHERE post_id = ? AND is_deleted = ? ORDER BY %s %s LIMIT ? OFFSET ?", request.Field, request.SortBy)
-	err = r.db.Select(&comments, query, postId, isDeleted, request.PageSize, request.Offset())
+	err = repository.Select(&comments, query, postId, isDeleted, request.PageSize, request.Offset())
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +73,8 @@ func (r RepositoryImpl) findAll(postId int, isDeleted bool, request *paging.Page
 	return paging.NewPage(comments, request, total), nil
 }
 
-func (r RepositoryImpl) updateContent(currentUserId, postId, commentId int, newContent string) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE comment SET content = :content WHERE id = :commentId AND author_id = :authorId AND post_id = :postId", map[string]any{
+func (repository RepositoryImpl) updateContent(currentUserId, postId, commentId int, newContent string) (affectedRows int64, err error) {
+	result, err := repository.NamedExec("UPDATE comment SET content = :content WHERE id = :commentId AND author_id = :authorId AND post_id = :postId", map[string]any{
 		"authorId":  currentUserId,
 		"postId":    postId,
 		"commentId": commentId,
@@ -92,8 +92,8 @@ func (r RepositoryImpl) updateContent(currentUserId, postId, commentId int, newC
 	return affectedRows, nil
 }
 
-func (r RepositoryImpl) updateAttachment(currentUserId, postId, commentId int, newAttachment string) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE comment SET attachment = :attachment WHERE id = :commentId AND author_id = :authorId AND post_id = :postId", map[string]any{
+func (repository RepositoryImpl) updateAttachment(currentUserId, postId, commentId int, newAttachment string) (affectedRows int64, err error) {
+	result, err := repository.NamedExec("UPDATE comment SET attachment = :attachment WHERE id = :commentId AND author_id = :authorId AND post_id = :postId", map[string]any{
 		"authorId":   currentUserId,
 		"postId":     postId,
 		"commentId":  commentId,
@@ -111,8 +111,8 @@ func (r RepositoryImpl) updateAttachment(currentUserId, postId, commentId int, n
 	return affectedRows, nil
 }
 
-func (r RepositoryImpl) deleteById(currentUserId, postId, commentId int) (affectedRows int64, err error) {
-	result, err := r.db.NamedExec("UPDATE comment SET is_deleted = true WHERE id = :commentId AND author_id = :currentUserId AND post_id = :postId", map[string]any{
+func (repository RepositoryImpl) deleteById(currentUserId, postId, commentId int) (affectedRows int64, err error) {
+	result, err := repository.NamedExec("UPDATE comment SET is_deleted = true WHERE id = :commentId AND author_id = :currentUserId AND post_id = :postId", map[string]any{
 		"currentUserId": currentUserId,
 		"postId":        postId,
 		"commentId":     commentId,

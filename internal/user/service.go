@@ -4,7 +4,6 @@ import (
 	"errors"
 	"social-media-application/internal/paging"
 	pd "social-media-application/internal/user/password"
-	"social-media-application/utils"
 	"strings"
 )
 
@@ -21,8 +20,6 @@ type (
 
 		changeStatus(userId int, isActive bool) (affectedRows int64, err error)
 		changePassword(userId int, newPassword string) (affectedRows int64, err error)
-
-		login(username, password string) (jwt string, err error)
 	}
 
 	ServiceImpl struct {
@@ -156,35 +153,4 @@ func (s ServiceImpl) changePassword(userId int, newPassword string) (affectedRow
 	}
 
 	return affectedRows, nil
-}
-
-func (s ServiceImpl) login(username string, password string) (jwt string, err error) {
-	if strings.TrimSpace(username) == "" {
-		return "", errors.New("username is required")
-	}
-
-	if strings.TrimSpace(password) == "" {
-		return "", errors.New("password is required")
-	}
-
-	user, err := s.repository.findByEmail(username)
-	if err != nil {
-		return "", errors.New("invalid credentials " + err.Error())
-	}
-
-	if pd.IsPasswordMatch(password, user.Password) {
-		return "", errors.New("invalid credentials ")
-	}
-
-	user, err = s.getByEmail(user.Email)
-	if err != nil {
-		return "", errors.New("invalid credentials" + err.Error())
-	}
-
-	jwt, err = utils.GenerateJWT(user.Id)
-	if err != nil {
-		return "", errors.New("cannot generate jwt: " + err.Error())
-	}
-
-	return jwt, nil
 }
