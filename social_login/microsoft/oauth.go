@@ -10,6 +10,10 @@ import (
 	"os"
 )
 
+type Controller struct {
+	*oauth2.Config
+}
+
 func InitMSLogin() *oauth2.Config {
 	return &oauth2.Config{
 		RedirectURL:  os.Getenv("MICROSOFT_REDIRECT_URL"),
@@ -20,13 +24,9 @@ func InitMSLogin() *oauth2.Config {
 	}
 }
 
-type Controller struct {
-	*oauth2.Config
-}
-
 func NewController(config *oauth2.Config) *Controller {
 	return &Controller{
-		config,
+		Config: config,
 	}
 }
 
