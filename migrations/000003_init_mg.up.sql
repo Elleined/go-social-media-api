@@ -9,4 +9,4 @@ CREATE TABLE IF NOT EXISTS refresh_token (
 );
 
 CREATE INDEX idx_created_at ON refresh_token(created_at);
-CREATE UNIQUE INDEX token ON refresh_token(token);
+CREATE UNIQUE INDEX token_idx ON refresh_token(token);

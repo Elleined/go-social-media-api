@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS user_social;
+DROP TABLE IF EXISTS provider_type;
+
+ALTER TABLE user MODIFY COLUMN password VARCHAR(50) NOT NULL;
