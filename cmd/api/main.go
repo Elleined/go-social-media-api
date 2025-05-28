@@ -10,6 +10,7 @@ import (
 	"social-media-application/internal/post"
 	pr "social-media-application/internal/post/reaction"
 	"social-media-application/internal/refresh"
+	"social-media-application/internal/social/provider_type"
 	"social-media-application/internal/user"
 	mw "social-media-application/middlewares"
 	"social-media-application/social_login/google"
@@ -81,6 +82,12 @@ func main() {
 
 	// Initialize middlewares
 	r.Use(mw.SecurityHeaders)
+
+	// Initialize provider type module
+	providerRepository := provider_type.NewRepository(db)
+	providerService := provider_type.NewService(providerRepository)
+	providerController := provider_type.NewController(providerService)
+	providerController.RegisterRoutes(r)
 
 	// Initialize refresh token module
 	refreshRepository := refresh.NewRepository(db)

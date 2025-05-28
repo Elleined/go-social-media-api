@@ -60,7 +60,7 @@ func (repository *RepositoryImpl) findById(id int) (User, error) {
 
 	err := repository.Get(&user, "SELECT * FROM user WHERE id = ?", id)
 	if err != nil {
-		return User{}, err
+		return user, err
 	}
 
 	return user, nil
