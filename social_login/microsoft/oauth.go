@@ -45,7 +45,7 @@ func (c Controller) login(ctx *gin.Context) {
 		oauth2.AccessTypeOffline,
 		oauth2.SetAuthURLParam("prompt", "login"),
 	)
-	ctx.Redirect(http.StatusFound, url)
+	ctx.Redirect(http.StatusTemporaryRedirect, url)
 }
 
 func (c Controller) callback(ctx *gin.Context) {
@@ -80,13 +80,7 @@ func (c Controller) callback(ctx *gin.Context) {
 		}
 	}(resp.Body)
 
-	userInfo := struct {
-		ID                string `json:"id"`
-		DisplayName       string `json:"display_name"`
-		Mail              string `json:"mail"`
-		UserPrincipalName string `json:"user_principal_name"`
-	}{}
-
+	var userInfo any
 	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": "failed to parse user info",
