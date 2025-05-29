@@ -4,9 +4,9 @@ import "github.com/jmoiron/sqlx"
 
 type (
 	Repository interface {
-		save(providerTypeId, providerId, userId int) (id int64, err error)
-		findByProviderTypeAndId(providerTypeId, providerId int) (Social, error)
-		isAlreadyExists(providerTypeId, providerId int) (bool, error)
+		save(providerTypeId, userId int, providerId string) (id int64, err error)
+		findByProviderTypeAndId(providerTypeId int, providerId string) (Social, error)
+		isAlreadyExists(providerTypeId int, providerId string) (bool, error)
 	}
 
 	RepositoryImpl struct {
@@ -20,7 +20,7 @@ func NewRepository(db *sqlx.DB) Repository {
 	}
 }
 
-func (r RepositoryImpl) save(providerTypeId, providerId, userId int) (id int64, err error) {
+func (r RepositoryImpl) save(providerTypeId, userId int, providerId string) (id int64, err error) {
 	result, err := r.NamedExec("INSERT INTO user_social(provider_type_id, provider_id, user_id) VALUES (:providerTypeId, :providerId, :userId)", map[string]any{
 		"providerTypeId": providerTypeId,
 		"providerId":     providerId,
@@ -38,7 +38,7 @@ func (r RepositoryImpl) save(providerTypeId, providerId, userId int) (id int64, 
 	return id, nil
 }
 
-func (r RepositoryImpl) findByProviderTypeAndId(providerTypeId, providerId int) (Social, error) {
+func (r RepositoryImpl) findByProviderTypeAndId(providerTypeId int, providerId string) (Social, error) {
 	var social Social
 	err := r.Get(&social, "SELECT * FROM user_social WHERE provider_type_id = ? AND provider_id = ?", providerTypeId, providerId)
 	if err != nil {
@@ -48,7 +48,7 @@ func (r RepositoryImpl) findByProviderTypeAndId(providerTypeId, providerId int) 
 	return social, nil
 }
 
-func (r RepositoryImpl) isAlreadyExists(providerTypeId, providerId int) (bool, error) {
+func (r RepositoryImpl) isAlreadyExists(providerTypeId int, providerId string) (bool, error) {
 	var exists bool
 	err := r.Get(&exists, "SELECT EXISTS(SELECT 1 FROM user_social WHERE provider_type_id = ? AND provider_id = ?)", providerTypeId, providerId)
 	if err != nil {

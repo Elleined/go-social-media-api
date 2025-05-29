@@ -1,12 +1,15 @@
 package social_login
 
-import "errors"
+import (
+	"errors"
+	"strings"
+)
 
 type (
 	Service interface {
-		Save(providerTypeId, providerId, userId int) (id int64, err error)
-		GetByProviderTypeAndId(providerTypeId, providerId int) (Social, error)
-		IsAlreadyExists(providerTypeId, providerId int) (bool, error)
+		Save(providerTypeId, userId int, providerId string) (id int64, err error)
+		GetByProviderTypeAndId(providerTypeId int, providerId string) (Social, error)
+		IsAlreadyExists(providerTypeId int, providerId string) (bool, error)
 	}
 
 	ServiceImpl struct {
@@ -20,12 +23,12 @@ func NewService(repository Repository) Service {
 	}
 }
 
-func (s ServiceImpl) Save(providerTypeId, providerId, userId int) (id int64, err error) {
+func (s ServiceImpl) Save(providerTypeId, userId int, providerId string) (id int64, err error) {
 	if providerTypeId <= 0 {
 		return 0, errors.New("provider type id is required")
 	}
 
-	if providerId <= 0 {
+	if strings.TrimSpace(providerId) == "" {
 		return 0, errors.New("provider id is required")
 	}
 
@@ -33,7 +36,7 @@ func (s ServiceImpl) Save(providerTypeId, providerId, userId int) (id int64, err
 		return 0, errors.New("user id is required")
 	}
 
-	id, err = s.repository.save(providerTypeId, providerId, userId)
+	id, err = s.repository.save(providerTypeId, userId, providerId)
 	if err != nil {
 		return 0, err
 	}
@@ -41,12 +44,12 @@ func (s ServiceImpl) Save(providerTypeId, providerId, userId int) (id int64, err
 	return id, nil
 }
 
-func (s ServiceImpl) GetByProviderTypeAndId(providerTypeId, providerId int) (Social, error) {
+func (s ServiceImpl) GetByProviderTypeAndId(providerTypeId int, providerId string) (Social, error) {
 	if providerTypeId <= 0 {
 		return Social{}, errors.New("provider type id is required")
 	}
 
-	if providerId <= 0 {
+	if strings.TrimSpace(providerId) == "" {
 		return Social{}, errors.New("provider id is required")
 	}
 
@@ -58,12 +61,12 @@ func (s ServiceImpl) GetByProviderTypeAndId(providerTypeId, providerId int) (Soc
 	return social, nil
 }
 
-func (s ServiceImpl) IsAlreadyExists(providerTypeId, providerId int) (bool, error) {
+func (s ServiceImpl) IsAlreadyExists(providerTypeId int, providerId string) (bool, error) {
 	if providerTypeId <= 0 {
 		return false, errors.New("provider type id is required")
 	}
 
-	if providerId <= 0 {
+	if strings.TrimSpace(providerId) == "" {
 		return false, errors.New("provider id is required")
 	}
 
