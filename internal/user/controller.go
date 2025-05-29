@@ -8,6 +8,7 @@ import (
 	pd "social-media-application/internal/user/password"
 	"social-media-application/utils"
 	"strconv"
+	"strings"
 )
 
 type (
@@ -246,7 +247,15 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 	user, err := c.service.getByEmail(loginRequest.Username)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "login failed! invalid credentials ",
+			"message": "login failed! invalid credentials",
+		})
+		return
+	}
+
+	// Meaning it was social login
+	if strings.TrimSpace(user.Password) == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "login failed! invalid credentials",
 		})
 		return
 	}
@@ -260,7 +269,7 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 
 	jwt, err := utils.GenerateJWT(user.Id)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "login failed! " + err.Error(),
 		})
 		return
@@ -268,7 +277,7 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 
 	token, err := c.refreshService.Save(user.Id)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "login failed! " + err.Error(),
 		})
 		return
