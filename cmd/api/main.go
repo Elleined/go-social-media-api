@@ -10,11 +10,11 @@ import (
 	"social-media-application/internal/post"
 	pr "social-media-application/internal/post/reaction"
 	"social-media-application/internal/refresh"
-	"social-media-application/internal/social/provider_type"
+	"social-media-application/internal/social_login/provider/google"
+	"social-media-application/internal/social_login/provider/microsoft"
+	provider_type2 "social-media-application/internal/social_login/provider_type"
 	"social-media-application/internal/user"
 	mw "social-media-application/middlewares"
-	"social-media-application/social_login/google"
-	"social-media-application/social_login/microsoft"
 	"social-media-application/utils"
 	"strings"
 
@@ -84,9 +84,9 @@ func main() {
 	r.Use(mw.SecurityHeaders)
 
 	// Initialize provider type module
-	providerRepository := provider_type.NewRepository(db)
-	providerService := provider_type.NewService(providerRepository)
-	providerController := provider_type.NewController(providerService)
+	providerRepository := provider_type2.NewRepository(db)
+	providerService := provider_type2.NewService(providerRepository)
+	providerController := provider_type2.NewController(providerService)
 	providerController.RegisterRoutes(r)
 
 	// Initialize refresh token module

@@ -1,4 +1,4 @@
-package social
+package social_login
 
 import "time"
 
