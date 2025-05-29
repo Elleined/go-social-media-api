@@ -14,14 +14,10 @@ type (
 	}
 )
 
-func (r RepositoryImpl) isAlreadyExists(providerTypeId, providerId int) (bool, error) {
-	var exists bool
-	err := r.Get(&exists, "SELECT EXISTS(SELECT 1 FROM user_social WHERE provider_type_id = ? AND provider_id = ?)", providerTypeId, providerId)
-	if err != nil {
-		return exists, err
+func NewRepository(db *sqlx.DB) Repository {
+	return &RepositoryImpl{
+		DB: db,
 	}
-
-	return exists, nil
 }
 
 func (r RepositoryImpl) save(providerTypeId, providerId, userId int) (id int64, err error) {
@@ -52,8 +48,12 @@ func (r RepositoryImpl) findByProviderTypeAndId(providerTypeId, providerId int) 
 	return social, nil
 }
 
-func NewRepository(db *sqlx.DB) Repository {
-	return &RepositoryImpl{
-		DB: db,
+func (r RepositoryImpl) isAlreadyExists(providerTypeId, providerId int) (bool, error) {
+	var exists bool
+	err := r.Get(&exists, "SELECT EXISTS(SELECT 1 FROM user_social WHERE provider_type_id = ? AND provider_id = ?)", providerTypeId, providerId)
+	if err != nil {
+		return exists, err
 	}
+
+	return exists, nil
 }
