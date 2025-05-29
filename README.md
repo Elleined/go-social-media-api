@@ -160,6 +160,3 @@ docker compose up -d backend-migration
 ```
 docker compose up -d backend
 ```
-
-# Useful links
-[Google Login](https://github.com/hrishiksh/golang-oauth2-starter)
