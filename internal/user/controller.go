@@ -267,7 +267,7 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 		return
 	}
 
-	jwt, err := utils.GenerateJWT(user.Id)
+	accessToken, err := utils.GenerateJWT(user.Id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "login failed! " + err.Error(),
@@ -275,7 +275,7 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := c.refreshService.Save(user.Id)
+	refreshToken, err := c.refreshService.Save(user.Id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "login failed! " + err.Error(),
@@ -284,8 +284,8 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"refresh_token": token,
-		"access_token":  jwt,
+		"refresh_token": refreshToken,
+		"access_token":  accessToken,
 		"message":       "saved the refresh token securely",
 	})
 }

@@ -4,9 +4,9 @@ import "errors"
 
 type (
 	Service interface {
-		save(providerTypeId, providerId, userId int) (id int64, err error)
-		findByProviderTypeAndId(providerTypeId, providerId int) (Social, error)
-		isAlreadyExists(providerTypeId, providerId int) (bool, error)
+		Save(providerTypeId, providerId, userId int) (id int64, err error)
+		GetByProviderTypeAndId(providerTypeId, providerId int) (Social, error)
+		IsAlreadyExists(providerTypeId, providerId int) (bool, error)
 	}
 
 	ServiceImpl struct {
@@ -20,7 +20,7 @@ func NewService(repository Repository) Service {
 	}
 }
 
-func (s ServiceImpl) save(providerTypeId, providerId, userId int) (id int64, err error) {
+func (s ServiceImpl) Save(providerTypeId, providerId, userId int) (id int64, err error) {
 	if providerTypeId <= 0 {
 		return 0, errors.New("provider type id is required")
 	}
@@ -41,7 +41,7 @@ func (s ServiceImpl) save(providerTypeId, providerId, userId int) (id int64, err
 	return id, nil
 }
 
-func (s ServiceImpl) findByProviderTypeAndId(providerTypeId, providerId int) (Social, error) {
+func (s ServiceImpl) GetByProviderTypeAndId(providerTypeId, providerId int) (Social, error) {
 	if providerTypeId <= 0 {
 		return Social{}, errors.New("provider type id is required")
 	}
@@ -58,7 +58,7 @@ func (s ServiceImpl) findByProviderTypeAndId(providerTypeId, providerId int) (So
 	return social, nil
 }
 
-func (s ServiceImpl) isAlreadyExists(providerTypeId, providerId int) (bool, error) {
+func (s ServiceImpl) IsAlreadyExists(providerTypeId, providerId int) (bool, error) {
 	if providerTypeId <= 0 {
 		return false, errors.New("provider type id is required")
 	}

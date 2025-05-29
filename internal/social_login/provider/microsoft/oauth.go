@@ -61,7 +61,7 @@ func (c Controller) callback(ctx *gin.Context) {
 	code := ctx.Query("code")
 	if code == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "missing code",
+			"message": "missing code",
 		})
 		return
 	}
@@ -69,7 +69,7 @@ func (c Controller) callback(ctx *gin.Context) {
 	token, err := c.config.Exchange(ctx.Request.Context(), code)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "authentication failed " + err.Error(),
+			"message": "authentication failed " + err.Error(),
 		})
 		return
 	}
@@ -78,7 +78,7 @@ func (c Controller) callback(ctx *gin.Context) {
 	resp, err := client.Get("https://graph.microsoft.com/v1.0/me")
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "failed to get user information " + err.Error(),
+			"message": "failed to get user information " + err.Error(),
 		})
 		return
 	}
@@ -92,10 +92,16 @@ func (c Controller) callback(ctx *gin.Context) {
 	var userInfo any
 	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to parse user info",
+			"message": "failed to parse user info",
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, userInfo)
+	var refreshToken string
+	var accessToken string
+	ctx.JSON(http.StatusOK, gin.H{
+		"refresh_token": refreshToken,
+		"access_token":  accessToken,
+		"message":       "saved the refresh token securely",
+	})
 }

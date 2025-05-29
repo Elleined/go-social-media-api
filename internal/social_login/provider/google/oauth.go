@@ -2,7 +2,6 @@ package google
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -59,11 +58,10 @@ func (c Controller) login(ctx *gin.Context) {
 }
 
 func (c Controller) callback(ctx *gin.Context) {
-	fmt.Println("HELLO")
 	code := ctx.Query("code")
 	if code == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "missing code",
+			"message": "missing code",
 		})
 		return
 	}
@@ -71,7 +69,7 @@ func (c Controller) callback(ctx *gin.Context) {
 	token, err := c.config.Exchange(ctx.Request.Context(), code)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "authentication failed " + err.Error(),
+			"message": "authentication failed " + err.Error(),
 		})
 		return
 	}
@@ -80,7 +78,7 @@ func (c Controller) callback(ctx *gin.Context) {
 	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "failed to get user information " + err.Error(),
+			"message": "failed to get user information " + err.Error(),
 		})
 		return
 	}
@@ -91,13 +89,36 @@ func (c Controller) callback(ctx *gin.Context) {
 		}
 	}(resp.Body)
 
-	var userInfo any
+	userInfo := struct {
+		Email         string `json:"email"`
+		FamilyName    string `json:"family_name"`
+		GivenName     string `json:"given_name"`
+		Id            string `json:"id"`
+		Name          string `json:"name"`
+		Picture       string `json:"picture"`
+		VerifiedEmail bool   `json:"verified_email"`
+	}{}
 	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to parse user info",
+			"message": "failed to parse user info",
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, userInfo)
+	if !userInfo.VerifiedEmail {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "email not verified",
+		})
+		return
+	}
+
+	//socialUser := c.socialUserService.GetByProviderTypeAndId(1)
+
+	var refreshToken string
+	var accessToken string
+	ctx.JSON(http.StatusOK, gin.H{
+		"refresh_token": refreshToken,
+		"access_token":  accessToken,
+		"message":       "saved the refresh token securely",
+	})
 }
