@@ -1,3 +1,5 @@
+ALTER TABLE user MODIFY COLUMN password VARCHAR(50) NULL;
+
 CREATE TABLE IF NOT EXISTS provider_type (
     id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(25) NOT NULL UNIQUE
@@ -8,8 +10,6 @@ VALUES
     ("LOCAL"),
     ("MICROSOFT"),
     ("GOOGLE");
-
-CREATE UNIQUE INDEX name_idx ON provider_type(name);
 
 CREATE TABLE IF NOT EXISTS user_social (
     id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
@@ -23,5 +23,3 @@ CREATE TABLE IF NOT EXISTS user_social (
 );
 
 CREATE UNIQUE INDEX provider_id_idx ON user_social(provider_id);
-
-ALTER TABLE user MODIFY COLUMN password VARCHAR(50) NULL;
