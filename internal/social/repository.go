@@ -4,7 +4,7 @@ import "github.com/jmoiron/sqlx"
 
 type (
 	Repository interface {
-		save(providerTypeId, providerId, userId int, signUpEmail string) (id int64, err error)
+		save(providerTypeId, providerId, userId int) (id int64, err error)
 		findByProviderTypeAndId(providerTypeId, providerId int) (Social, error)
 	}
 
@@ -13,7 +13,7 @@ type (
 	}
 )
 
-func (r RepositoryImpl) save(providerTypeId, providerId, userId int, signUpEmail string) (id int64, err error) {
+func (r RepositoryImpl) save(providerTypeId, providerId, userId int) (id int64, err error) {
 	result, err := r.NamedExec("INSERT INTO user_social(provider_type_id, provider_id, user_id) VALUES (:providerTypeId, :providerId, :userId)", map[string]any{
 		"providerTypeId": providerTypeId,
 		"providerId":     providerId,
