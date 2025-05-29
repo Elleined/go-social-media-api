@@ -9,11 +9,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"social-media-application/internal/refresh"
 )
-
-type Controller struct {
-	*oauth2.Config
-}
 
 func InitGoogleLogin() *oauth2.Config {
 	return &oauth2.Config{
@@ -25,9 +22,15 @@ func InitGoogleLogin() *oauth2.Config {
 	}
 }
 
-func NewController(config *oauth2.Config) *Controller {
+type Controller struct {
+	config         *oauth2.Config
+	refreshService refresh.Service
+}
+
+func NewController(config *oauth2.Config, refreshService refresh.Service) *Controller {
 	return &Controller{
-		Config: config,
+		config:         config,
+		refreshService: refreshService,
 	}
 }
 
@@ -41,7 +44,7 @@ func (c Controller) RegisterRoutes(e *gin.Engine) {
 
 func (c Controller) login(ctx *gin.Context) {
 	// Redirect user to Google login page
-	url := c.AuthCodeURL(
+	url := c.config.AuthCodeURL(
 		"state",
 		oauth2.AccessTypeOffline,
 		oauth2.SetAuthURLParam("prompt", "login"),
@@ -59,7 +62,7 @@ func (c Controller) callback(ctx *gin.Context) {
 		return
 	}
 
-	token, err := c.Exchange(ctx.Request.Context(), code)
+	token, err := c.config.Exchange(ctx.Request.Context(), code)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "authentication failed " + err.Error(),
@@ -67,7 +70,7 @@ func (c Controller) callback(ctx *gin.Context) {
 		return
 	}
 
-	client := c.Client(ctx.Request.Context(), token)
+	client := c.config.Client(ctx.Request.Context(), token)
 	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
