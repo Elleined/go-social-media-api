@@ -27,11 +27,12 @@ func NewController(service Service) Controller {
 }
 
 func (c *ControllerImpl) RegisterRoutes(e *gin.Engine) {
-	r := e.Group("/users/refresh-tokens")
+	e.POST("/users/refresh-tokens", c.refresh)
+
+	r := e.Group("/users/refresh-tokens", middleware.JWT)
 	{
-		r.POST("", c.refresh)
-		r.GET("", c.getAllBy, middleware.JWT)
-		r.DELETE("/:id", c.revoke, middleware.JWT)
+		r.GET("", c.getAllBy)
+		r.DELETE("/:id", c.revoke)
 	}
 }
 
