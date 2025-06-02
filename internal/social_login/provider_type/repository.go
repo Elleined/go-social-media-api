@@ -7,6 +7,8 @@ type (
 		save(name string) (id int64, err error)
 
 		findById(id int) (ProviderType, error)
+		findByName(name string) (ProviderType, error)
+
 		findAll() ([]ProviderType, error)
 
 		update(id int, name string) (affectedRows int64, err error)
@@ -46,6 +48,16 @@ func (r RepositoryImpl) save(name string) (id int64, err error) {
 func (r RepositoryImpl) findById(id int) (ProviderType, error) {
 	var providerType ProviderType
 	err := r.Get(&providerType, `SELECT * FROM provider_type WHERE id = ?`, id)
+	if err != nil {
+		return ProviderType{}, err
+	}
+
+	return providerType, nil
+}
+
+func (r RepositoryImpl) findByName(name string) (ProviderType, error) {
+	var providerType ProviderType
+	err := r.Get(&providerType, `SELECT * FROM provider_type WHERE name = ?`, name)
 	if err != nil {
 		return ProviderType{}, err
 	}

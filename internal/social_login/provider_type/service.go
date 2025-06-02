@@ -10,6 +10,7 @@ type (
 		save(name string) (id int64, err error)
 
 		getById(id int) (ProviderType, error)
+		GetByName(name string) (ProviderType, error)
 		getAll() ([]ProviderType, error)
 
 		update(id int, name string) (affectedRows int64, err error)
@@ -55,6 +56,19 @@ func (s ServiceImpl) getById(id int) (ProviderType, error) {
 	}
 
 	providerType, err := s.repository.findById(id)
+	if err != nil {
+		return ProviderType{}, err
+	}
+
+	return providerType, nil
+}
+
+func (s ServiceImpl) GetByName(name string) (ProviderType, error) {
+	if strings.TrimSpace(name) == "" {
+		return ProviderType{}, errors.New("name is required")
+	}
+
+	providerType, err := s.repository.findByName(name)
 	if err != nil {
 		return ProviderType{}, err
 	}
