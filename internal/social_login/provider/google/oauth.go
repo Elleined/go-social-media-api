@@ -11,6 +11,7 @@ import (
 	"social-media-application/internal/refresh"
 	"social-media-application/internal/social_login"
 	"social-media-application/internal/user"
+	middleware "social-media-application/middlewares"
 )
 
 func InitGoogleLogin() *oauth2.Config {
@@ -112,13 +113,32 @@ func (c Controller) callback(ctx *gin.Context) {
 		return
 	}
 
-	//socialUser := c.socialUserService.GetByProviderTypeAndId(1)
+	socialUser, err := c.socialUserService.GetByProviderTypeAndId(3, userInfo.Id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "doesn't exists " + err.Error(),
+		})
+		return
+	}
 
-	var refreshToken string
-	var accessToken string
+	accessToken, err := middleware.GenerateJWT(socialUser.UserId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "login failed! " + err.Error(),
+		})
+		return
+	}
+
+	refreshToken, err := c.refreshService.Save(socialUser.UserId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "login failed! " + err.Error(),
+		})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"refresh_token": refreshToken,
 		"access_token":  accessToken,
-		"message":       "saved the refresh token securely",
 	})
 }

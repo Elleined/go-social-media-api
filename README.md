@@ -1,6 +1,19 @@
-# Token
-1. Refresh Token 1 Month
-2. Access Token 15 Minutes
+# System Features
+## Main features
+1. CRUD of posts
+2. CRUD of post reactions
+3. CRUD of comments
+4. CRUD of comment reactions
+5. CRUD of emoji
+6. CRUD of provider type
+7. CRUD of users
+
+## Special features
+1. Robust pagination
+2. Social login (Google and Microsoft) and local login [Documented here](https://github.com/Elleined/go-social-media-api/issues/2)
+3. Refresh token for 1 week [Refresh token feature](https://github.com/Elleined/security-project?tab=readme-ov-file#refresh-token)
+4. Applied access token for 15 minutes as middleware in protected routes
+
 
 # Validations
 ## User

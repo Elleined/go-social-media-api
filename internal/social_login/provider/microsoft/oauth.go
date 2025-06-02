@@ -102,6 +102,5 @@ func (c Controller) callback(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"refresh_token": refreshToken,
 		"access_token":  accessToken,
-		"message":       "saved the refresh token securely",
 	})
 }
