@@ -1,6 +1,7 @@
 package refresh
 
 import (
+	"database/sql"
 	"errors"
 	"log"
 	"strings"
@@ -11,6 +12,7 @@ type (
 		isValid(token Token) error
 
 		Save(userId int) (token string, err error)
+		SaveWith(userId int, expiresAt sql.NullTime) (token string, err error)
 
 		getBy(token string) (Token, error)
 		getAllBy(userId int) ([]Token, error)
@@ -48,6 +50,19 @@ func (s ServiceImpl) Save(userId int) (token string, err error) {
 	}
 
 	token, err = s.repository.save(userId)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+func (s ServiceImpl) SaveWith(userId int, expiresAt sql.NullTime) (token string, err error) {
+	if userId <= 0 {
+		return "", errors.New("userId is invalid")
+	}
+
+	token, err = s.repository.saveWith(userId, expiresAt)
 	if err != nil {
 		return "", err
 	}

@@ -1,6 +1,7 @@
 package refresh
 
 import (
+	"database/sql"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"os"
@@ -11,6 +12,8 @@ import (
 type (
 	Repository interface {
 		save(userId int) (token string, err error)
+		saveWith(userId int, expiresAt sql.NullTime) (token string, err error)
+
 		findBy(token string) (Token, error)
 
 		findAllBy(userId int) ([]Token, error)
@@ -39,6 +42,20 @@ func (repository RepositoryImpl) save(userId int) (token string, err error) {
 	_, err = repository.NamedExec("INSERT INTO refresh_token(token, expires_at, user_id) VALUES (:token, :expiresAt, :userId)", map[string]any{
 		"token":     token,
 		"expiresAt": time.Now().AddDate(0, 0, tokenExpiration),
+		"userId":    userId,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+func (repository RepositoryImpl) saveWith(userId int, expiresAt sql.NullTime) (token string, err error) {
+	token = uuid.New().String()
+	_, err = repository.NamedExec("INSERT INTO refresh_token(token, expires_at, user_id) VALUES (:token, :expiresAt, :userId)", map[string]any{
+		"token":     token,
+		"expiresAt": expiresAt,
 		"userId":    userId,
 	})
 	if err != nil {
