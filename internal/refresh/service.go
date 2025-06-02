@@ -58,6 +58,10 @@ func (s ServiceImpl) Save(userId int) (token string, err error) {
 }
 
 func (s ServiceImpl) SaveWith(userId int, expiresAt sql.NullTime) (token string, err error) {
+	if userId <= 0 {
+		return "", errors.New("userId is invalid")
+	}
+
 	token, err = s.repository.saveWith(userId, expiresAt)
 	if err != nil {
 		return "", err
