@@ -8,6 +8,7 @@ import (
 	pd "social-media-application/internal/user/password"
 	"social-media-application/middlewares"
 	"strconv"
+	"strings"
 )
 
 type (
@@ -246,7 +247,15 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 	user, err := c.service.getByEmail(loginRequest.Username)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "login failed! invalid credentials ",
+			"message": "login failed! invalid credentials",
+		})
+		return
+	}
+
+	// Meaning it was social login
+	if strings.TrimSpace(user.Password) == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "login failed! Please login via social account",
 		})
 		return
 	}
@@ -258,24 +267,24 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 		return
 	}
 
-	jwt, err := middleware.GenerateJWT(user.Id)
+	accessToken, err := middleware.GenerateJWT(user.Id)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "login failed! " + err.Error(),
 		})
 		return
 	}
 
-	token, err := c.refreshService.Save(user.Id)
+	refreshToken, err := c.refreshService.Save(user.Id)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "login failed! " + err.Error(),
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"refresh_token": token,
-		"access_token":  jwt,
+		"refresh_token": refreshToken,
+		"access_token":  accessToken,
 	})
 }
