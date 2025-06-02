@@ -10,7 +10,10 @@ import (
 	"os"
 	"social-media-application/internal/refresh"
 	"social-media-application/internal/social_login"
+	"social-media-application/internal/social_login/provider_type"
 	"social-media-application/internal/user"
+	middleware "social-media-application/middlewares"
+	"strings"
 )
 
 func InitMSLogin() *oauth2.Config {
@@ -24,18 +27,20 @@ func InitMSLogin() *oauth2.Config {
 }
 
 type Controller struct {
-	config            *oauth2.Config
-	refreshService    refresh.Service
-	socialUserService social_login.Service
-	userService       user.Service
+	config              *oauth2.Config
+	refreshService      refresh.Service
+	socialUserService   social_login.Service
+	userService         user.Service
+	providerTypeService provider_type.Service
 }
 
-func NewController(config *oauth2.Config, refreshService refresh.Service, socialUserService social_login.Service, userService user.Service) *Controller {
+func NewController(config *oauth2.Config, refreshService refresh.Service, socialUserService social_login.Service, userService user.Service, providerTypeService provider_type.Service) *Controller {
 	return &Controller{
-		config:            config,
-		refreshService:    refreshService,
-		socialUserService: socialUserService,
-		userService:       userService,
+		config:              config,
+		refreshService:      refreshService,
+		socialUserService:   socialUserService,
+		userService:         userService,
+		providerTypeService: providerTypeService,
 	}
 }
 
@@ -58,6 +63,7 @@ func (c Controller) login(ctx *gin.Context) {
 }
 
 func (c Controller) callback(ctx *gin.Context) {
+	// Extract the "code" query parameter from the URL.
 	code := ctx.Query("code")
 	if code == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -66,6 +72,7 @@ func (c Controller) callback(ctx *gin.Context) {
 		return
 	}
 
+	// Exchange the authorization code for an OAuth2 token.
 	token, err := c.config.Exchange(ctx.Request.Context(), code)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -74,7 +81,10 @@ func (c Controller) callback(ctx *gin.Context) {
 		return
 	}
 
+	// Create an HTTP client using the token.
 	client := c.config.Client(ctx.Request.Context(), token)
+
+	// Make a GET request to the social provider's user info endpoint.
 	resp, err := client.Get("https://graph.microsoft.com/v1.0/me")
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -89,18 +99,130 @@ func (c Controller) callback(ctx *gin.Context) {
 		}
 	}(resp.Body)
 
-	var userInfo any
+	// Define a struct to decode the JSON response from the user info endpoint.
+	userInfo := struct {
+		DisplayName       string `json:"displayName"`
+		GivenName         string `json:"givenName"`
+		Id                string `json:"id"`
+		JobTitle          string `json:"jobTitle"`
+		Mail              string `json:"mail"`
+		MobilePhone       string `json:"mobilePhone"`
+		OfficeLocation    string `json:"officeLocation"`
+		PreferredLanguage string `json:"preferredLanguage"`
+		Surname           string `json:"surname"`
+		UserPrincipalName string `json:"userPrincipalName"`
+	}{}
 	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "failed to parse user info",
 		})
 		return
 	}
+	// End of microsoft callback
 
-	var refreshToken string
-	var accessToken string
+	// Start of backend logic
+	// Get provider type if exists
+	providerType, err := c.providerTypeService.GetByName("MICROSOFT")
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "failed to get provider type",
+		})
+		return
+	}
+
+	// 1 User already exists
+	socialUser, err := c.socialUserService.GetByProviderTypeAndId(providerType.Id, userInfo.Id)
+	if err == nil {
+		accessToken, refreshToken, err := c.generateTokens(socialUser.UserId)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "login failed! " + err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"refresh_token": refreshToken,
+			"access_token":  accessToken,
+		})
+		return
+	}
+
+	// 2 User already exist and linked to other social account
+	existingUser, err := c.userService.GetByEmail(userInfo.Mail)
+	if err == nil {
+		// Means local user
+		if strings.TrimSpace(existingUser.Password) != "" {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Login failed! Please login locally",
+			})
+			return
+		}
+
+		_, err := c.socialUserService.Save(providerType.Id, existingUser.Id, userInfo.Id)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "login failed! " + err.Error(),
+			})
+			return
+		}
+
+		accessToken, refreshToken, err := c.generateTokens(existingUser.Id)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "login failed! " + err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"refresh_token": refreshToken,
+			"access_token":  accessToken,
+		})
+		return
+	}
+
+	// 3 User not exists and no links to other social account
+	id, err := c.userService.SaveWithoutPassword(userInfo.GivenName, userInfo.Surname, userInfo.Mail)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "login failed! " + err.Error(),
+		})
+		return
+	}
+
+	_, err = c.socialUserService.Save(providerType.Id, int(id), userInfo.Id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "login failed! " + err.Error(),
+		})
+		return
+	}
+
+	accessToken, refreshToken, err := c.generateTokens(int(id))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "login failed! " + err.Error(),
+		})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"refresh_token": refreshToken,
 		"access_token":  accessToken,
 	})
+}
+
+func (c Controller) generateTokens(userId int) (accessToken, refreshToken string, err error) {
+	accessToken, err = middleware.GenerateJWT(userId)
+	if err != nil {
+		return "", "", err
+	}
+
+	refreshToken, err = c.refreshService.Save(userId)
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
 }
