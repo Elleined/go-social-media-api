@@ -10,9 +10,10 @@ import (
 type (
 	Service interface {
 		save(firstName, lastName, email, password string) (id int64, err error)
+		SaveWithoutPassword(firstName, lastName, email string) (id int64, err error) // for social register
 
 		getById(id int) (User, error)
-		getByEmail(email string) (User, error)
+		GetByEmail(email string) (User, error)
 
 		getAll(isActive bool, request *paging.PageRequest) (*paging.Page[User], error)
 
@@ -72,6 +73,15 @@ func (s ServiceImpl) save(firstName, lastName, email, password string) (id int64
 	return id, nil
 }
 
+func (s ServiceImpl) SaveWithoutPassword(firstName, lastName, email string) (id int64, err error) {
+	id, err = s.save(firstName, lastName, email, "")
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
 func (s ServiceImpl) getById(id int) (User, error) {
 	if id <= 0 {
 		return User{}, errors.New("user id is required")
@@ -85,7 +95,7 @@ func (s ServiceImpl) getById(id int) (User, error) {
 	return user, nil
 }
 
-func (s ServiceImpl) getByEmail(email string) (User, error) {
+func (s ServiceImpl) GetByEmail(email string) (User, error) {
 	if strings.TrimSpace(email) == "" {
 		return User{}, errors.New("email is required")
 	}
@@ -163,6 +173,6 @@ func (s ServiceImpl) changePassword(userId int, newPassword string) (affectedRow
 	if affectedRows <= 0 {
 		return 0, errors.New("no rows affected")
 	}
-	
+
 	return affectedRows, nil
 }

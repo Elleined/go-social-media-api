@@ -12,6 +12,7 @@ import (
 	"social-media-application/internal/social_login"
 	"social-media-application/internal/user"
 	middleware "social-media-application/middlewares"
+	"strings"
 )
 
 func InitGoogleLogin() *oauth2.Config {
@@ -113,15 +114,62 @@ func (c Controller) callback(ctx *gin.Context) {
 		return
 	}
 
-	socialUser, err := c.socialUserService.GetByProviderTypeAndId(3, userInfo.Id)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": "doesn't exists " + err.Error(),
+	const GOOGLE = 3
+
+	// 1 User already exists
+	socialUser, err := c.socialUserService.GetByProviderTypeAndId(GOOGLE, userInfo.Id)
+	if err == nil {
+		accessToken, refreshToken, err := c.generateTokens(socialUser.UserId)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "login failed! " + err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"refresh_token": refreshToken,
+			"access_token":  accessToken,
 		})
 		return
 	}
 
-	accessToken, err := middleware.GenerateJWT(socialUser.UserId)
+	// 2 User already exist and linked to other social account
+	existingUser, err := c.userService.GetByEmail(userInfo.Email)
+	if err == nil {
+		// Means local user
+		if strings.TrimSpace(existingUser.Password) != "" {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Login failed! Please login locally",
+			})
+			return
+		}
+
+		_, err := c.socialUserService.Save(GOOGLE, existingUser.Id, userInfo.Id)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "login failed! " + err.Error(),
+			})
+			return
+		}
+
+		accessToken, refreshToken, err := c.generateTokens(existingUser.Id)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "login failed! " + err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"refresh_token": refreshToken,
+			"access_token":  accessToken,
+		})
+		return
+	}
+
+	// 3 User not exists and no links to other social account
+	id, err := c.userService.SaveWithoutPassword(userInfo.GivenName, userInfo.FamilyName, userInfo.Email)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "login failed! " + err.Error(),
@@ -129,7 +177,15 @@ func (c Controller) callback(ctx *gin.Context) {
 		return
 	}
 
-	refreshToken, err := c.refreshService.Save(socialUser.UserId)
+	_, err = c.socialUserService.Save(GOOGLE, int(id), userInfo.Id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "login failed! " + err.Error(),
+		})
+		return
+	}
+
+	accessToken, refreshToken, err := c.generateTokens(int(id))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "login failed! " + err.Error(),
@@ -141,4 +197,18 @@ func (c Controller) callback(ctx *gin.Context) {
 		"refresh_token": refreshToken,
 		"access_token":  accessToken,
 	})
+}
+
+func (c Controller) generateTokens(userId int) (accessToken, refreshToken string, err error) {
+	accessToken, err = middleware.GenerateJWT(userId)
+	if err != nil {
+		return "", "", err
+	}
+
+	refreshToken, err = c.refreshService.Save(userId)
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
 }

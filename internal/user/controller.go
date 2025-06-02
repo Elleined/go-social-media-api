@@ -109,7 +109,7 @@ func (c *ControllerImpl) getById(ctx *gin.Context) {
 func (c *ControllerImpl) getByEmail(ctx *gin.Context) {
 	email := ctx.Param("email")
 
-	user, err := c.service.getByEmail(email)
+	user, err := c.service.GetByEmail(email)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get by email failed " + err.Error(),
@@ -244,7 +244,7 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 		return
 	}
 
-	user, err := c.service.getByEmail(loginRequest.Username)
+	user, err := c.service.GetByEmail(loginRequest.Username)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "login failed! invalid credentials",
