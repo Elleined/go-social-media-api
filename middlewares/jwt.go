@@ -16,8 +16,16 @@ import (
 // token referred as the jwt and its validated
 
 func JWT(ctx *gin.Context) {
+	authHeader := ctx.GetHeader("Authorization")
+	if strings.HasPrefix(authHeader, "Bearer ") {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"message": "invalid authorization header format",
+		})
+		return
+	}
+
 	// Get the actual JWT without the Bearer as prefix: eyJhb...
-	tokenString := strings.TrimPrefix(ctx.GetHeader("Authorization"), "Bearer ")
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	if strings.TrimSpace(tokenString) == "" {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"message": "invalid authorization header format",
