@@ -3,7 +3,7 @@ package refresh
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"social-media-application/utils"
+	"social-media-application/middlewares"
 	"strconv"
 )
 
@@ -27,9 +27,10 @@ func NewController(service Service) Controller {
 }
 
 func (c *ControllerImpl) RegisterRoutes(e *gin.Engine) {
-	r := e.Group("/users/refresh-tokens")
+	e.POST("/users/refresh-tokens", c.refresh)
+
+	r := e.Group("/users/refresh-tokens", middleware.JWT)
 	{
-		r.POST("", c.refresh)
 		r.GET("", c.getAllBy)
 		r.DELETE("/:id", c.revoke)
 	}
@@ -81,7 +82,7 @@ func (c *ControllerImpl) refresh(ctx *gin.Context) {
 	}
 
 	// 3. Generate and save the new refresh token and return it
-	newRefreshToken, err := c.service.Save(oldRefreshToken.UserId)
+	newRefreshToken, err := c.service.SaveWith(oldRefreshToken.UserId, oldRefreshToken.ExpiresAt)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "refresh failed! " + err.Error(),
@@ -90,7 +91,7 @@ func (c *ControllerImpl) refresh(ctx *gin.Context) {
 	}
 
 	// 4. Generate new access token and return it
-	accessToken, err := utils.GenerateJWT(oldRefreshToken.UserId)
+	accessToken, err := middleware.GenerateJWT(oldRefreshToken.UserId)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "refresh failed! " + err.Error(),
@@ -101,20 +102,19 @@ func (c *ControllerImpl) refresh(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"refresh_token": newRefreshToken,
 		"access_token":  accessToken,
-		"message":       "saved the refresh token securely",
 	})
 }
 
 func (c *ControllerImpl) getAllBy(ctx *gin.Context) {
-	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
+	sub, err := middleware.GetSubject(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "get all by failed " + err.Error(),
 		})
 		return
 	}
 
-	refreshTokens, err := c.service.getAllBy(currentUserId)
+	refreshTokens, err := c.service.getAllBy(sub)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all by failed " + err.Error(),
@@ -126,10 +126,10 @@ func (c *ControllerImpl) getAllBy(ctx *gin.Context) {
 }
 
 func (c *ControllerImpl) revoke(ctx *gin.Context) {
-	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
+	sub, err := middleware.GetSubject(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": "get all by failed " + err.Error(),
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "save failed " + err.Error(),
 		})
 		return
 	}
@@ -141,7 +141,7 @@ func (c *ControllerImpl) revoke(ctx *gin.Context) {
 		})
 		return
 	}
-	_, err = c.service.revoke(id, currentUserId)
+	_, err = c.service.revoke(id, sub)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "revoke failed " + err.Error(),

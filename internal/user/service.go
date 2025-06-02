@@ -117,6 +117,10 @@ func (s ServiceImpl) deleteById(id int) (affectedRows int64, err error) {
 		return 0, err
 	}
 
+	if affectedRows <= 0 {
+		return 0, errors.New("no rows affected")
+	}
+
 	return affectedRows, nil
 }
 
@@ -128,6 +132,10 @@ func (s ServiceImpl) changeStatus(userId int, isActive bool) (affectedRows int64
 	affectedRows, err = s.repository.changeStatus(userId, isActive)
 	if err != nil {
 		return 0, err
+	}
+
+	if affectedRows <= 0 {
+		return 0, errors.New("no rows affected")
 	}
 
 	return affectedRows, nil
@@ -152,5 +160,9 @@ func (s ServiceImpl) changePassword(userId int, newPassword string) (affectedRow
 		return 0, err
 	}
 
+	if affectedRows <= 0 {
+		return 0, errors.New("no rows affected")
+	}
+	
 	return affectedRows, nil
 }
