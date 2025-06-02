@@ -101,7 +101,6 @@ func (c *ControllerImpl) refresh(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"refresh_token": newRefreshToken,
 		"access_token":  accessToken,
-		"message":       "saved the refresh token securely",
 	})
 }
 
@@ -109,7 +108,7 @@ func (c *ControllerImpl) getAllBy(ctx *gin.Context) {
 	sub, err := middleware.GetSubject(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "save failed " + err.Error(),
+			"message": "get all by failed " + err.Error(),
 		})
 		return
 	}

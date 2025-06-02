@@ -17,7 +17,7 @@ import (
 
 func JWT(ctx *gin.Context) {
 	authHeader := ctx.GetHeader("Authorization")
-	if strings.HasPrefix(authHeader, "Bearer ") {
+	if !strings.HasPrefix(authHeader, "Bearer ") {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"message": "invalid authorization header format",
 		})

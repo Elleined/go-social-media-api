@@ -277,6 +277,5 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"refresh_token": token,
 		"access_token":  jwt,
-		"message":       "saved the refresh token securely",
 	})
 }
