@@ -10,6 +10,7 @@ import (
 	"social-media-application/internal/post"
 	pr "social-media-application/internal/post/reaction"
 	"social-media-application/internal/refresh"
+	"social-media-application/internal/social_login"
 	"social-media-application/internal/social_login/provider/google"
 	"social-media-application/internal/social_login/provider/microsoft"
 	provider_type2 "social-media-application/internal/social_login/provider_type"
@@ -56,16 +57,6 @@ func main() {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 
-	// Initialize Microsoft Login
-	microsoftConfig := microsoft.InitMSLogin()
-	microsoftController := microsoft.NewController(microsoftConfig)
-	microsoftController.RegisterRoutes(r)
-
-	// Initialize Google Login
-	googleConfig := google.InitGoogleLogin()
-	googleController := google.NewController(googleConfig)
-	googleController.RegisterRoutes(r)
-
 	// root endpoint
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -101,6 +92,9 @@ func main() {
 	userController := user.NewController(userService, refreshService)
 	userController.RegisterRoutes(r)
 
+	userSocialRepository := social_login.NewRepository(db)
+	userSocialService := social_login.NewService(userSocialRepository)
+
 	// Initialize emoji module
 	emojiRepository := emoji.NewRepository(db)
 	emojiService := emoji.NewService(emojiRepository)
@@ -130,6 +124,16 @@ func main() {
 	commentReactionService := cr.NewService(commentReactionRepository)
 	commentReactionController := cr.NewController(commentReactionService)
 	commentReactionController.RegisterRoutes(r)
+
+	// Initialize Microsoft Login
+	microsoftConfig := microsoft.InitMSLogin()
+	microsoftController := microsoft.NewController(microsoftConfig, refreshService, userSocialService, userService, providerService)
+	microsoftController.RegisterRoutes(r)
+
+	// Initialize Google Login
+	googleConfig := google.InitGoogleLogin()
+	googleController := google.NewController(googleConfig, refreshService, userSocialService, userService, providerService)
+	googleController.RegisterRoutes(r)
 
 	err = r.Run(os.Getenv("PORT"))
 	if err != nil {
