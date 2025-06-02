@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"social-media-application/internal/paging"
-	"social-media-application/utils"
+	"social-media-application/middlewares"
 	"strconv"
 )
 
@@ -47,10 +47,10 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 }
 
 func (c ControllerImpl) save(ctx *gin.Context) {
-	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
+	sub, err := middleware.GetSubject(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": "saved failed " + err.Error(),
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "save failed " + err.Error(),
 		})
 		return
 	}
@@ -79,7 +79,7 @@ func (c ControllerImpl) save(ctx *gin.Context) {
 		return
 	}
 
-	id, err := c.service.save(currentUserId, postId, commentId, emojiId)
+	id, err := c.service.save(sub, postId, commentId, emojiId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "saved failed " + err.Error(),
@@ -179,10 +179,10 @@ func (c ControllerImpl) getAllByEmoji(ctx *gin.Context) {
 }
 
 func (c ControllerImpl) update(ctx *gin.Context) {
-	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
+	sub, err := middleware.GetSubject(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": "get all by emoji failed " + err.Error(),
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "save failed " + err.Error(),
 		})
 		return
 	}
@@ -211,7 +211,7 @@ func (c ControllerImpl) update(ctx *gin.Context) {
 		return
 	}
 
-	_, err = c.service.update(currentUserId, postId, commentId, emojiId)
+	_, err = c.service.update(sub, postId, commentId, emojiId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "saved failed " + err.Error(),
@@ -223,10 +223,10 @@ func (c ControllerImpl) update(ctx *gin.Context) {
 }
 
 func (c ControllerImpl) delete(ctx *gin.Context) {
-	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
+	sub, err := middleware.GetSubject(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": "delete failed " + err.Error(),
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "save failed " + err.Error(),
 		})
 		return
 	}
@@ -247,7 +247,7 @@ func (c ControllerImpl) delete(ctx *gin.Context) {
 		return
 	}
 
-	_, err = c.service.delete(currentUserId, postId, commentId)
+	_, err = c.service.delete(sub, postId, commentId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "delete failed " + err.Error(),

@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"social-media-application/internal/paging"
-	"social-media-application/utils"
+	"social-media-application/middlewares"
 	"strconv"
 )
 
@@ -36,7 +36,7 @@ func NewController(service Service) Controller {
 }
 
 func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
-	r := e.Group("/users/posts")
+	r := e.Group("/users/posts", middleware.JWT)
 	{
 		r.POST("", c.save)
 
@@ -52,14 +52,6 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 }
 
 func (c ControllerImpl) save(ctx *gin.Context) {
-	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": "save failed " + err.Error(),
-		})
-		return
-	}
-
 	postRequest := struct {
 		Subject string `json:"subject" binding:"required"`
 		Content string `json:"content" binding:"required"`
@@ -72,7 +64,15 @@ func (c ControllerImpl) save(ctx *gin.Context) {
 		return
 	}
 
-	id, err := c.service.save(currentUserId, postRequest.Subject, postRequest.Content)
+	sub, err := middleware.GetSubject(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "save failed " + err.Error(),
+		})
+		return
+	}
+
+	id, err := c.service.save(sub, postRequest.Subject, postRequest.Content)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "save failed " + err.Error(),
@@ -84,10 +84,10 @@ func (c ControllerImpl) save(ctx *gin.Context) {
 }
 
 func (c ControllerImpl) getAll(ctx *gin.Context) {
-	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
+	sub, err := middleware.GetSubject(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": "get all failed " + err.Error(),
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "save failed " + err.Error(),
 		})
 		return
 	}
@@ -112,7 +112,7 @@ func (c ControllerImpl) getAll(ctx *gin.Context) {
 		return
 	}
 
-	posts, err := c.service.getAll(currentUserId, isDeleted, request)
+	posts, err := c.service.getAll(sub, isDeleted, request)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all failed " + err.Error(),
@@ -124,10 +124,10 @@ func (c ControllerImpl) getAll(ctx *gin.Context) {
 }
 
 func (c ControllerImpl) getAllBy(ctx *gin.Context) {
-	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
+	sub, err := middleware.GetSubject(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": "get all by failed " + err.Error(),
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "save failed " + err.Error(),
 		})
 		return
 	}
@@ -152,7 +152,7 @@ func (c ControllerImpl) getAllBy(ctx *gin.Context) {
 		return
 	}
 
-	posts, err := c.service.getAllBy(currentUserId, isDeleted, request)
+	posts, err := c.service.getAllBy(sub, isDeleted, request)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all by failed " + err.Error(),
@@ -164,10 +164,10 @@ func (c ControllerImpl) getAllBy(ctx *gin.Context) {
 }
 
 func (c ControllerImpl) updateSubject(ctx *gin.Context) {
-	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
+	sub, err := middleware.GetSubject(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": "update subject failed " + err.Error(),
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "save failed " + err.Error(),
 		})
 		return
 	}
@@ -181,7 +181,7 @@ func (c ControllerImpl) updateSubject(ctx *gin.Context) {
 	}
 
 	subject := ctx.Query("subject")
-	_, err = c.service.updateSubject(currentUserId, postId, subject)
+	_, err = c.service.updateSubject(sub, postId, subject)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "update subject failed " + err.Error(),
@@ -193,10 +193,10 @@ func (c ControllerImpl) updateSubject(ctx *gin.Context) {
 }
 
 func (c ControllerImpl) updateContent(ctx *gin.Context) {
-	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
+	sub, err := middleware.GetSubject(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": "update content failed " + err.Error(),
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "save failed " + err.Error(),
 		})
 		return
 	}
@@ -210,7 +210,7 @@ func (c ControllerImpl) updateContent(ctx *gin.Context) {
 	}
 
 	content := ctx.Query("content")
-	_, err = c.service.updateContent(currentUserId, postId, content)
+	_, err = c.service.updateContent(sub, postId, content)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "update content failed" + err.Error(),
@@ -222,10 +222,10 @@ func (c ControllerImpl) updateContent(ctx *gin.Context) {
 }
 
 func (c ControllerImpl) updateAttachment(ctx *gin.Context) {
-	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
+	sub, err := middleware.GetSubject(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": "update attachment failed " + err.Error(),
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "save failed " + err.Error(),
 		})
 		return
 	}
@@ -239,7 +239,7 @@ func (c ControllerImpl) updateAttachment(ctx *gin.Context) {
 	}
 
 	attachment := ctx.Query("attachment")
-	_, err = c.service.updateAttachment(currentUserId, postId, attachment)
+	_, err = c.service.updateAttachment(sub, postId, attachment)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "update attachment failed " + err.Error(),
@@ -251,10 +251,10 @@ func (c ControllerImpl) updateAttachment(ctx *gin.Context) {
 }
 
 func (c ControllerImpl) deleteById(ctx *gin.Context) {
-	currentUserId, err := utils.GetSubject(ctx.GetHeader("Authorization"))
+	sub, err := middleware.GetSubject(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"message": "delete by id failed " + err.Error(),
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "save failed " + err.Error(),
 		})
 		return
 	}
@@ -267,7 +267,7 @@ func (c ControllerImpl) deleteById(ctx *gin.Context) {
 		return
 	}
 
-	_, err = c.service.deleteById(currentUserId, postId)
+	_, err = c.service.deleteById(sub, postId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "delete by id failed " + err.Error(),

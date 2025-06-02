@@ -6,7 +6,7 @@ import (
 	"social-media-application/internal/paging"
 	"social-media-application/internal/refresh"
 	pd "social-media-application/internal/user/password"
-	"social-media-application/utils"
+	"social-media-application/middlewares"
 	"strconv"
 )
 
@@ -258,7 +258,7 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 		return
 	}
 
-	jwt, err := utils.GenerateJWT(user.Id)
+	jwt, err := middleware.GenerateJWT(user.Id)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "login failed! " + err.Error(),
