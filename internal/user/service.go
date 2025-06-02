@@ -74,7 +74,19 @@ func (s ServiceImpl) save(firstName, lastName, email, password string) (id int64
 }
 
 func (s ServiceImpl) SaveWithoutPassword(firstName, lastName, email string) (id int64, err error) {
-	id, err = s.save(firstName, lastName, email, "")
+	if strings.TrimSpace(firstName) == "" {
+		return 0, errors.New("first name is required")
+	}
+
+	if strings.TrimSpace(lastName) == "" {
+		return 0, errors.New("last name is required")
+	}
+
+	if strings.TrimSpace(email) == "" {
+		return 0, errors.New("email is required")
+	}
+
+	id, err = s.repository.save(firstName, lastName, email, "")
 	if err != nil {
 		return 0, err
 	}
