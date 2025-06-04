@@ -18,6 +18,7 @@ type (
 		getAllBy(userId int) ([]Token, error)
 
 		revoke(id int, userId int) (affectedRows int64, err error)
+		RevokeByToken(token string) (affectedRows int64, err error)
 	}
 
 	ServiceImpl struct {
@@ -102,6 +103,23 @@ func (s ServiceImpl) revoke(id int, userId int) (affectedRows int64, err error) 
 	}
 
 	affectedRows, err = s.repository.revoke(id, userId)
+	if err != nil {
+		return 0, err
+	}
+
+	if affectedRows <= 0 {
+		return 0, errors.New("no affected rows")
+	}
+
+	return affectedRows, nil
+}
+
+func (s ServiceImpl) RevokeByToken(token string) (affectedRows int64, err error) {
+	if strings.TrimSpace(token) == "" {
+		return 0, errors.New("token is empty")
+	}
+
+	affectedRows, err = s.repository.revokeByToken(token)
 	if err != nil {
 		return 0, err
 	}

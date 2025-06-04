@@ -27,6 +27,7 @@ type (
 		changePassword(ctx *gin.Context)
 
 		login(ctx *gin.Context)
+		logout(ctx *gin.Context)
 
 		RegisterRoutes(c *gin.Engine)
 	}
@@ -48,6 +49,7 @@ func (c *ControllerImpl) RegisterRoutes(e *gin.Engine) {
 	r := e.Group("/users")
 	{
 		r.POST("/login", c.login)
+		r.POST("/logout", c.logout)
 		r.POST("", c.save)
 
 		r.GET("/id/:id", c.getById)
@@ -289,4 +291,34 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, accessToken)
+}
+
+func (c *ControllerImpl) logout(ctx *gin.Context) {
+	// Invalidate refresh token in database
+	refreshToken, err := ctx.Cookie("refreshToken")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "logout failed! " + err.Error(),
+		})
+		return
+	}
+
+	_, err = c.refreshService.RevokeByToken(refreshToken)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "logout failed! " + err.Error(),
+		})
+		return
+	}
+
+	// Invalidated refresh token cookie
+	ctx.SetCookie(
+		"refreshToken", // cookie name
+		"",             // value
+		-1,             // maxAge negative to delete
+		"/",            // path
+		"",             // domain (empty = current domain)
+		false,          // secure
+		true,           // httpOnly
+	)
 }

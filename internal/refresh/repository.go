@@ -104,7 +104,7 @@ func (repository RepositoryImpl) revoke(id int, userId int) (affectedRows int64,
 }
 
 func (repository RepositoryImpl) revokeByToken(token string) (affectedRows int64, err error) {
-	result, err := repository.NamedExec("DELETE FROM refresh_token WHERE token = ?", map[string]any{
+	result, err := repository.NamedExec("UPDATE refresh_token SET revoked_at = NOW() WHERE token = :token", map[string]any{
 		"token": token,
 	})
 	if err != nil {
