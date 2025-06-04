@@ -284,6 +284,9 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 		return
 	}
 
-	utils.SetRefreshTokenCookie(ctx, refreshToken)
+	err = utils.SetRefreshTokenCookie(ctx, refreshToken)
+	if err != nil {
+		return
+	}
 	ctx.JSON(http.StatusOK, accessToken)
 }

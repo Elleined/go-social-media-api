@@ -94,7 +94,10 @@ func (c *ControllerImpl) refresh(ctx *gin.Context) {
 		return
 	}
 
-	utils.SetRefreshTokenCookie(ctx, newRefreshToken)
+	err = utils.SetRefreshTokenCookie(ctx, newRefreshToken)
+	if err != nil {
+		return
+	}
 	ctx.JSON(http.StatusOK, accessToken)
 }
 

@@ -57,12 +57,13 @@ func (c Controller) RegisterRoutes(e *gin.Engine) {
 
 func (c Controller) login(ctx *gin.Context) {
 	// Redirect user to Microsoft login page
-	url := c.config.AuthCodeURL(
-		"state",
-		oauth2.AccessTypeOffline,
-		oauth2.SetAuthURLParam("prompt", "login"),
-	)
-	ctx.Redirect(http.StatusTemporaryRedirect, url)
+
+	ctx.Redirect(http.StatusTemporaryRedirect,
+		c.config.AuthCodeURL(
+			"state",
+			oauth2.AccessTypeOffline,
+			oauth2.SetAuthURLParam("prompt", "login"),
+		))
 }
 
 func (c Controller) callback(ctx *gin.Context) {

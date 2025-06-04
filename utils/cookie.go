@@ -18,12 +18,13 @@ import (
 // secure: only sent with https not http
 // httpOnly: cannot be access via JS
 
-func SetRefreshTokenCookie(ctx *gin.Context, value string) {
+func SetRefreshTokenCookie(ctx *gin.Context, value string) error {
 	refreshTokenExpiryDays, err := strconv.Atoi(os.Getenv("REFRESH_TOKEN_EXPIRATION_IN_DAYS"))
 	if err != nil {
-		return
+		return err
 	}
 
 	refreshTokenExpiryHour := time.Duration(refreshTokenExpiryDays) * 24 * time.Hour
 	ctx.SetCookie("refreshToken", value, int(refreshTokenExpiryHour.Seconds()), "/", "", false, true)
+	return nil
 }
