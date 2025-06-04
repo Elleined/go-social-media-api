@@ -19,6 +19,7 @@ type (
 		findAllBy(userId int) ([]Token, error)
 
 		revoke(id int, userId int) (affectedRows int64, err error)
+		revokeByToken(token string) (affectedRows int64, err error)
 	}
 
 	RepositoryImpl struct {
@@ -100,4 +101,20 @@ func (repository RepositoryImpl) revoke(id int, userId int) (affectedRows int64,
 	}
 
 	return affectedRows, err
+}
+
+func (repository RepositoryImpl) revokeByToken(token string) (affectedRows int64, err error) {
+	result, err := repository.NamedExec("DELETE FROM refresh_token WHERE token = ?", map[string]any{
+		"token": token,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	affectedRows, err = result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return affectedRows, nil
 }
