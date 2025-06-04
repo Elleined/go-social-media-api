@@ -144,10 +144,21 @@ func (c Controller) callback(ctx *gin.Context) {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, gin.H{
-			"refresh_token": refreshToken,
-			"access_token":  accessToken,
-		})
+		err = utils.SetRefreshTokenCookie(ctx, refreshToken)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "login failed! " + err.Error(),
+			})
+			return
+		}
+
+		redirectFrontEndURL := fmt.Sprintf(
+			"%s#access_token=%s",
+			os.Getenv("FRONT_END_REDIRECT_URL"),
+			url.QueryEscape(accessToken),
+		)
+
+		ctx.Redirect(http.StatusFound, redirectFrontEndURL)
 		return
 	}
 
@@ -178,10 +189,21 @@ func (c Controller) callback(ctx *gin.Context) {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, gin.H{
-			"refresh_token": refreshToken,
-			"access_token":  accessToken,
-		})
+		err = utils.SetRefreshTokenCookie(ctx, refreshToken)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"message": "login failed! " + err.Error(),
+			})
+			return
+		}
+
+		redirectFrontEndURL := fmt.Sprintf(
+			"%s#access_token=%s",
+			os.Getenv("FRONT_END_REDIRECT_URL"),
+			url.QueryEscape(accessToken),
+		)
+
+		ctx.Redirect(http.StatusFound, redirectFrontEndURL)
 		return
 	}
 
@@ -210,14 +232,21 @@ func (c Controller) callback(ctx *gin.Context) {
 		return
 	}
 
-	utils.SetRefreshTokenCookie(ctx, refreshToken)
+	err = utils.SetRefreshTokenCookie(ctx, refreshToken)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "login failed! " + err.Error(),
+		})
+		return
+	}
+
 	redirectFrontEndURL := fmt.Sprintf(
 		"%s#access_token=%s",
 		os.Getenv("FRONT_END_REDIRECT_URL"),
 		url.QueryEscape(accessToken),
 	)
 
-	ctx.Redirect(http.StatusSeeOther, redirectFrontEndURL)
+	ctx.Redirect(http.StatusFound, redirectFrontEndURL)
 }
 
 func (c Controller) generateTokens(userId int) (accessToken, refreshToken string, err error) {
