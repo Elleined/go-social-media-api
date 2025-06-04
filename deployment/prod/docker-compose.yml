@@ -6,6 +6,7 @@ services:
     environment:
       - GIN_MODE=release
       - PORT=:${SMA_PORT}
+      - FRONT_END_REDIRECT_URL=${FRONT_END_REDIRECT_URL}
       - DB_USERNAME=${MYSQL_USER}
       - DB_PASSWORD=${MYSQL_PASSWORD}
       - DB_HOST=${MYSQL_CONTAINER_NAME}

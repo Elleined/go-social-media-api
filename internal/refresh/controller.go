@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"social-media-application/middlewares"
+	"social-media-application/utils"
 	"strconv"
 )
 
@@ -42,19 +43,13 @@ func (c *ControllerImpl) RegisterRoutes(e *gin.Engine) {
 // 4. Generate new access token and return it
 func (c *ControllerImpl) refresh(ctx *gin.Context) {
 	// get the refresh token from client
-	request := struct {
-		Token string `json:"refresh_token" binding:"required"`
-	}{}
-
-	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "refresh failed " + err.Error(),
-		})
+	refreshToken, err := ctx.Cookie("refreshToken")
+	if err != nil {
 		return
 	}
 
 	// get the refresh token from database
-	oldRefreshToken, err := c.service.getBy(request.Token)
+	oldRefreshToken, err := c.service.getBy(refreshToken)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "refresh failed " + err.Error(),
@@ -99,10 +94,8 @@ func (c *ControllerImpl) refresh(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"refresh_token": newRefreshToken,
-		"access_token":  accessToken,
-	})
+	utils.SetRefreshTokenCookie(ctx, newRefreshToken)
+	ctx.JSON(http.StatusOK, accessToken)
 }
 
 func (c *ControllerImpl) getAllBy(ctx *gin.Context) {

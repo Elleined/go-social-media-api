@@ -2,17 +2,20 @@ package microsoft
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/microsoft"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"social-media-application/internal/refresh"
 	"social-media-application/internal/social_login"
 	"social-media-application/internal/social_login/provider_type"
 	"social-media-application/internal/user"
 	middleware "social-media-application/middlewares"
+	"social-media-application/utils"
 	"strings"
 )
 
@@ -207,10 +210,14 @@ func (c Controller) callback(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"refresh_token": refreshToken,
-		"access_token":  accessToken,
-	})
+	utils.SetRefreshTokenCookie(ctx, refreshToken)
+	redirectFrontEndURL := fmt.Sprintf(
+		"%s#access_token=%s",
+		os.Getenv("FRONT_END_REDIRECT_URL"),
+		url.QueryEscape(accessToken),
+	)
+
+	ctx.Redirect(http.StatusSeeOther, redirectFrontEndURL)
 }
 
 func (c Controller) generateTokens(userId int) (accessToken, refreshToken string, err error) {

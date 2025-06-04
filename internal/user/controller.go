@@ -7,6 +7,7 @@ import (
 	"social-media-application/internal/refresh"
 	pd "social-media-application/internal/user/password"
 	"social-media-application/middlewares"
+	"social-media-application/utils"
 	"strconv"
 	"strings"
 )
@@ -283,8 +284,6 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"refresh_token": refreshToken,
-		"access_token":  accessToken,
-	})
+	utils.SetRefreshTokenCookie(ctx, refreshToken)
+	ctx.JSON(http.StatusOK, accessToken)
 }
