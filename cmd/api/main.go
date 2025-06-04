@@ -11,6 +11,7 @@ import (
 	pr "social-media-application/internal/post/reaction"
 	"social-media-application/internal/refresh"
 	"social-media-application/internal/social_login"
+	"social-media-application/internal/social_login/provider/facebook"
 	"social-media-application/internal/social_login/provider/google"
 	"social-media-application/internal/social_login/provider/microsoft"
 	"social-media-application/internal/social_login/provider_type"
@@ -135,6 +136,11 @@ func main() {
 	googleConfig := google.InitGoogleLogin()
 	googleController := google.NewController(googleConfig, refreshService, userSocialService, userService, providerService)
 	googleController.RegisterRoutes(r)
+	
+	// Initialize Facebook Login
+	facebookConfig := facebook.InitFacebookLogin()
+	facebookController := facebook.NewController(facebookConfig, refreshService, userSocialService, userService, providerService)
+	facebookController.RegisterRoutes(r)
 
 	err = r.Run(os.Getenv("PORT"))
 	if err != nil {

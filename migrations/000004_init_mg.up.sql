@@ -9,6 +9,7 @@ INSERT INTO provider_type(name)
 VALUES
     ("LOCAL"),
     ("MICROSOFT"),
+    ("FACEBOOK"),
     ("GOOGLE");
 
 CREATE TABLE IF NOT EXISTS user_social (

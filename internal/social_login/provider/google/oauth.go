@@ -118,7 +118,7 @@ func (c Controller) callback(ctx *gin.Context) {
 		})
 		return
 	}
-	// End of google callback
+	// end of auth provider call
 
 	// Start of backend logic
 	if !userInfo.VerifiedEmail {

@@ -1,11 +1,11 @@
-package microsoft
+package facebook
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/microsoft"
+	"golang.org/x/oauth2/facebook"
 	"io"
 	"net/http"
 	"net/url"
@@ -19,13 +19,13 @@ import (
 	"strings"
 )
 
-func InitMSLogin() *oauth2.Config {
+func InitFacebookLogin() *oauth2.Config {
 	return &oauth2.Config{
-		RedirectURL:  os.Getenv("MICROSOFT_REDIRECT_URL"),
-		ClientID:     os.Getenv("MICROSOFT_KEY"),
-		ClientSecret: os.Getenv("MICROSOFT_SECRET"),
-		Scopes:       []string{"User.Read"},
-		Endpoint:     microsoft.AzureADEndpoint(os.Getenv("MICROSOFT_TENANT_ID")),
+		ClientID:     os.Getenv("FACEBOOK_KEY"),
+		ClientSecret: os.Getenv("FACEBOOK_SECRET"),
+		RedirectURL:  os.Getenv("FACEBOOK_REDIRECT_URL"),
+		Scopes:       []string{"public_profile", "email"},
+		Endpoint:     facebook.Endpoint,
 	}
 }
 
@@ -48,7 +48,7 @@ func NewController(config *oauth2.Config, refreshService refresh.Service, social
 }
 
 func (c Controller) RegisterRoutes(e *gin.Engine) {
-	r := e.Group("/auth/microsoft")
+	r := e.Group("/auth/facebook")
 	{
 		r.GET("", c.login)
 		r.GET("/callback", c.callback)
@@ -56,8 +56,7 @@ func (c Controller) RegisterRoutes(e *gin.Engine) {
 }
 
 func (c Controller) login(ctx *gin.Context) {
-	// Redirect user to Microsoft login page
-
+	// Redirect user to Google login page
 	ctx.Redirect(http.StatusTemporaryRedirect,
 		c.config.AuthCodeURL(
 			"state",
@@ -69,7 +68,7 @@ func (c Controller) login(ctx *gin.Context) {
 func (c Controller) callback(ctx *gin.Context) {
 	// Extract the "code" query parameter from the URL.
 	code := ctx.Query("code")
-	if code == "" {
+	if strings.TrimSpace(code) == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "missing code",
 		})
@@ -89,7 +88,7 @@ func (c Controller) callback(ctx *gin.Context) {
 	client := c.config.Client(ctx.Request.Context(), token)
 
 	// Make a GET request to the social provider's user info endpoint.
-	resp, err := client.Get("https://graph.microsoft.com/v1.0/me")
+	resp, err := client.Get("https://graph.facebook.com/me?fields=id,name,email&access_token=" + token.AccessToken)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "failed to get user information " + err.Error(),
@@ -103,18 +102,10 @@ func (c Controller) callback(ctx *gin.Context) {
 		}
 	}(resp.Body)
 
-	// Define a struct to decode the JSON response from the user info endpoint.
 	userInfo := struct {
-		DisplayName       string `json:"displayName"`
-		GivenName         string `json:"givenName"`
-		Id                string `json:"id"`
-		JobTitle          string `json:"jobTitle"`
-		Mail              string `json:"mail"`
-		MobilePhone       string `json:"mobilePhone"`
-		OfficeLocation    string `json:"officeLocation"`
-		PreferredLanguage string `json:"preferredLanguage"`
-		Surname           string `json:"surname"`
-		UserPrincipalName string `json:"userPrincipalName"`
+		Id    string `json:"id"`
+		Name  string `json:"name"`
+		Email string `json:"email"`
 	}{}
 	if err := json.NewDecoder(resp.Body).Decode(&userInfo); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -126,7 +117,7 @@ func (c Controller) callback(ctx *gin.Context) {
 
 	// Start of backend logic
 	// Get provider type if exists
-	providerType, err := c.providerTypeService.GetByName("MICROSOFT")
+	providerType, err := c.providerTypeService.GetByName("FACEBOOK")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "failed to get provider type",
@@ -158,13 +149,12 @@ func (c Controller) callback(ctx *gin.Context) {
 			os.Getenv("FRONT_END_REDIRECT_URL"),
 			url.QueryEscape(accessToken),
 		)
-
 		ctx.Redirect(http.StatusFound, redirectFrontEndURL)
 		return
 	}
 
 	// 2 User already exist and linked to other social account
-	existingUser, err := c.userService.GetByEmail(userInfo.Mail)
+	existingUser, err := c.userService.GetByEmail(userInfo.Email)
 	if err == nil {
 		// Means local user
 		if strings.TrimSpace(existingUser.Password) != "" {
@@ -203,13 +193,12 @@ func (c Controller) callback(ctx *gin.Context) {
 			os.Getenv("FRONT_END_REDIRECT_URL"),
 			url.QueryEscape(accessToken),
 		)
-
 		ctx.Redirect(http.StatusFound, redirectFrontEndURL)
 		return
 	}
 
 	// 3 User not exists and no links to other social account
-	id, err := c.userService.SaveWithoutPassword(userInfo.GivenName, userInfo.Surname, userInfo.Mail)
+	id, err := c.userService.SaveWithoutPassword(userInfo.Name, userInfo.Name, userInfo.Email)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "login failed! " + err.Error(),
@@ -246,7 +235,6 @@ func (c Controller) callback(ctx *gin.Context) {
 		os.Getenv("FRONT_END_REDIRECT_URL"),
 		url.QueryEscape(accessToken),
 	)
-
 	ctx.Redirect(http.StatusFound, redirectFrontEndURL)
 }
 
