@@ -12,6 +12,7 @@ type (
 	Controller interface {
 		save(ctx *gin.Context)
 
+		getById(ctx *gin.Context)
 		getAll(ctx *gin.Context)
 
 		updateContent(ctx *gin.Context)
@@ -38,6 +39,7 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 	{
 		r.POST("", c.save)
 
+		r.GET("/:commentId", c.getById)
 		r.GET("", c.getAll)
 
 		r.PATCH("/:commentId/content", c.updateContent)
@@ -84,6 +86,33 @@ func (c ControllerImpl) save(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, id)
+}
+
+func (c ControllerImpl) getById(ctx *gin.Context) {
+	postId, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "get by id failed " + err.Error(),
+		})
+		return
+	}
+
+	commentId, err := strconv.Atoi(ctx.Param("commentId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "get by id failed " + err.Error(),
+		})
+		return
+	}
+
+	comment, err := c.service.getById(postId, commentId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "get by id failed " + err.Error(),
+		})
+	}
+
+	ctx.JSON(http.StatusOK, comment)
 }
 
 func (c ControllerImpl) getAll(ctx *gin.Context) {

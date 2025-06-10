@@ -12,6 +12,7 @@ type (
 	Repository interface {
 		save(authorId, postId int, content, attachment string) (id int64, err error)
 
+		findById(postId, commentId int) (Comment, error)
 		findAll(postId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Comment], error)
 
 		updateContent(currentUserId, postId, commentId int, newContent string) (affectedRows int64, err error)
@@ -48,6 +49,16 @@ func (repository RepositoryImpl) save(authorId, postId int, content, attachment 
 	}
 
 	return id, nil
+}
+
+func (repository RepositoryImpl) findById(postId, commentId int) (Comment, error) {
+	var comment Comment
+	err := repository.Get(&comment, "SELECT * FROM comment WHERE post_id = ? AND id = ?", postId, commentId)
+	if err != nil {
+		return Comment{}, err
+	}
+
+	return comment, nil
 }
 
 func (repository RepositoryImpl) findAll(postId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Comment], error) {

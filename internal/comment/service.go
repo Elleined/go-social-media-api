@@ -10,6 +10,7 @@ type (
 	Service interface {
 		save(authorId, postId int, content, attachment string) (id int64, err error)
 
+		getById(postId, commentId int) (Comment, error)
 		getAll(postId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Comment], error)
 
 		updateContent(currentUserId, postId, commentId int, newContent string) (affectedRows int64, err error)
@@ -48,6 +49,15 @@ func (s ServiceImpl) save(authorId, postId int, content, attachment string) (id 
 	}
 
 	return id, nil
+}
+
+func (s ServiceImpl) getById(postId, commentId int) (Comment, error) {
+	comment, err := s.repository.findById(postId, commentId)
+	if err != nil {
+		return Comment{}, err
+	}
+
+	return comment, nil
 }
 
 func (s ServiceImpl) getAll(postId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Comment], error) {
