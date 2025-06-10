@@ -10,7 +10,7 @@ import (
 
 type (
 	Repository interface {
-		save(authorId, postId int, content string) (id int64, err error)
+		save(authorId, postId int, content, attachment string) (id int64, err error)
 
 		findAll(postId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Comment], error)
 
@@ -31,11 +31,12 @@ func NewRepository(db *sqlx.DB) Repository {
 	}
 }
 
-func (repository RepositoryImpl) save(authorId, postId int, content string) (id int64, err error) {
-	result, err := repository.NamedExec("INSERT INTO comment (author_id, post_id, content) VALUE (:authorId, :postId, :content)", map[string]any{
-		"authorId": authorId,
-		"postId":   postId,
-		"content":  content,
+func (repository RepositoryImpl) save(authorId, postId int, content, attachment string) (id int64, err error) {
+	result, err := repository.NamedExec("INSERT INTO comment (author_id, post_id, content, attachment) VALUE (:authorId, :postId, :content, :attachment)", map[string]any{
+		"authorId":   authorId,
+		"postId":     postId,
+		"content":    content,
+		"attachment": attachment,
 	})
 	if err != nil {
 		return 0, err

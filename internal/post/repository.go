@@ -10,7 +10,7 @@ import (
 
 type (
 	Repository interface {
-		save(authorId int, subject, content string) (id int64, err error)
+		save(authorId int, subject, content, attachment string) (id int64, err error)
 
 		findAll(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error)
 
@@ -36,11 +36,12 @@ func NewRepository(db *sqlx.DB) Repository {
 	}
 }
 
-func (repository RepositoryImpl) save(authorId int, subject, content string) (id int64, err error) {
-	result, err := repository.NamedExec("INSERT INTO post (subject, content, author_id) VALUES (:subject, :content, :authorId)", map[string]any{
-		"subject":  subject,
-		"content":  content,
-		"authorId": authorId,
+func (repository RepositoryImpl) save(authorId int, subject, content, attachment string) (id int64, err error) {
+	result, err := repository.NamedExec("INSERT INTO post (subject, content, attachment, author_id) VALUES (:subject, :content, :attachment, :authorId)", map[string]any{
+		"subject":    subject,
+		"content":    content,
+		"attachment": attachment,
+		"authorId":   authorId,
 	})
 
 	if err != nil {

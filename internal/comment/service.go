@@ -8,7 +8,7 @@ import (
 
 type (
 	Service interface {
-		save(authorId, postId int, content string) (id int64, err error)
+		save(authorId, postId int, content, attachment string) (id int64, err error)
 
 		getAll(postId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Comment], error)
 
@@ -29,7 +29,7 @@ func NewService(repository Repository) Service {
 	}
 }
 
-func (s ServiceImpl) save(authorId, postId int, content string) (id int64, err error) {
+func (s ServiceImpl) save(authorId, postId int, content, attachment string) (id int64, err error) {
 	if authorId <= 0 {
 		return 0, errors.New("author is required")
 	}
@@ -42,7 +42,7 @@ func (s ServiceImpl) save(authorId, postId int, content string) (id int64, err e
 		return 0, errors.New("content is required")
 	}
 
-	id, err = s.repository.save(authorId, postId, content)
+	id, err = s.repository.save(authorId, postId, content, attachment)
 	if err != nil {
 		return 0, err
 	}

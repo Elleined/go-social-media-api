@@ -52,12 +52,13 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 }
 
 func (c ControllerImpl) save(ctx *gin.Context) {
-	postRequest := struct {
-		Subject string `json:"subject" binding:"required"`
-		Content string `json:"content" binding:"required"`
+	request := struct {
+		Subject    string `json:"subject" binding:"required"`
+		Content    string `json:"content" binding:"required"`
+		Attachment string `json:"attachment"`
 	}{}
 
-	if err := ctx.ShouldBind(&postRequest); err != nil {
+	if err := ctx.ShouldBind(&request); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "save failed " + err.Error(),
 		})
@@ -72,7 +73,7 @@ func (c ControllerImpl) save(ctx *gin.Context) {
 		return
 	}
 
-	id, err := c.service.save(sub, postRequest.Subject, postRequest.Content)
+	id, err := c.service.save(sub, request.Subject, request.Content, request.Attachment)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "save failed " + err.Error(),

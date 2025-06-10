@@ -64,9 +64,18 @@ func (c ControllerImpl) save(ctx *gin.Context) {
 		return
 	}
 
-	content := ctx.Query("content")
+	request := struct {
+		Content    string `json:"content" binding:"required"`
+		Attachment string `json:"attachment"`
+	}{}
+	if err := ctx.ShouldBind(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "save failed " + err.Error(),
+		})
+		return
+	}
 
-	id, err := c.service.save(sub, postId, content)
+	id, err := c.service.save(sub, postId, request.Content, request.Attachment)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "saved failed " + err.Error(),
