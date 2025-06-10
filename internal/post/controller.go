@@ -15,7 +15,6 @@ type (
 		getAll(ctx *gin.Context)
 		getAllBy(ctx *gin.Context)
 
-		updateSubject(ctx *gin.Context)
 		updateContent(ctx *gin.Context)
 		updateAttachment(ctx *gin.Context)
 
@@ -43,7 +42,6 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 		r.GET("", c.getAll)
 		r.GET("/all-by-user", c.getAllBy)
 
-		r.PATCH("/:id/subject", c.updateSubject)
 		r.PATCH("/:id/content", c.updateContent)
 		r.PATCH("/:id/attachment", c.updateAttachment)
 
@@ -53,7 +51,6 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 
 func (c ControllerImpl) save(ctx *gin.Context) {
 	request := struct {
-		Subject    string `json:"subject" binding:"required"`
 		Content    string `json:"content" binding:"required"`
 		Attachment string `json:"attachment"`
 	}{}
@@ -73,7 +70,7 @@ func (c ControllerImpl) save(ctx *gin.Context) {
 		return
 	}
 
-	id, err := c.service.save(sub, request.Subject, request.Content, request.Attachment)
+	id, err := c.service.save(sub, request.Content, request.Attachment)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "save failed " + err.Error(),
@@ -162,35 +159,6 @@ func (c ControllerImpl) getAllBy(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, posts)
-}
-
-func (c ControllerImpl) updateSubject(ctx *gin.Context) {
-	sub, err := middleware.GetSubject(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "save failed " + err.Error(),
-		})
-		return
-	}
-
-	postId, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "update subject failed " + err.Error(),
-		})
-		return
-	}
-
-	subject := ctx.Query("subject")
-	_, err = c.service.updateSubject(sub, postId, subject)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"message": "update subject failed " + err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, subject)
 }
 
 func (c ControllerImpl) updateContent(ctx *gin.Context) {

@@ -10,13 +10,12 @@ import (
 
 type (
 	Repository interface {
-		save(authorId int, subject, content, attachment string) (id int64, err error)
+		save(authorId int, content, attachment string) (id int64, err error)
 
 		findAll(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error)
 
 		findAllBy(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error)
 
-		updateSubject(currentUserId, postId int, newSubject string) (affectedRows int64, err error)
 		updateContent(currentUserId, postId int, newContent string) (affectedRows int64, err error)
 		updateAttachment(currentUserId, postId int, newAttachment string) (affectedRows int64, err error)
 
@@ -36,9 +35,8 @@ func NewRepository(db *sqlx.DB) Repository {
 	}
 }
 
-func (repository RepositoryImpl) save(authorId int, subject, content, attachment string) (id int64, err error) {
-	result, err := repository.NamedExec("INSERT INTO post (subject, content, attachment, author_id) VALUES (:subject, :content, :attachment, :authorId)", map[string]any{
-		"subject":    subject,
+func (repository RepositoryImpl) save(authorId int, content, attachment string) (id int64, err error) {
+	result, err := repository.NamedExec("INSERT INTO post (content, attachment, author_id) VALUES (:content, :attachment, :authorId)", map[string]any{
 		"content":    content,
 		"attachment": attachment,
 		"authorId":   authorId,
@@ -108,24 +106,6 @@ func (repository RepositoryImpl) findAllBy(currentUserId int, isDeleted bool, re
 	}
 
 	return paging.NewPage(posts, request, total), nil
-}
-
-func (repository RepositoryImpl) updateSubject(currentUserId int, postId int, newSubject string) (affectedRows int64, err error) {
-	result, err := repository.NamedExec("UPDATE post SET subject = :subject WHERE id = :id AND author_id = :authorId", map[string]any{
-		"subject":  newSubject,
-		"id":       postId,
-		"authorId": currentUserId,
-	})
-	if err != nil {
-		return 0, err
-	}
-
-	affectedRows, err = result.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-
-	return affectedRows, nil
 }
 
 func (repository RepositoryImpl) updateContent(currentUserId, postId int, newContent string) (affectedRows int64, err error) {
