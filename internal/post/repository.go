@@ -12,6 +12,7 @@ type (
 	Repository interface {
 		save(authorId int, content, attachment string) (id int64, err error)
 
+		findById(postId int) (Post, error)
 		findAll(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error)
 
 		findAllBy(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error)
@@ -52,6 +53,16 @@ func (repository RepositoryImpl) save(authorId int, content, attachment string) 
 	}
 
 	return id, nil
+}
+
+func (repository RepositoryImpl) findById(postId int) (Post, error) {
+	var post Post
+	err := repository.Get(&post, "SELECT * FROM post WHERE id = ?", postId)
+	if err != nil {
+		return Post{}, err
+	}
+
+	return post, nil
 }
 
 func (repository RepositoryImpl) findAll(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error) {

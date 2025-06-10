@@ -10,6 +10,7 @@ type (
 	Service interface {
 		save(authorId int, content, attachment string) (id int64, err error)
 
+		getById(postId int) (Post, error)
 		getAll(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error)
 		getAllBy(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error)
 
@@ -45,6 +46,19 @@ func (s ServiceImpl) save(authorId int, content, attachment string) (id int64, e
 	}
 
 	return id, nil
+}
+
+func (s ServiceImpl) getById(postId int) (Post, error) {
+	if postId <= 0 {
+		return Post{}, errors.New("post id is required")
+	}
+
+	post, err := s.repository.findById(postId)
+	if err != nil {
+		return Post{}, err
+	}
+
+	return post, nil
 }
 
 func (s ServiceImpl) getAll(currentUserId int, isDeleted bool, request *paging.PageRequest) (*paging.Page[Post], error) {

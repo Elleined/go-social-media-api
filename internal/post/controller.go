@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"social-media-application/internal/paging"
-	"social-media-application/middlewares"
+	middleware "social-media-application/middlewares"
 	"strconv"
 )
 
@@ -12,6 +12,7 @@ type (
 	Controller interface {
 		save(ctx *gin.Context)
 
+		getById(ctx *gin.Context)
 		getAll(ctx *gin.Context)
 		getAllBy(ctx *gin.Context)
 
@@ -39,6 +40,7 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 	{
 		r.POST("", c.save)
 
+		r.GET("/:id", c.getById)
 		r.GET("", c.getAll)
 		r.GET("/all-by-user", c.getAllBy)
 
@@ -79,6 +81,26 @@ func (c ControllerImpl) save(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, id)
+}
+
+func (c ControllerImpl) getById(ctx *gin.Context) {
+	postId, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "update content failed" + err.Error(),
+		})
+		return
+	}
+
+	post, err := c.service.getById(postId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "get failed " + err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, post)
 }
 
 func (c ControllerImpl) getAll(ctx *gin.Context) {
