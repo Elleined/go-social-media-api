@@ -7,6 +7,8 @@ import (
 type (
 	Repository interface {
 		save(name string) (id int64, err error)
+
+		findById(emojiId int) (Emoji, error)
 		findAll() ([]Emoji, error)
 		update(emojiId int, newName string) (affectedRows int64, err error)
 		delete(emojiId int) (affectedRows int64, err error)
@@ -39,6 +41,16 @@ func (repository RepositoryImpl) save(name string) (id int64, err error) {
 	}
 
 	return id, nil
+}
+
+func (repository RepositoryImpl) findById(emojiId int) (Emoji, error) {
+	var emoji Emoji
+	err := repository.Get(&emoji, "SELECT * FROM emoji WHERE id = ?", emojiId)
+	if err != nil {
+		return Emoji{}, err
+	}
+
+	return emoji, nil
 }
 
 func (repository RepositoryImpl) findAll() ([]Emoji, error) {

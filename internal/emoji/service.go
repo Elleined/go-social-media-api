@@ -8,6 +8,7 @@ import (
 type (
 	Service interface {
 		save(name string) (id int64, err error)
+		getById(emojiId int) (Emoji, error)
 		getAll() ([]Emoji, error)
 		update(emojiId int, newName string) (affectedRows int64, err error)
 		delete(emojiId int) (affectedRows int64, err error)
@@ -44,6 +45,19 @@ func (s ServiceImpl) save(name string) (id int64, err error) {
 	}
 
 	return id, nil
+}
+
+func (s ServiceImpl) getById(emojiId int) (Emoji, error) {
+	if emojiId <= 0 {
+		return Emoji{}, errors.New("emojiId is required")
+	}
+
+	emoji, err := s.repository.findById(emojiId)
+	if err != nil {
+		return Emoji{}, err
+	}
+
+	return emoji, nil
 }
 
 func (s ServiceImpl) getAll() ([]Emoji, error) {

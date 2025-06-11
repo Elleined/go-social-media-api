@@ -32,7 +32,7 @@ func NewController(service Service) Controller {
 }
 
 func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
-	r := e.Group("/provider_types", middleware.JWT)
+	r := e.Group("/provider-types", middleware.JWT)
 	{
 		r.POST("", c.save)
 		r.GET("/:id", c.getById)

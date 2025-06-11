@@ -9,12 +9,12 @@ import (
 	"social-media-application/internal/emoji"
 	"social-media-application/internal/post"
 	pr "social-media-application/internal/post/reaction"
+	provider_type2 "social-media-application/internal/provider_type"
 	"social-media-application/internal/refresh"
 	"social-media-application/internal/social_login"
 	"social-media-application/internal/social_login/provider/facebook"
 	"social-media-application/internal/social_login/provider/google"
 	"social-media-application/internal/social_login/provider/microsoft"
-	"social-media-application/internal/social_login/provider_type"
 	"social-media-application/internal/user"
 	mw "social-media-application/middlewares"
 	"social-media-application/utils"
@@ -77,9 +77,9 @@ func main() {
 	r.Use(mw.Cors())
 
 	// Initialize provider type module
-	providerRepository := provider_type.NewRepository(db)
-	providerService := provider_type.NewService(providerRepository)
-	providerController := provider_type.NewController(providerService)
+	providerRepository := provider_type2.NewRepository(db)
+	providerService := provider_type2.NewService(providerRepository)
+	providerController := provider_type2.NewController(providerService)
 	providerController.RegisterRoutes(r)
 
 	// Initialize refresh token module
@@ -136,7 +136,7 @@ func main() {
 	googleConfig := google.InitGoogleLogin()
 	googleController := google.NewController(googleConfig, refreshService, userSocialService, userService, providerService)
 	googleController.RegisterRoutes(r)
-	
+
 	// Initialize Facebook Login
 	facebookConfig := facebook.InitFacebookLogin()
 	facebookController := facebook.NewController(facebookConfig, refreshService, userSocialService, userService, providerService)

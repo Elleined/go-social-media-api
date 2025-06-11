@@ -12,6 +12,7 @@ type (
 	Controller interface {
 		save(ctx *gin.Context)
 
+		getById(ctx *gin.Context)
 		getAll(ctx *gin.Context)
 		getAllByEmoji(ctx *gin.Context)
 
@@ -38,6 +39,7 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 	{
 		r.POST("", c.save)
 
+		r.GET("/:reactionId", c.getById)
 		r.GET("", c.getAll)
 		r.GET("/emoji/:emojiId", c.getAllByEmoji)
 
@@ -90,6 +92,42 @@ func (c ControllerImpl) save(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, id)
 }
 
+func (c ControllerImpl) getById(ctx *gin.Context) {
+	postId, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "get by id failed " + err.Error(),
+		})
+		return
+	}
+
+	commentId, err := strconv.Atoi(ctx.Param("commentId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "get by id failed " + err.Error(),
+		})
+		return
+	}
+
+	reactionId, err := strconv.Atoi(ctx.Param("reactionId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "get by id failed " + err.Error(),
+		})
+		return
+	}
+
+	reaction, err := c.service.getById(postId, commentId, reactionId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "get by id failed " + err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, reaction)
+}
+
 func (c ControllerImpl) getAll(ctx *gin.Context) {
 	postId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -119,7 +157,7 @@ func (c ControllerImpl) getAll(ctx *gin.Context) {
 		return
 	}
 
-	reactions, err := c.service.findAll(postId, commentId, request)
+	reactions, err := c.service.getAll(postId, commentId, request)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all failed " + err.Error(),
@@ -167,7 +205,7 @@ func (c ControllerImpl) getAllByEmoji(ctx *gin.Context) {
 		return
 	}
 
-	reactions, err := c.service.findAllByEmoji(postId, commentId, emojiId, request)
+	reactions, err := c.service.getAllByEmoji(postId, commentId, emojiId, request)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "get all by emoji failed " + err.Error(),

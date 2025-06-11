@@ -12,6 +12,7 @@ type (
 	Repository interface {
 		save(reactorId, postId, emojiId int) (id int64, err error)
 
+		findById(postId, reactionId int) (Reaction, error)
 		findAll(postId int, request *paging.PageRequest) (*paging.Page[Reaction], error)
 		findAllByEmoji(postId int, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error)
 
@@ -50,6 +51,16 @@ func (repository RepositoryImpl) save(reactorId, postId, emojiId int) (id int64,
 	}
 
 	return id, nil
+}
+
+func (repository RepositoryImpl) findById(postId, reactionId int) (Reaction, error) {
+	var reaction Reaction
+	err := repository.Get(&reaction, "SELECT * FROM post_reaction WHERE post_id = ? AND id = ?", postId, reactionId)
+	if err != nil {
+		return Reaction{}, err
+	}
+
+	return reaction, nil
 }
 
 func (repository RepositoryImpl) findAll(postId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {

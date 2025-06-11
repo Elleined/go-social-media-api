@@ -9,6 +9,7 @@ type (
 	Service interface {
 		save(reactorId, postId, emojiId int) (id int64, err error)
 
+		getById(postId, reactionId int) (Reaction, error)
 		getAll(postId int, request *paging.PageRequest) (*paging.Page[Reaction], error)
 		getAllByEmoji(postId int, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error)
 
@@ -56,6 +57,19 @@ func (s ServiceImpl) save(reactorId, postId, emojiId int) (id int64, err error) 
 	}
 
 	return id, nil
+}
+
+func (s ServiceImpl) getById(postId, reactionId int) (Reaction, error) {
+	if reactionId <= 0 {
+		return Reaction{}, errors.New("post id is required")
+	}
+
+	reaction, err := s.repository.findById(postId, reactionId)
+	if err != nil {
+		return Reaction{}, err
+	}
+
+	return reaction, nil
 }
 
 func (s ServiceImpl) getAll(postId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {

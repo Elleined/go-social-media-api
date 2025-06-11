@@ -12,8 +12,9 @@ type (
 	Controller interface {
 		save(ctx *gin.Context)
 
-		findAll(ctx *gin.Context)
-		findAllByEmoji(ctx *gin.Context)
+		getById(ctx *gin.Context)
+		getAll(ctx *gin.Context)
+		getAllByEmoji(ctx *gin.Context)
 
 		update(ctx *gin.Context)
 
@@ -38,8 +39,9 @@ func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
 	{
 		r.POST("", c.save)
 
-		r.GET("", c.findAll)
-		r.GET("/emoji/:emojiId", c.findAllByEmoji)
+		r.GET("/:reactionId", c.getById)
+		r.GET("", c.getAll)
+		r.GET("/emoji/:emojiId", c.getAllByEmoji)
 
 		r.PATCH("/emoji/:emojiId", c.update)
 		r.DELETE("", c.delete)
@@ -82,7 +84,35 @@ func (c ControllerImpl) save(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, id)
 }
 
-func (c ControllerImpl) findAll(ctx *gin.Context) {
+func (c ControllerImpl) getById(ctx *gin.Context) {
+	postId, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "saved failed " + err.Error(),
+		})
+		return
+	}
+
+	reactionId, err := strconv.Atoi(ctx.Param("reactionId"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "get by id failed " + err.Error(),
+		})
+		return
+	}
+
+	reaction, err := c.service.getById(postId, reactionId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "get by id failed " + err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, reaction)
+}
+
+func (c ControllerImpl) getAll(ctx *gin.Context) {
 	postId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -114,7 +144,7 @@ func (c ControllerImpl) findAll(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, reactions)
 }
 
-func (c ControllerImpl) findAllByEmoji(ctx *gin.Context) {
+func (c ControllerImpl) getAllByEmoji(ctx *gin.Context) {
 	postId, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{

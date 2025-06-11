@@ -9,8 +9,9 @@ type (
 	Service interface {
 		save(reactorId, postId, commentId, emojiId int) (id int64, err error)
 
-		findAll(postId, commentId int, request *paging.PageRequest) (*paging.Page[Reaction], error)
-		findAllByEmoji(postId, commentId, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error)
+		getById(postId, commentId, reactionId int) (Reaction, error)
+		getAll(postId, commentId int, request *paging.PageRequest) (*paging.Page[Reaction], error)
+		getAllByEmoji(postId, commentId, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error)
 
 		update(reactorId, postId, commentId, newEmojiId int) (affectedRows int64, err error)
 
@@ -58,7 +59,28 @@ func (s ServiceImpl) save(reactorId, postId, commentId, emojiId int) (id int64, 
 	return id, nil
 }
 
-func (s ServiceImpl) findAll(postId, commentId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (s ServiceImpl) getById(postId, commentId, reactionId int) (Reaction, error) {
+	if postId <= 0 {
+		return Reaction{}, errors.New("postId is required")
+	}
+
+	if commentId <= 0 {
+		return Reaction{}, errors.New("commentId is required")
+	}
+
+	if reactionId <= 0 {
+		return Reaction{}, errors.New("reactionId is required")
+	}
+
+	reaction, err := s.repository.findById(postId, commentId, reactionId)
+	if err != nil {
+		return Reaction{}, err
+	}
+
+	return reaction, nil
+}
+
+func (s ServiceImpl) getAll(postId, commentId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
 	if postId <= 0 {
 		return nil, errors.New("postId is required")
 	}
@@ -75,7 +97,7 @@ func (s ServiceImpl) findAll(postId, commentId int, request *paging.PageRequest)
 	return reactions, nil
 }
 
-func (s ServiceImpl) findAllByEmoji(postId, commentId, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
+func (s ServiceImpl) getAllByEmoji(postId, commentId, emojiId int, request *paging.PageRequest) (*paging.Page[Reaction], error) {
 	if postId <= 0 {
 		return nil, errors.New("postId is required")
 	}
