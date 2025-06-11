@@ -180,9 +180,8 @@ func (c ControllerImpl) updateContent(ctx *gin.Context) {
 		return
 	}
 
-	newContent := ctx.Query("newContent")
-
-	_, err = c.service.updateContent(sub, postId, commentId, newContent)
+	content := ctx.Query("content")
+	_, err = c.service.updateContent(sub, postId, commentId, content)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "update content failed " + err.Error(),
@@ -190,7 +189,7 @@ func (c ControllerImpl) updateContent(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, newContent)
+	ctx.JSON(http.StatusOK, content)
 }
 
 func (c ControllerImpl) updateAttachment(ctx *gin.Context) {
@@ -218,9 +217,8 @@ func (c ControllerImpl) updateAttachment(ctx *gin.Context) {
 		return
 	}
 
-	newAttachment := ctx.Query("newAttachment")
-
-	_, err = c.service.updateAttachment(sub, postId, commentId, newAttachment)
+	attachment := ctx.Query("attachment")
+	_, err = c.service.updateAttachment(sub, postId, commentId, attachment)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "update attachment failed " + err.Error(),
@@ -228,7 +226,7 @@ func (c ControllerImpl) updateAttachment(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, newAttachment)
+	ctx.JSON(http.StatusOK, attachment)
 }
 
 func (c ControllerImpl) deleteById(ctx *gin.Context) {

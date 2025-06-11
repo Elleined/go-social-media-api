@@ -31,7 +31,7 @@ func (c *ControllerImpl) RegisterRoutes(e *gin.Engine) {
 	r := e.Group("/users/refresh-tokens")
 	{
 		// Public
-		e.POST("", c.refresh)
+		r.POST("", c.refresh)
 
 		// Protected
 		r.GET("", middleware.JWT, c.getAllBy)
