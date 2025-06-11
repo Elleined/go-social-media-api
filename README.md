@@ -160,6 +160,14 @@ docker compose up -d backend-migration
 ```
 docker compose up -d file-server
 ```
+5. Create post folder for post attachments
+```
+http://localhost:8090/folders/post
+```
+6. Create comment folder for comment attachments
+```
+http://localhost:8090/folders/comment
+```
 
 ## prod
 1. CD to deployment > prod or dev
@@ -172,4 +180,12 @@ docker compose up -d backend-migration
 4. Run the project
 ```
 docker compose up -d backend
+```
+5. Create post folder for post attachments
+```
+http://localhost:8090/folders/post
+```
+6. Create comment folder for comment attachments
+```
+http://localhost:8090/folders/comment
 ```
