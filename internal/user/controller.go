@@ -288,8 +288,12 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 
 	err = utils.SetRefreshTokenCookie(ctx, refreshToken)
 	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "login failed! " + err.Error(),
+		})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, accessToken)
 }
 

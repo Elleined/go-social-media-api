@@ -45,6 +45,9 @@ func (c *ControllerImpl) refresh(ctx *gin.Context) {
 	// get the refresh token from client
 	refreshToken, err := ctx.Cookie("refreshToken")
 	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "refresh failed " + err.Error(),
+		})
 		return
 	}
 
@@ -96,8 +99,12 @@ func (c *ControllerImpl) refresh(ctx *gin.Context) {
 
 	err = utils.SetRefreshTokenCookie(ctx, newRefreshToken)
 	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "refresh failed! " + err.Error(),
+		})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, accessToken)
 }
 

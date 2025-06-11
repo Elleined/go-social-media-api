@@ -40,26 +40,9 @@ func JWT(ctx *gin.Context) {
 		}
 		return getSecretKey(), nil
 	})
-	if err != nil || !token.Valid {
+	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": "invalid token",
-		})
-		return
-	}
-
-	// Get the JWT expiration
-	exp, ok := token.Claims.(jwt.MapClaims)["exp"].(float64)
-	if !ok {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": "invalid exp token claims",
-		})
-		return
-	}
-
-	// Validate if token is not expired
-	if time.Now().After(time.Unix(int64(exp), 0)) {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": "token expired",
+			"message": err.Error(),
 		})
 		return
 	}
@@ -115,6 +98,20 @@ func GetSubject(ctx *gin.Context) (int, error) {
 	}
 
 	return int(id), nil
+}
+
+func GetExpiration(ctx *gin.Context) (time.Time, error) {
+	exp, exists := ctx.Get("exp")
+	if !exists {
+		return time.Time{}, errors.New("exp not found")
+	}
+
+	expiration, ok := exp.(float64)
+	if !ok {
+		return time.Time{}, errors.New("id is not a number")
+	}
+
+	return time.Unix(int64(expiration), 0), nil
 }
 
 func getSecretKey() []byte {
