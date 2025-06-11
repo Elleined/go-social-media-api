@@ -34,7 +34,7 @@ func NewController(service Service) Controller {
 }
 
 func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
-	r := e.Group("/users/posts/:id/comments/:commentId/reactions")
+	r := e.Group("/users/posts/:id/comments/:commentId/reactions", middleware.JWT)
 	{
 		r.POST("", c.save)
 

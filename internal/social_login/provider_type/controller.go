@@ -3,6 +3,7 @@ package provider_type
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	middleware "social-media-application/middlewares"
 	"strconv"
 )
 
@@ -31,7 +32,7 @@ func NewController(service Service) Controller {
 }
 
 func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
-	r := e.Group("/provider_types")
+	r := e.Group("/provider_types", middleware.JWT)
 	{
 		r.POST("", c.save)
 		r.GET("/:id", c.getById)

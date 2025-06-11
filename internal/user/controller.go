@@ -16,6 +16,7 @@ type (
 	Controller interface {
 		save(ctx *gin.Context)
 
+		getByJWT(ctx *gin.Context)
 		getById(ctx *gin.Context)
 		getByEmail(ctx *gin.Context)
 
@@ -48,6 +49,7 @@ func NewController(service Service, refreshService refresh.Service) Controller {
 func (c *ControllerImpl) RegisterRoutes(e *gin.Engine) {
 	r := e.Group("/users")
 	{
+		// Public
 		r.POST("/login", c.login)
 		r.POST("/logout", c.logout)
 		r.POST("", c.save)
@@ -60,6 +62,9 @@ func (c *ControllerImpl) RegisterRoutes(e *gin.Engine) {
 
 		r.PATCH("/:id/status", c.changeStatus)
 		r.PATCH("/:id/password", c.changePassword)
+
+		// Protected
+		r.GET("/jwt", middleware.JWT, c.getByJWT)
 	}
 }
 
@@ -87,6 +92,26 @@ func (c *ControllerImpl) save(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, id)
+}
+
+func (c *ControllerImpl) getByJWT(ctx *gin.Context) {
+	sub, err := middleware.GetSubject(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "get by jwt failed " + err.Error(),
+		})
+		return
+	}
+
+	user, err := c.service.getById(sub)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "get by jwt failed " + err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, user)
 }
 
 func (c *ControllerImpl) getById(ctx *gin.Context) {

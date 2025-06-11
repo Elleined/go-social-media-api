@@ -3,6 +3,7 @@ package emoji
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	middleware "social-media-application/middlewares"
 	"strconv"
 )
 
@@ -28,7 +29,7 @@ func NewController(service Service) Controller {
 }
 
 func (c ControllerImpl) RegisterRoutes(e *gin.Engine) {
-	r := e.Group("/emojis")
+	r := e.Group("/emojis", middleware.JWT)
 	{
 		r.POST("", c.save)
 		r.GET("", c.getAll)
