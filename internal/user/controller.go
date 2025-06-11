@@ -24,6 +24,7 @@ type (
 
 		deleteById(ctx *gin.Context)
 
+		changeAttachment(ctx *gin.Context)
 		changeStatus(ctx *gin.Context)
 		changePassword(ctx *gin.Context)
 
@@ -60,6 +61,7 @@ func (c *ControllerImpl) RegisterRoutes(e *gin.Engine) {
 
 		r.DELETE("/:id", c.deleteById)
 
+		r.PATCH("/:id/attachment", c.changeAttachment)
 		r.PATCH("/:id/status", c.changeStatus)
 		r.PATCH("/:id/password", c.changePassword)
 
@@ -69,21 +71,22 @@ func (c *ControllerImpl) RegisterRoutes(e *gin.Engine) {
 }
 
 func (c *ControllerImpl) save(ctx *gin.Context) {
-	userRequest := struct {
-		FirstName string `json:"first_name" binding:"required"`
-		LastName  string `json:"last_name" binding:"required"`
-		Email     string `json:"email" binding:"required"`
-		Password  string `json:"password" binding:"required"`
+	request := struct {
+		FirstName  string `json:"first_name" binding:"required"`
+		LastName   string `json:"last_name" binding:"required"`
+		Email      string `json:"email" binding:"required"`
+		Password   string `json:"password" binding:"required"`
+		Attachment string `json:"attachment"`
 	}{}
 
-	if err := ctx.ShouldBind(&userRequest); err != nil {
+	if err := ctx.ShouldBind(&request); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "saved failed " + err.Error(),
 		})
 		return
 	}
 
-	id, err := c.service.save(userRequest.FirstName, userRequest.LastName, userRequest.Email, userRequest.Password)
+	id, err := c.service.saveLocal(request.FirstName, request.LastName, request.Email, request.Password, request.Attachment)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "saved failed " + err.Error(),
@@ -198,6 +201,28 @@ func (c *ControllerImpl) deleteById(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusNoContent, nil)
+}
+
+func (c *ControllerImpl) changeAttachment(ctx *gin.Context) {
+	id, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "change attachment failed " + err.Error(),
+		})
+		return
+	}
+
+	attachment := ctx.Param("attachment")
+
+	_, err = c.service.changeAttachment(id, attachment)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "change attachment failed " + err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, attachment)
 }
 
 func (c *ControllerImpl) changeStatus(ctx *gin.Context) {

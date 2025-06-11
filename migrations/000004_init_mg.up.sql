@@ -1,5 +1,3 @@
-ALTER TABLE user MODIFY COLUMN password VARCHAR(100) NULL;
-
 CREATE TABLE IF NOT EXISTS provider_type (
     id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(25) NOT NULL UNIQUE
@@ -23,4 +21,4 @@ CREATE TABLE IF NOT EXISTS user_social (
     FOREIGN KEY (provider_type_id) REFERENCES provider_type(id)
 );
 
-CREATE UNIQUE INDEX provider_id_idx ON user_social(provider_id);
+CREATE UNIQUE INDEX idx_provider_id ON user_social(provider_id);

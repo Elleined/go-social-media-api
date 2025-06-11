@@ -9,8 +9,8 @@ import (
 
 type (
 	Service interface {
-		save(firstName, lastName, email, password string) (id int64, err error)
-		SaveWithoutPassword(firstName, lastName, email string) (id int64, err error) // for social register
+		saveLocal(firstName, lastName, email, password, attachment string) (id int64, err error)
+		SaveSocial(firstName, lastName, email string) (id int64, err error) // for social register
 
 		getById(id int) (User, error)
 		GetByEmail(email string) (User, error)
@@ -19,6 +19,7 @@ type (
 
 		deleteById(id int) (affectedRows int64, err error)
 
+		changeAttachment(userId int, attachment string) (affectedRows int64, err error)
 		changeStatus(userId int, isActive bool) (affectedRows int64, err error)
 		changePassword(userId int, newPassword string) (affectedRows int64, err error)
 	}
@@ -34,7 +35,7 @@ func NewService(repository Repository) Service {
 	}
 }
 
-func (s ServiceImpl) save(firstName, lastName, email, password string) (id int64, err error) {
+func (s ServiceImpl) saveLocal(firstName, lastName, email, password, attachment string) (id int64, err error) {
 	if strings.TrimSpace(firstName) == "" {
 		return 0, errors.New("first name is required")
 	}
@@ -65,7 +66,7 @@ func (s ServiceImpl) save(firstName, lastName, email, password string) (id int64
 		return 0, err
 	}
 
-	id, err = s.repository.save(firstName, lastName, email, hashedPassword)
+	id, err = s.repository.saveLocal(firstName, lastName, email, hashedPassword, attachment)
 	if err != nil {
 		return 0, err
 	}
@@ -73,7 +74,7 @@ func (s ServiceImpl) save(firstName, lastName, email, password string) (id int64
 	return id, nil
 }
 
-func (s ServiceImpl) SaveWithoutPassword(firstName, lastName, email string) (id int64, err error) {
+func (s ServiceImpl) SaveSocial(firstName, lastName, email string) (id int64, err error) {
 	if strings.TrimSpace(firstName) == "" {
 		return 0, errors.New("first name is required")
 	}
@@ -86,7 +87,7 @@ func (s ServiceImpl) SaveWithoutPassword(firstName, lastName, email string) (id 
 		return 0, errors.New("email is required")
 	}
 
-	id, err = s.repository.save(firstName, lastName, email, "")
+	id, err = s.repository.saveSocial(firstName, lastName, email)
 	if err != nil {
 		return 0, err
 	}
@@ -135,6 +136,27 @@ func (s ServiceImpl) deleteById(id int) (affectedRows int64, err error) {
 	}
 
 	affectedRows, err = s.repository.deleteById(id)
+	if err != nil {
+		return 0, err
+	}
+
+	if affectedRows <= 0 {
+		return 0, errors.New("no rows affected")
+	}
+
+	return affectedRows, nil
+}
+
+func (s ServiceImpl) changeAttachment(userId int, attachment string) (affectedRows int64, err error) {
+	if userId <= 0 {
+		return 0, errors.New("user id is required")
+	}
+
+	if strings.TrimSpace(attachment) == "" {
+		return 0, errors.New("attachment is required")
+	}
+
+	affectedRows, err = s.repository.changeAttachment(userId, attachment)
 	if err != nil {
 		return 0, err
 	}

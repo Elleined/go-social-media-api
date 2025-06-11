@@ -209,7 +209,7 @@ func (c Controller) callback(ctx *gin.Context) {
 	}
 
 	// 3 User not exists and no links to other social account
-	id, err := c.userService.SaveWithoutPassword(userInfo.GivenName, userInfo.Surname, userInfo.Mail)
+	id, err := c.userService.SaveSocial(userInfo.GivenName, userInfo.Surname, userInfo.Mail)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "login failed! " + err.Error(),
