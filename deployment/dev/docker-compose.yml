@@ -41,7 +41,7 @@ services:
         condition: service_healthy
 
   mysql-server:
-    image: mysql:8.0.39
+    image: mysql:${MYSQL_IMAGE_TAG}
     container_name: ${MYSQL_CONTAINER_NAME}
     restart: always
     environment:
@@ -51,7 +51,7 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     ports:
-      - "${MYSQL_OUTSIDE_PORT}:${MYSQL_PORT}"
+      - "${MYSQL_HOST_PORT}:${MYSQL_PORT}"
     networks:
       - sma-network
     volumes:
