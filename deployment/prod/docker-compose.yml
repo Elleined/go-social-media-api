@@ -4,6 +4,7 @@ services:
     container_name: ${SMA_CONTAINER_NAME}
     restart: always
     environment:
+      - TZ=Asia/Manila
       - GIN_MODE=release
       - PORT=:${SMA_PORT}
       - FRONT_END_REDIRECT_URL=${FRONT_END_REDIRECT_URL}
@@ -53,6 +54,7 @@ services:
     container_name: ${FSA_CONTAINER_NAME}
     restart: always
     environment:
+      - TZ=Asia/Manila
       - PORT=:${FSA_PORT}
       - UPLOAD_ROOT_FOLDER=${UPLOAD_ROOT_FOLDER}
       - MAX_FILE_SIZE=${MAX_FILE_SIZE}
@@ -77,6 +79,8 @@ services:
     image: migrate/migrate
     container_name: migration
     restart: no
+    environment:
+      - TZ=Asia/Manila
     networks:
       - sma-network
     volumes:
@@ -91,6 +95,7 @@ services:
     container_name: ${MYSQL_CONTAINER_NAME}
     restart: always
     environment:
+      - TZ=Asia/Manila
       - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
