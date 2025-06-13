@@ -189,3 +189,7 @@ http://localhost:8090/folders/post
 ```
 http://localhost:8090/folders/comment
 ```
+6. Create comment folder for comment attachments
+```
+http://localhost:8090/folders/user
+```
