@@ -73,9 +73,9 @@ services:
       retries: 3
       start_period: 120s
 
-  backend-migration:
+  migration:
     image: migrate/migrate
-    container_name: backend-migration
+    container_name: migration
     restart: no
     networks:
       - sma-network

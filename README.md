@@ -154,7 +154,7 @@
 2. Supply the correct environment variables
 3. Run database migration
 ```
-docker compose up -d backend-migration
+docker compose up -d migration
 ```
 4. Run the file-server-api
 ```
@@ -174,7 +174,7 @@ http://localhost:8090/folders/comment
 2. Supply the correct environment variables
 3. Run database migration
 ```
-docker compose up -d backend-migration
+docker compose up -d migration
 ```
 
 4. Run the project

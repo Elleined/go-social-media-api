@@ -35,7 +35,7 @@ Thumbs.db
 # Env/config files (customize if needed)
 .env
 *.env
-.env.*
+deployment/dev/.env.development
 config.yaml
 config.json
 
