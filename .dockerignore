@@ -1,1 +1,5 @@
 ./deployment
+
+*.env
+.env
+env.*
