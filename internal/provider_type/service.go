@@ -2,6 +2,7 @@ package provider_type
 
 import (
 	"errors"
+	"github.com/redis/go-redis/v9"
 	"strings"
 )
 
@@ -19,12 +20,14 @@ type (
 
 	ServiceImpl struct {
 		repository Repository
+		redis      *redis.Client
 	}
 )
 
-func NewService(repository Repository) Service {
+func NewService(repository Repository, redis *redis.Client) Service {
 	return &ServiceImpl{
 		repository: repository,
+		redis:      redis,
 	}
 }
 

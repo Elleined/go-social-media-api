@@ -7,21 +7,23 @@ import (
 	"strconv"
 )
 
-func InitRedisConnection() *redis.Client {
+func InitRedisConnection() (*redis.Client, error) {
 	db, err := strconv.Atoi(os.Getenv("REDIS_DB"))
 	if err != nil {
-		panic(fmt.Sprintf("Can't connect to redis %s", err.Error()))
+		return nil, err
 	}
 
 	protocol, err := strconv.Atoi(os.Getenv("REDIS_PROTOCOL"))
 	if err != nil {
-		panic(fmt.Sprintf("Can't connect to redis %s", err.Error()))
+		return nil, err
 	}
 
-	return redis.NewClient(&redis.Options{
+	client := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")),
 		Password: os.Getenv("REDIS_PASSWORD"),
 		DB:       db,
 		Protocol: protocol,
 	})
+
+	return client, nil
 }

@@ -53,6 +53,11 @@ func main() {
 		}
 	}(db)
 
+	redis, err := utils.InitRedisConnection()
+	if err != nil {
+		panic("can't connect to redis")
+	}
+
 	// Initialize gin
 	r := gin.New()
 	r.Use(gin.Logger())
@@ -78,7 +83,7 @@ func main() {
 
 	// Initialize provider type module
 	providerRepository := provider_type2.NewRepository(db)
-	providerService := provider_type2.NewService(providerRepository)
+	providerService := provider_type2.NewService(providerRepository, redis)
 	providerController := provider_type2.NewController(providerService)
 	providerController.RegisterRoutes(r)
 
