@@ -44,7 +44,11 @@ http://localhost:8090/folders/user
 ## prod
 1. CD to deployment > prod
 2. Supply the correct environment variables
-3. Run database migration
+3. Run these command it will run the following:
+   - file-server
+   - redis-server
+   - mysql-server
+   - backend
 ```
 docker compose up -d migration
 ```
