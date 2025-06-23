@@ -21,27 +21,23 @@
 2. Supply the correct environment variables in (./dev/.env) and local project .env
 3. Run database migration
 ```
-docker compose up -d migration
+docker compose up -d dev-migration
 ```
-4. Run the file-server-api
-```
-docker compose up -d file-server
-```
-5. Create post folder for post attachments
+4. Create post folder for post attachments
 ```
 http://localhost:8090/folders/post
 ```
-6. Create comment folder for comment attachments
+5. Create comment folder for comment attachments
 ```
 http://localhost:8090/folders/comment
 ```
-7. Create comment folder for comment attachments
+6. Create comment folder for comment attachments
 ```
 http://localhost:8090/folders/user
 ```
-8. Add GIN_MODE=debug to IDE environment variable (important!)
-9. Add the .env file to IDE environment variable (important!)
-10. Run the local project
+7. Add GIN_MODE=debug to IDE environment variable (important!)
+8. Add the .env file to IDE environment variable (important!)
+9. Run the local project
 
 ## prod
 1. CD to deployment > prod
@@ -50,16 +46,11 @@ http://localhost:8090/folders/user
 ```
 docker compose up -d migration
 ```
-
-4. Run the project
-```
-docker compose up -d backend
-```
-5. Create post folder for post attachments
+4. Create post folder for post attachments
 ```
 http://localhost:8090/folders/post
 ```
-6. Create comment folder for comment attachments
+5. Create comment folder for comment attachments
 ```
 http://localhost:8090/folders/comment
 ```

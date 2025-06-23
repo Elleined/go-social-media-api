@@ -12,7 +12,7 @@ services:
     ports:
       - "${FSA_PORT}:${FSA_PORT}"
     networks:
-      - sma-network
+      - dev-network
     volumes:
       - ${FSA_BIND_MOUNT}:${UPLOAD_ROOT_FOLDER}
       - /etc/localtime:/etc/localtime:ro
@@ -24,23 +24,25 @@ services:
       retries: 3
       start_period: 120s
 
-  migration:
+  dev-migration:
     image: migrate/migrate
-    container_name: migration
+    container_name: dev-migration
     environment:
       - TZ=Asia/Manila
     networks:
-      - sma-network
+      - dev-network
     volumes:
       - ${MIGRATION_SOURCE}:${MIGRATION_DESTINATION}
     entrypoint: ["migrate", "-path", "${MIGRATION_DESTINATION}", "-database", "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(${MYSQL_CONTAINER_NAME}:${MYSQL_PORT})/${MYSQL_DATABASE}", "up"]
     depends_on:
-      mysql-server:
+      dev-mysql-server:
         condition: service_healthy
-      redis-server:
+      dev-redis-server:
+        condition: service_healthy
+      file-server:
         condition: service_healthy
 
-  mysql-server:
+  dev-mysql-server:
     image: mysql:${MYSQL_IMAGE_TAG}
     container_name: ${MYSQL_CONTAINER_NAME}
     environment:
@@ -52,9 +54,9 @@ services:
     ports:
       - "${MYSQL_HOST_PORT}:${MYSQL_PORT}"
     networks:
-      - sma-network
+      - dev-network
     volumes:
-      - sma-volume:/var/lib/mysql
+      - dev-mysql-server:/var/lib/mysql
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     healthcheck:
@@ -64,7 +66,7 @@ services:
       retries: 5
       start_period: 30s
 
-  redis-server:
+  dev-redis-server:
     image: redis:${REDIS_IMAGE_TAG}
     container_name: ${REDIS_CONTAINER_NAME}
     environment:
@@ -73,9 +75,9 @@ services:
     ports:
       - "${REDIS_HOST_PORT}:${REDIS_PORT}"
     networks:
-      - sma-network
+      - dev-network
     volumes:
-      - redis-volume:/data
+      - dev-redis-volume:/data
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     healthcheck:
@@ -86,16 +88,16 @@ services:
       start_period: 30s
 
 volumes:
-  sma-volume:
+  dev-mysql-server:
     external: false
-    name: ${VOLUME_NAME}
+    name: ${MYSQL_VOLUME_NAME}
 
-  redis-volume:
+  dev-redis-volume:
     external: false
     name: ${REDIS_VOLUME_NAME}
 
 networks:
-  sma-network:
+  dev-network:
     name: ${NETWORK_NAME}
     external: false
     ipam:
