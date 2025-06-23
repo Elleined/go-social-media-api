@@ -20,6 +20,11 @@ services:
       - REFRESH_TOKEN_EXPIRATION_IN_DAYS=${REFRESH_TOKEN_EXPIRATION_IN_DAYS}
       - FSA_HOST=${FSA_CONTAINER_NAME}
       - FSA_PORT=${FSA_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_DB=${REDIS_DB}
+      - REDIS_PROTOCOL=${REDIS_PROTOCOL}
       - MICROSOFT_KEY=${MICROSOFT_KEY}
       - MICROSOFT_SECRET=${MICROSOFT_SECRET}
       - MICROSOFT_REDIRECT_URL=${MICROSOFT_REDIRECT_URL}
@@ -105,7 +110,7 @@ services:
     networks:
       - sma-network
     volumes:
-      - sma-volume:/var/lib/mysql
+      - mysql-volume:/var/lib/mysql
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     healthcheck:
@@ -115,10 +120,35 @@ services:
       retries: 5
       start_period: 30s
 
+  redis-server:
+    image: redis:${REDIS_IMAGE_TAG}
+    container_name: ${REDIS_CONTAINER_NAME}
+    environment:
+      - TZ=Asia/Manila
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "${REDIS_HOST_PORT}:${REDIS_PORT}"
+    networks:
+      - sma-network
+    volumes:
+      - redis-volume:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "$$REDIS_PASSWORD", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
 volumes:
-  sma-volume:
+  mysql-volume:
     external: false
-    name: ${VOLUME_NAME}
+    name: ${MYSQL_VOLUME_NAME}
+
+  redis-volume:
+    external: false
+    name: ${REDIS_VOLUME_NAME}
 
 networks:
   sma-network:
