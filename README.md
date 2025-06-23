@@ -18,8 +18,11 @@
 # How to run
 ## dev
 1. CD to deployment > dev
-2. Supply the correct environment variables in (./dev/.env) and local project .env
-3. Run database migration
+2. Supply the correct environment variables in (./deployment/dev/.env) and local project .env
+3. Run these command it will run the following:
+   - file-server
+   - redis-server
+   - mysql-server
 ```
 docker compose up -d dev-migration
 ```
@@ -36,8 +39,7 @@ http://localhost:8090/folders/comment
 http://localhost:8090/folders/user
 ```
 7. Add GIN_MODE=debug to IDE environment variable (important!)
-8. Add the .env file to IDE environment variable (important!)
-9. Run the local project
+8. Run the local project
 
 ## prod
 1. CD to deployment > prod
