@@ -1,8 +1,7 @@
 services:
-  file-server:
+  dev-file-server:
     image: elleined/go-file-server-api:${FSA_IMAGE_TAG}
     container_name: ${FSA_CONTAINER_NAME}
-    restart: always
     environment:
       - TZ=Asia/Manila
       - PORT=:${FSA_PORT}
@@ -13,7 +12,7 @@ services:
     ports:
       - "${FSA_PORT}:${FSA_PORT}"
     networks:
-      - sma-network
+      - dev-network
     volumes:
       - ${FSA_BIND_MOUNT}:${UPLOAD_ROOT_FOLDER}
       - /etc/localtime:/etc/localtime:ro
@@ -25,27 +24,26 @@ services:
       retries: 3
       start_period: 120s
 
-  migration:
+  dev-migration:
     image: migrate/migrate
-    container_name: migration
+    container_name: dev-migration
     restart: no
     environment:
       - TZ=Asia/Manila
     networks:
-      - sma-network
+      - dev-network
     volumes:
       - ${MIGRATION_SOURCE}:${MIGRATION_DESTINATION}
     entrypoint: ["migrate", "-path", "${MIGRATION_DESTINATION}", "-database", "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(${MYSQL_CONTAINER_NAME}:${MYSQL_PORT})/${MYSQL_DATABASE}", "up"]
     depends_on:
-      mysql-server:
+      dev-mysql-server:
         condition: service_healthy
-      file-server:
+      dev-file-server:
         condition: service_healthy
 
-  mysql-server:
+  dev-mysql-server:
     image: mysql:${MYSQL_IMAGE_TAG}
     container_name: ${MYSQL_CONTAINER_NAME}
-    restart: always
     environment:
       - TZ=Asia/Manila
       - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
@@ -55,9 +53,9 @@ services:
     ports:
       - "${MYSQL_HOST_PORT}:${MYSQL_PORT}"
     networks:
-      - sma-network
+      - dev-network
     volumes:
-      - sma-volume:/var/lib/mysql
+      - dev-mysql-volume:/var/lib/mysql
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     healthcheck:
@@ -68,12 +66,12 @@ services:
       start_period: 30s
 
 volumes:
-  sma-volume:
+  dev-mysql-volume:
     external: false
-    name: ${VOLUME_NAME}
+    name: ${MYSQL_VOLUME_NAME}
 
 networks:
-  sma-network:
+  dev-network:
     name: ${NETWORK_NAME}
     external: false
     ipam:

@@ -23,7 +23,7 @@
    - file-server
    - mysql-server
 ```
-docker compose up -d migration
+docker compose up -d dev-migration
 ```
 4. Create post folder for post attachments
 ```
