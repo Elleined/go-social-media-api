@@ -51,6 +51,7 @@ http://localhost:8090/folders/user
    - backend
 ```
 docker compose up -d migration
+docker compose up -d backend
 ```
 4. Create post folder for post attachments
 ```

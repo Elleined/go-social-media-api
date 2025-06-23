@@ -53,6 +53,8 @@ services:
         condition: service_healthy
       file-server:
         condition: service_healthy
+      redis-server:
+        condition: service_healthy
 
   file-server:
     image: elleined/go-file-server-api:${FSA_IMAGE_TAG}
@@ -93,10 +95,6 @@ services:
     entrypoint: ["migrate", "-path", "${MIGRATION_DESTINATION}", "-database", "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(${MYSQL_CONTAINER_NAME}:${MYSQL_PORT})/${MYSQL_DATABASE}", "up"]
     depends_on:
       mysql-server:
-        condition: service_healthy
-      redis-server:
-        condition: service_healthy
-      file-server:
         condition: service_healthy
 
   mysql-server:
