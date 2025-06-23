@@ -46,9 +46,9 @@ http://localhost:8090/folders/user
 3. Run these command it will run the following:
    - file-server
    - mysql-server
-   - backend
 ```
 docker compose up -d migration
+docker compose up -d backend
 ```
 4. Create post folder for post attachments
 ```

@@ -89,8 +89,6 @@ services:
     depends_on:
       mysql-server:
         condition: service_healthy
-      file-server:
-        condition: service_healthy
 
   mysql-server:
     image: mysql:${MYSQL_IMAGE_TAG}
@@ -107,7 +105,7 @@ services:
     networks:
       - sma-network
     volumes:
-      - sma-volume:/var/lib/mysql
+      - mysql-volume:/var/lib/mysql
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
     healthcheck:
@@ -118,9 +116,9 @@ services:
       start_period: 30s
 
 volumes:
-  sma-volume:
+  mysql-volume:
     external: false
-    name: ${VOLUME_NAME}
+    name: ${MYSQL_VOLUME_NAME}
 
 networks:
   sma-network:
