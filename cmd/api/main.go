@@ -9,7 +9,7 @@ import (
 	"social-media-application/internal/emoji"
 	"social-media-application/internal/post"
 	pr "social-media-application/internal/post/reaction"
-	provider_type2 "social-media-application/internal/provider_type"
+	"social-media-application/internal/provider_type"
 	"social-media-application/internal/refresh"
 	"social-media-application/internal/social_login"
 	"social-media-application/internal/social_login/provider/facebook"
@@ -77,9 +77,9 @@ func main() {
 	r.Use(mw.Cors())
 
 	// Initialize provider type module
-	providerRepository := provider_type2.NewRepository(db)
-	providerService := provider_type2.NewService(providerRepository)
-	providerController := provider_type2.NewController(providerService)
+	providerRepository := provider_type.NewRepository(db)
+	providerService := provider_type.NewService(providerRepository)
+	providerController := provider_type.NewController(providerService)
 	providerController.RegisterRoutes(r)
 
 	// Initialize refresh token module

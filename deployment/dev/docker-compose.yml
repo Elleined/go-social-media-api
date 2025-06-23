@@ -39,6 +39,8 @@ services:
     depends_on:
       mysql-server:
         condition: service_healthy
+      file-server:
+        condition: service_healthy
 
   mysql-server:
     image: mysql:${MYSQL_IMAGE_TAG}

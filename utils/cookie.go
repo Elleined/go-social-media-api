@@ -25,6 +25,6 @@ func SetRefreshTokenCookie(ctx *gin.Context, value string) error {
 	}
 
 	refreshTokenExpiryHour := time.Duration(refreshTokenExpiryDays) * 24 * time.Hour
-	ctx.SetCookie("refreshToken", value, int(refreshTokenExpiryHour.Seconds()), "/", "", false, true)
+	ctx.SetCookie("refreshToken", value, int(refreshTokenExpiryHour.Seconds()), "/", "", true, true)
 	return nil
 }
