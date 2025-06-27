@@ -17,8 +17,8 @@ import (
 func JWT(ctx *gin.Context) {
 	accessToken, err := ctx.Cookie("accessToken")
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "refresh failed " + err.Error(),
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"message": "no logged in user",
 		})
 		return
 	}

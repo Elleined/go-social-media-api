@@ -354,7 +354,7 @@ func (c *ControllerImpl) logout(ctx *gin.Context) {
 	refreshToken, err := ctx.Cookie("refreshToken")
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "logout failed! " + err.Error(),
+			"message": "logout failed no logged in user",
 		})
 		return
 	}
