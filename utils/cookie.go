@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -50,6 +51,7 @@ func setRefreshToken(ctx *gin.Context, value string) error {
 
 	expirationInHours := time.Duration(expirationInDays) * 24 * time.Hour
 	ctx.SetCookie("refreshToken", value, int(expirationInHours.Seconds()), "/", "", secure, httpOnly)
+	ctx.SetSameSite(http.SameSiteStrictMode)
 	return nil
 }
 
@@ -73,6 +75,7 @@ func setAccessToken(ctx *gin.Context, value string) error {
 
 	expirationInSeconds := time.Duration(expirationInMinute).Seconds()
 	ctx.SetCookie("accessToken", value, int(expirationInSeconds), "/", "", secure, httpOnly)
+	ctx.SetSameSite(http.SameSiteStrictMode)
 	return nil
 }
 
