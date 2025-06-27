@@ -99,7 +99,7 @@ func (c *ControllerImpl) refresh(ctx *gin.Context) {
 		return
 	}
 
-	err = utils.SetRefreshTokenCookie(ctx, newRefreshToken)
+	err = utils.SetRefreshToken(ctx, newRefreshToken)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "refresh failed! " + err.Error(),

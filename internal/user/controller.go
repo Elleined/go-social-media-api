@@ -336,7 +336,7 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 		return
 	}
 
-	err = utils.SetRefreshTokenCookie(ctx, refreshToken)
+	err = utils.SetRefreshToken(ctx, refreshToken)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "login failed! " + err.Error(),
@@ -366,13 +366,5 @@ func (c *ControllerImpl) logout(ctx *gin.Context) {
 	}
 
 	// Invalidated refresh token cookie
-	ctx.SetCookie(
-		"refreshToken", // cookie name
-		"",             // value
-		-1,             // maxAge negative to delete
-		"/",            // path
-		"",             // domain (empty = current domain)
-		false,          // secure
-		true,           // httpOnly
-	)
+	utils.ClearAccessToken(ctx)
 }

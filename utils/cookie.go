@@ -18,13 +18,53 @@ import (
 // secure: only sent with https not http
 // httpOnly: cannot be access via JS
 
-func SetRefreshTokenCookie(ctx *gin.Context, value string) error {
-	refreshTokenExpiryDays, err := strconv.Atoi(os.Getenv("REFRESH_TOKEN_EXPIRATION_IN_DAYS"))
+const (
+	secure   = true
+	httpOnly = true
+)
+
+func SetRefreshToken(ctx *gin.Context, value string) error {
+	expirationInDays, err := strconv.Atoi(os.Getenv("REFRESH_TOKEN_EXPIRATION_IN_DAYS"))
 	if err != nil {
 		return err
 	}
 
-	refreshTokenExpiryHour := time.Duration(refreshTokenExpiryDays) * 24 * time.Hour
-	ctx.SetCookie("refreshToken", value, int(refreshTokenExpiryHour.Seconds()), "/", "", true, true)
+	expirationInHours := time.Duration(expirationInDays) * 24 * time.Hour
+	ctx.SetCookie("refreshToken", value, int(expirationInHours.Seconds()), "/", "", secure, httpOnly)
 	return nil
+}
+
+func ClearRefreshToken(ctx *gin.Context) {
+	ctx.SetCookie(
+		"refreshToken", // cookie name
+		"",             // value
+		-1,             // maxAge negative to delete
+		"/",            // path
+		"",             // domain (empty = current domain)
+		secure,         // secure
+		httpOnly,       // httpOnly
+	)
+}
+
+func SetAccessToken(ctx *gin.Context, value string) error {
+	expirationInMinute, err := strconv.Atoi(os.Getenv("JWT_EXPIRATION_IN_MINUTE"))
+	if err != nil {
+		return err
+	}
+
+	expirationInSeconds := time.Duration(expirationInMinute).Seconds()
+	ctx.SetCookie("accessToken", value, int(expirationInSeconds), "/", "", secure, httpOnly)
+	return nil
+}
+
+func ClearAccessToken(ctx *gin.Context) {
+	ctx.SetCookie(
+		"accessToken", // cookie name
+		"",            // value
+		-1,            // maxAge negative to delete
+		"/",           // path
+		"",            // domain (empty = current domain)
+		secure,        // secure
+		httpOnly,      // httpOnly
+	)
 }

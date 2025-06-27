@@ -148,7 +148,7 @@ func (c Controller) callback(ctx *gin.Context) {
 			return
 		}
 
-		err = utils.SetRefreshTokenCookie(ctx, refreshToken)
+		err = utils.SetRefreshToken(ctx, refreshToken)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"message": "login failed! " + err.Error(),
@@ -192,7 +192,7 @@ func (c Controller) callback(ctx *gin.Context) {
 			return
 		}
 
-		err = utils.SetRefreshTokenCookie(ctx, refreshToken)
+		err = utils.SetRefreshToken(ctx, refreshToken)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"message": "login failed! " + err.Error(),
@@ -234,7 +234,7 @@ func (c Controller) callback(ctx *gin.Context) {
 		return
 	}
 
-	err = utils.SetRefreshTokenCookie(ctx, refreshToken)
+	err = utils.SetRefreshToken(ctx, refreshToken)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "login failed! " + err.Error(),
