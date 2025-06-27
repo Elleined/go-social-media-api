@@ -99,15 +99,15 @@ func (c *ControllerImpl) refresh(ctx *gin.Context) {
 		return
 	}
 
-	err = utils.SetRefreshToken(ctx, newRefreshToken)
+	err = utils.SetTokens(ctx, accessToken, newRefreshToken)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "refresh failed! " + err.Error(),
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, accessToken)
+	ctx.JSON(http.StatusOK, nil)
 }
 
 func (c *ControllerImpl) getAllBy(ctx *gin.Context) {

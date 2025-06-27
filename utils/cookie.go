@@ -23,7 +23,26 @@ const (
 	httpOnly = true
 )
 
-func SetRefreshToken(ctx *gin.Context, value string) error {
+func SetTokens(ctx *gin.Context, accessToken string, refreshToken string) error {
+	err := setRefreshToken(ctx, refreshToken)
+	if err != nil {
+		return err
+	}
+
+	err = setAccessToken(ctx, accessToken)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ClearTokens(ctx *gin.Context) {
+	clearAccessToken(ctx)
+	clearRefreshToken(ctx)
+}
+
+func setRefreshToken(ctx *gin.Context, value string) error {
 	expirationInDays, err := strconv.Atoi(os.Getenv("REFRESH_TOKEN_EXPIRATION_IN_DAYS"))
 	if err != nil {
 		return err
@@ -34,7 +53,7 @@ func SetRefreshToken(ctx *gin.Context, value string) error {
 	return nil
 }
 
-func ClearRefreshToken(ctx *gin.Context) {
+func clearRefreshToken(ctx *gin.Context) {
 	ctx.SetCookie(
 		"refreshToken", // cookie name
 		"",             // value
@@ -46,7 +65,7 @@ func ClearRefreshToken(ctx *gin.Context) {
 	)
 }
 
-func SetAccessToken(ctx *gin.Context, value string) error {
+func setAccessToken(ctx *gin.Context, value string) error {
 	expirationInMinute, err := strconv.Atoi(os.Getenv("JWT_EXPIRATION_IN_MINUTE"))
 	if err != nil {
 		return err
@@ -57,7 +76,7 @@ func SetAccessToken(ctx *gin.Context, value string) error {
 	return nil
 }
 
-func ClearAccessToken(ctx *gin.Context) {
+func clearAccessToken(ctx *gin.Context) {
 	ctx.SetCookie(
 		"accessToken", // cookie name
 		"",            // value

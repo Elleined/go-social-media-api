@@ -2,13 +2,11 @@ package facebook
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/facebook"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"social-media-application/internal/provider_type"
 	"social-media-application/internal/refresh"
@@ -136,7 +134,7 @@ func (c Controller) callback(ctx *gin.Context) {
 			return
 		}
 
-		err = utils.SetRefreshToken(ctx, refreshToken)
+		err = utils.SetTokens(ctx, accessToken, refreshToken)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"message": "login failed! " + err.Error(),
@@ -144,12 +142,7 @@ func (c Controller) callback(ctx *gin.Context) {
 			return
 		}
 
-		redirectFrontEndURL := fmt.Sprintf(
-			"%s#access_token=%s",
-			os.Getenv("FRONT_END_REDIRECT_URL"),
-			url.QueryEscape(accessToken),
-		)
-		ctx.Redirect(http.StatusFound, redirectFrontEndURL)
+		ctx.Redirect(http.StatusFound, os.Getenv("FRONT_END_REDIRECT_URL"))
 		return
 	}
 
@@ -180,7 +173,7 @@ func (c Controller) callback(ctx *gin.Context) {
 			return
 		}
 
-		err = utils.SetRefreshToken(ctx, refreshToken)
+		err = utils.SetTokens(ctx, accessToken, refreshToken)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"message": "login failed! " + err.Error(),
@@ -188,12 +181,7 @@ func (c Controller) callback(ctx *gin.Context) {
 			return
 		}
 
-		redirectFrontEndURL := fmt.Sprintf(
-			"%s#access_token=%s",
-			os.Getenv("FRONT_END_REDIRECT_URL"),
-			url.QueryEscape(accessToken),
-		)
-		ctx.Redirect(http.StatusFound, redirectFrontEndURL)
+		ctx.Redirect(http.StatusFound, os.Getenv("FRONT_END_REDIRECT_URL"))
 		return
 	}
 
@@ -222,7 +210,7 @@ func (c Controller) callback(ctx *gin.Context) {
 		return
 	}
 
-	err = utils.SetRefreshToken(ctx, refreshToken)
+	err = utils.SetTokens(ctx, accessToken, refreshToken)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "login failed! " + err.Error(),
@@ -230,12 +218,7 @@ func (c Controller) callback(ctx *gin.Context) {
 		return
 	}
 
-	redirectFrontEndURL := fmt.Sprintf(
-		"%s#access_token=%s",
-		os.Getenv("FRONT_END_REDIRECT_URL"),
-		url.QueryEscape(accessToken),
-	)
-	ctx.Redirect(http.StatusFound, redirectFrontEndURL)
+	ctx.Redirect(http.StatusFound, os.Getenv("FRONT_END_REDIRECT_URL"))
 }
 
 func (c Controller) generateTokens(userId int) (accessToken, refreshToken string, err error) {
