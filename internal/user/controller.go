@@ -344,7 +344,9 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, nil)
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "authentication successful",
+	})
 }
 
 func (c *ControllerImpl) logout(ctx *gin.Context) {

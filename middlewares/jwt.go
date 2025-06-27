@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -16,25 +15,16 @@ import (
 // token referred as the jwt and its validated
 
 func JWT(ctx *gin.Context) {
-	authHeader := ctx.GetHeader("Authorization")
-	if !strings.HasPrefix(authHeader, "Bearer ") {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": "invalid authorization header format",
+	accessToken, err := ctx.Cookie("accessToken")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "refresh failed " + err.Error(),
 		})
 		return
 	}
 
-	// Get the actual JWT without the Bearer as prefix: eyJhb...
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	if strings.TrimSpace(tokenString) == "" {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"message": "invalid authorization header format",
-		})
-		return
-	}
-
-	// Validate signing method and return secret key
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
+	// Validate signing method and return secret key and check for expiration
+	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (any, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}

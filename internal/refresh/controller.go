@@ -107,7 +107,9 @@ func (c *ControllerImpl) refresh(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, nil)
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "refreshing access token successful",
+	})
 }
 
 func (c *ControllerImpl) getAllBy(ctx *gin.Context) {
