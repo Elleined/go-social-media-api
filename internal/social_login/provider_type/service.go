@@ -12,9 +12,6 @@ type (
 		getById(id int) (ProviderType, error)
 		GetByName(name string) (ProviderType, error)
 		getAll() ([]ProviderType, error)
-
-		update(id int, name string) (affectedRows int64, err error)
-		delete(id int) (affectedRows int64, err error)
 	}
 
 	ServiceImpl struct {
@@ -83,51 +80,4 @@ func (s ServiceImpl) getAll() ([]ProviderType, error) {
 	}
 
 	return providerTypes, nil
-}
-
-func (s ServiceImpl) update(id int, name string) (affectedRows int64, err error) {
-	if id <= 0 {
-		return 0, errors.New("id is required")
-	}
-
-	if strings.TrimSpace(name) == "" {
-		return 0, errors.New("name is required")
-	}
-
-	exists, err := s.repository.isAlreadyExists(name)
-	if err != nil {
-		return 0, err
-	}
-
-	if exists {
-		return 0, errors.New("name already exists")
-	}
-
-	affectedRows, err = s.repository.update(id, name)
-	if err != nil {
-		return 0, err
-	}
-
-	if affectedRows <= 0 {
-		return 0, errors.New("no rows updated")
-	}
-
-	return affectedRows, nil
-}
-
-func (s ServiceImpl) delete(id int) (affectedRows int64, err error) {
-	if id <= 0 {
-		return 0, errors.New("id is required")
-	}
-
-	affectedRows, err = s.repository.delete(id)
-	if err != nil {
-		return 0, err
-	}
-
-	if affectedRows <= 0 {
-		return 0, errors.New("no rows updated")
-	}
-
-	return affectedRows, nil
 }

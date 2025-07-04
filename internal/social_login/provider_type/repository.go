@@ -8,11 +8,7 @@ type (
 
 		findById(id int) (ProviderType, error)
 		findByName(name string) (ProviderType, error)
-
 		findAll() ([]ProviderType, error)
-
-		update(id int, name string) (affectedRows int64, err error)
-		delete(id int) (affectedRows int64, err error)
 
 		isAlreadyExists(name string) (bool, error)
 	}
@@ -73,39 +69,6 @@ func (r RepositoryImpl) findAll() ([]ProviderType, error) {
 	}
 
 	return providerTypes, nil
-}
-
-func (r RepositoryImpl) update(id int, name string) (affectedRows int64, err error) {
-	result, err := r.NamedExec("UPDATE provider_type SET name = :name WHERE id = :id", map[string]any{
-		"id":   id,
-		"name": name,
-	})
-	if err != nil {
-		return 0, err
-	}
-
-	affectedRows, err = result.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-
-	return affectedRows, nil
-}
-
-func (r RepositoryImpl) delete(id int) (affectedRows int64, err error) {
-	result, err := r.NamedExec("DELETE FROM provider_type WHERE id = :id", map[string]any{
-		"id": id,
-	})
-	if err != nil {
-		return 0, err
-	}
-
-	affectedRows, err = result.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-
-	return affectedRows, nil
 }
 
 func (r RepositoryImpl) isAlreadyExists(name string) (bool, error) {
