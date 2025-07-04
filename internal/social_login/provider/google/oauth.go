@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"os"
 	"social-media-application/internal/refresh"
-	"social-media-application/internal/social_login"
 	"social-media-application/internal/social_login/provider_type"
+	"social-media-application/internal/social_login/social_user"
 	"social-media-application/internal/user"
 	middleware "social-media-application/middlewares"
 	"social-media-application/utils"
@@ -30,12 +30,12 @@ func InitGoogleLogin() *oauth2.Config {
 type Controller struct {
 	config              *oauth2.Config
 	refreshService      refresh.Service
-	socialUserService   social_login.Service
+	socialUserService   social_user.Service
 	userService         user.Service
 	providerTypeService provider_type.Service
 }
 
-func NewController(config *oauth2.Config, refreshService refresh.Service, socialUserService social_login.Service, userService user.Service, providerTypeService provider_type.Service) *Controller {
+func NewController(config *oauth2.Config, refreshService refresh.Service, socialUserService social_user.Service, userService user.Service, providerTypeService provider_type.Service) *Controller {
 	return &Controller{
 		config:              config,
 		refreshService:      refreshService,

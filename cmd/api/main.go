@@ -10,11 +10,11 @@ import (
 	"social-media-application/internal/post"
 	pr "social-media-application/internal/post/reaction"
 	"social-media-application/internal/refresh"
-	"social-media-application/internal/social_login"
 	"social-media-application/internal/social_login/provider/facebook"
 	"social-media-application/internal/social_login/provider/google"
 	"social-media-application/internal/social_login/provider/microsoft"
 	"social-media-application/internal/social_login/provider_type"
+	"social-media-application/internal/social_login/social_user"
 	"social-media-application/internal/user"
 	mw "social-media-application/middlewares"
 	"social-media-application/utils"
@@ -92,8 +92,8 @@ func main() {
 	userController := user.NewController(userService, refreshService)
 	userController.RegisterRoutes(r)
 
-	userSocialRepository := social_login.NewRepository(db)
-	userSocialService := social_login.NewService(userSocialRepository)
+	userSocialRepository := social_user.NewRepository(db)
+	userSocialService := social_user.NewService(userSocialRepository)
 
 	// Initialize emoji module
 	emojiRepository := emoji.NewRepository(db)
