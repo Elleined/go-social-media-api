@@ -285,19 +285,19 @@ func (c *ControllerImpl) changePassword(ctx *gin.Context) {
 }
 
 func (c *ControllerImpl) login(ctx *gin.Context) {
-	loginRequest := struct {
+	request := struct {
 		Username string `json:"username" binding:"required"`
 		Password string `json:"password" binding:"required"`
 	}{}
 
-	if err := ctx.ShouldBind(&loginRequest); err != nil {
+	if err := ctx.ShouldBind(&request); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "login failed " + err.Error(),
 		})
 		return
 	}
 
-	user, err := c.service.GetByEmail(loginRequest.Username)
+	user, err := c.service.GetByEmail(request.Username)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "login failed! invalid credentials",
@@ -313,7 +313,7 @@ func (c *ControllerImpl) login(ctx *gin.Context) {
 		return
 	}
 
-	if !pd.IsPasswordMatch(loginRequest.Password, user.Password) {
+	if !pd.IsPasswordMatch(request.Password, user.Password) {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "login failed! invalid credentials",
 		})

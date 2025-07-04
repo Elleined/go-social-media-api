@@ -9,9 +9,8 @@ type (
 		save(name string) (id int64, err error)
 
 		findById(emojiId int) (Emoji, error)
+		findByName(name string) (Emoji, error)
 		findAll() ([]Emoji, error)
-		update(emojiId int, newName string) (affectedRows int64, err error)
-		delete(emojiId int) (affectedRows int64, err error)
 
 		isAlreadyExists(name string) (bool, error)
 	}
@@ -53,6 +52,16 @@ func (repository RepositoryImpl) findById(emojiId int) (Emoji, error) {
 	return emoji, nil
 }
 
+func (repository RepositoryImpl) findByName(name string) (Emoji, error) {
+	var emoji Emoji
+	err := repository.Get(&emoji, "SELECT * FROM emoji WHERE name = ?", name)
+	if err != nil {
+		return Emoji{}, err
+	}
+
+	return emoji, nil
+}
+
 func (repository RepositoryImpl) findAll() ([]Emoji, error) {
 	emojis := make([]Emoji, 10)
 
@@ -62,39 +71,6 @@ func (repository RepositoryImpl) findAll() ([]Emoji, error) {
 	}
 
 	return emojis, nil
-}
-
-func (repository RepositoryImpl) update(emojiId int, newName string) (affectedRows int64, err error) {
-	result, err := repository.NamedExec("UPDATE emoji SET name = :name WHERE id = :id", map[string]any{
-		"name": newName,
-		"id":   emojiId,
-	})
-	if err != nil {
-		return 0, err
-	}
-
-	affectedRows, err = result.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-
-	return affectedRows, nil
-}
-
-func (repository RepositoryImpl) delete(emojiId int) (affectedRows int64, err error) {
-	result, err := repository.NamedExec("DELETE FROM emoji WHERE id = :id", map[string]any{
-		"id": emojiId,
-	})
-	if err != nil {
-		return 0, err
-	}
-
-	affectedRows, err = result.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-
-	return affectedRows, nil
 }
 
 func (repository RepositoryImpl) isAlreadyExists(name string) (bool, error) {
